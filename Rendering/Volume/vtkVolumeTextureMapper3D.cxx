@@ -398,6 +398,7 @@ template <class T>
 void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
                                                  vtkVolumeTextureMapper3D *me,
                                                  double scalarRange[2],
+                                                 double gradientRange[2],
                                                  int components,
                                                  int bins[256][256],
                                                  unsigned char *volume1,
@@ -451,7 +452,7 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
   aspect[1] = spacing[1] * 2.0 / avgSpacing;
   aspect[2] = spacing[2] * 2.0 / avgSpacing;
 
-  double scale = 255.0 / (0.25*(scalarRange[1] - scalarRange[0]));
+  double scale = 255.0 / (gradientRange[1] - gradientRange[0]);
   double scale2 = 255.0 / (scalarRange[1] - scalarRange[0]);
 
   // Get the length at or below which normals are considered to
@@ -692,6 +693,10 @@ vtkVolumeTextureMapper3D::vtkVolumeTextureMapper3D()
   this->SupportsNonPowerOfTwoTextures = false;
   this->HistogramValues               = vtkIntArray::New();
   this->HistogramValues->SetNumberOfTuples(256*256);
+  this->FixedGradientRange[0] = 0.0;
+  this->FixedGradientRange[1] = 0.0;
+  this->FixedScalarRange[0] = 0.0;
+  this->FixedScalarRange[1] = 0.0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1076,8 +1081,10 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
   int components = scalarArray->GetNumberOfComponents();
 
     // Find the scalar range
-  double scalarRange[2];
-  scalarArray->GetRange(scalarRange, components-1);
+  double scalarRange[2] = { this->FixedScalarRange[0], this->FixedScalarRange[1] };
+  if (this->FixedScalarRange[0]==0.0 && this->FixedScalarRange[1]==0.0) {
+    scalarArray->GetRange(scalarRange, components-1);
+  }
 
   int powerOfTwoDim[3];
 
@@ -1165,6 +1172,8 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
   double offset;
   double scale;
 
+
+
   int arraySizeNeeded;
 
   int scalarType = scalarArray->GetDataType();
@@ -1218,12 +1227,20 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
   typedef int (*histo)[256];
   histo bins = (histo)(HistogramValues->GetPointer(0));
 
+  double grange[2] = {this->FixedGradientRange[0] , this->FixedGradientRange[1] };
+  if (this->FixedGradientRange[0] == 0.0 && this->FixedGradientRange[1] == 0.0)
+  {
+    grange[0] = 0.0;
+    grange[1] = (scalarRange[1]-scalarRange[0])*0.25;
+  }
+
   switch ( scalarType )
     {
     vtkTemplateMacro(
       vtkVolumeTextureMapper3DComputeGradients(
         static_cast<VTK_TT *>(dataPtr), this,
-        scalarRange, components,
+        scalarRange, grange,
+        components,
         bins,
         this->Volume1,
         this->Volume2,

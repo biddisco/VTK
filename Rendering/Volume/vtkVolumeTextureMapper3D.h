@@ -211,6 +211,8 @@ protected:
   double                    SavedScalarOpacityDistance;
 
   vtkIntArray              *HistogramValues;
+  double                    FixedGradientRange[2];
+  double                    FixedScalarRange[2];
   unsigned char             ColorLookup[65536*4];
   unsigned char             AlphaLookup[65536];
   double                    TempArray1[3*4096];
