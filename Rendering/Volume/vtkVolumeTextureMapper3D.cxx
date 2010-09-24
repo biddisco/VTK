@@ -591,9 +591,12 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
 
         // Compute the gradient magnitude
         t = sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] );
+        if (t>0) {
+          t = log10(t);
+        }
 
         // Encode this into an 4 bit value
-        gvalue = t * scale;
+        gvalue = (t-gradientRange[0]) * scale;
 
         gvalue = (gvalue<0.0)?(0.0):(gvalue);
         gvalue = (gvalue>255.0)?(255.0):(gvalue);
