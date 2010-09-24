@@ -457,7 +457,7 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
 
   // Get the length at or below which normals are considered to
   // be "zero"
-  zeroNormalThreshold =.001 * (scalarRange[1] - scalarRange[0]);
+  zeroNormalThreshold =1E-3 * (scalarRange[1] - scalarRange[0]);
 
   int thread_id = 0;
   int thread_count = 1;
@@ -590,14 +590,14 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
         n[2] /= aspect[2];
 
         // Compute the gradient magnitude
-        t = sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] );
+        double grad_mag = sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] );
+        t = grad_mag;
         if (t>0) {
           t = log10(t);
         }
 
-        // Encode this into an 4 bit value
+        // Encode this into an 8 bit value
         gvalue = (t-gradientRange[0]) * scale;
-
         gvalue = (gvalue<0.0)?(0.0):(gvalue);
         gvalue = (gvalue>255.0)?(255.0):(gvalue);
 
@@ -609,11 +609,11 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
         bins[static_cast<unsigned char>(gvalue + 0.5)][static_cast<unsigned char>(bindex + 0.5)] += 1;
 
         // Normalize the gradient direction
-        if ( t > zeroNormalThreshold )
+        if ( grad_mag > zeroNormalThreshold )
           {
-          n[0] /= t;
-          n[1] /= t;
-          n[2] /= t;
+          n[0] /= grad_mag;
+          n[1] /= grad_mag;
+          n[2] /= grad_mag;
           }
         else
           {
