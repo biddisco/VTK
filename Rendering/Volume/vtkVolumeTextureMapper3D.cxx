@@ -457,7 +457,7 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
 
   // Get the length at or below which normals are considered to
   // be "zero"
-  zeroNormalThreshold =1E-3 * (scalarRange[1] - scalarRange[0]);
+  zeroNormalThreshold =1E-6 * (scalarRange[1] - scalarRange[0]);
 
   int thread_id = 0;
   int thread_count = 1;
