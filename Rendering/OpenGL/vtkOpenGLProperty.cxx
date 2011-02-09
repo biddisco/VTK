@@ -179,6 +179,23 @@ void vtkOpenGLProperty::AddShaderVariable(const char *name,
 }
 
 // ----------------------------------------------------------------------------
+void vtkOpenGLProperty::AddShaderVariableArray(const char *name, 
+    int numberOfComponents, int numberOfElements, float *x)
+{
+  this->Superclass::AddShaderVariable(name, numberOfComponents*numberOfElements, x);
+  if(this->PropProgram!=0)
+    {
+    if(this->PropProgram->GetUniformVariables()==0)
+      {
+      vtkUniformVariables *vars=vtkUniformVariables::New();
+      this->PropProgram->SetUniformVariables(vars);
+      vars->Delete();
+      }
+    this->PropProgram->GetUniformVariables()->SetUniformfv(name, numberOfComponents, numberOfElements, x);
+    }
+}
+
+// ----------------------------------------------------------------------------
 bool vtkOpenGLProperty::RenderShaders(vtkActor* vtkNotUsed(anActor), vtkRenderer* ren)
 {
   // unbind any textures for starters

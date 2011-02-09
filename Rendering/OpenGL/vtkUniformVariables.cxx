@@ -112,14 +112,16 @@ protected:
 class vtkUniformVectorInt : public vtkUniform
 {
 public:
-  vtkUniformVectorInt(int size,
-                      int *values)
+  vtkUniformVectorInt(int components,
+                      int *values, int elements=1)
     {
       this->ClassType=ClassTypeVectorInt;
-      this->Size=size;
-      this->Values=new int[size];
+      this->Size=elements*components;
+      this->Elements=elements;
+      this->Components=components;
+      this->Values=new int[this->Size];
       int i=0;
-      while(i<size)
+      while(i<this->Size)
         {
         this->Values[i]=values[i];
         ++i;
@@ -152,25 +154,26 @@ public:
 
    virtual void Send(int location)
     {
-      switch(this->Size)
+      switch(this->Components)
         {
         case 1:
-          vtkgl::Uniform1i(location,this->Values[0]);
+          vtkgl::Uniform1iv(location, this->Elements, this->Values);
           break;
         case 2:
-          vtkgl::Uniform2i(location,this->Values[0],this->Values[1]);
+          vtkgl::Uniform2iv(location, this->Elements, this->Values);
           break;
         case 3:
-          vtkgl::Uniform3i(location,this->Values[0],this->Values[1],
-                           this->Values[2]);
+          vtkgl::Uniform3iv(location, this->Elements, this->Values);
           break;
         case 4:
-          vtkgl::Uniform4i(location,this->Values[0],this->Values[1],
-                           this->Values[2],this->Values[3]);
+          vtkgl::Uniform4iv(location, this->Elements, this->Values);
+          break;
+        default:
+          vtkgl::Uniform1iv(location, this->Size, this->Values);
           break;
         }
       vtkOpenGLStaticCheckErrorMacro("failed at glUniform*i");
-    }
+   }
 
   virtual void PrintSelf(ostream &os, vtkIndent indent)
     {
@@ -198,20 +201,24 @@ public:
 
 protected:
   int Size;
+  int Elements;
+  int Components;
   int *Values;
 };
 
 class vtkUniformVectorFloat : public vtkUniform
 {
 public:
-  vtkUniformVectorFloat(int size,
-                        float *values)
+  vtkUniformVectorFloat(int components,
+                      float *values, int elements=1)
     {
       this->ClassType=ClassTypeVectorFloat;
-      this->Size=size;
-      this->Values=new float[size];
+      this->Size=elements*components;
+      this->Elements=elements;
+      this->Components=components;
+      this->Values=new float[this->Size];
       int i=0;
-      while(i<size)
+      while(i<this->Size)
         {
         this->Values[i]=values[i];
         ++i;
@@ -245,21 +252,22 @@ public:
 
   virtual void Send(int location)
     {
-      switch(this->Size)
+        switch(this->Components)
         {
         case 1:
-          vtkgl::Uniform1f(location,this->Values[0]);
+          vtkgl::Uniform1fv(location, this->Elements, this->Values);
           break;
         case 2:
-          vtkgl::Uniform2f(location,this->Values[0],this->Values[1]);
+          vtkgl::Uniform2fv(location, this->Elements, this->Values);
           break;
         case 3:
-          vtkgl::Uniform3f(location,this->Values[0],this->Values[1],
-                           this->Values[2]);
+          vtkgl::Uniform3fv(location, this->Elements, this->Values);
           break;
         case 4:
-          vtkgl::Uniform4f(location,this->Values[0],this->Values[1],
-                           this->Values[2],this->Values[3]);
+          vtkgl::Uniform4fv(location, this->Elements, this->Values);
+          break;
+        default:
+          vtkgl::Uniform1fv(location, this->Size, this->Values);
           break;
         }
       vtkOpenGLStaticCheckErrorMacro("failed at glUniform*f");
@@ -283,14 +291,16 @@ public:
 
   virtual vtkUniform *Clone() const
     {
-      vtkUniformVectorFloat *result=new vtkUniformVectorFloat(this->Size,
-                                                              this->Values);
+      vtkUniformVectorFloat *result=new vtkUniformVectorFloat(this->Components,
+                                             this->Values, this->Elements);
       result->SetName(this->Name);
       return result;
     }
 
 protected:
   int Size;
+  int Elements;
+  int Components;
   float *Values;
 };
 
@@ -716,7 +726,7 @@ void vtkUniformVariables::SetUniformi(const char *name,
 {
   assert("pre: name_exists" && name!=0);
   assert("pre: value_exists" && value!=0);
-  assert("pre: valid_numberOfComponents" && numberOfComponents>=1 && numberOfComponents<=4);
+  assert("pre: valid_numberOfComponents" && numberOfComponents>=1 && numberOfComponents<=64);
 
   UniformMapIt cur=this->Map->Map.find(name);
 
@@ -778,7 +788,7 @@ void vtkUniformVariables::SetUniformf(const char *name,
 {
   assert("pre: name_exists" && name!=0);
   assert("pre: value_exists" && value!=0);
-  assert("pre: valid_numberOfComponents" && numberOfComponents>=1 && numberOfComponents<=4);
+  assert("pre: valid_numberOfComponents" && numberOfComponents>=1 && numberOfComponents<=64);
 
   UniformMapIt cur=this->Map->Map.find(name);
 

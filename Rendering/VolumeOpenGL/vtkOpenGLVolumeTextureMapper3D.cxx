@@ -189,7 +189,7 @@ void vtkOpenGLVolumeTextureMapper3D::Render(vtkRenderer *ren, vtkVolume *vol)
 
   this->Timer->StopTimer();
 
-  this->TimeToDraw = static_cast<float>(this->Timer->GetElapsedTime());
+  this->TimeToDraw = static_cast<double>(this->Timer->GetElapsedTime());
 
   // If the timer is not accurate enough, set it to a small
   // time so that it is not zero
@@ -361,7 +361,7 @@ void vtkOpenGLVolumeTextureMapper3D::RenderPolygons( vtkRenderer *ren,
   vtkOpenGLClearErrorMacro();
 
   double bounds[27][6];
-  float distance2[27];
+  double distance2[27];
 
   int   numIterations;
   int i, j, k;
@@ -409,7 +409,7 @@ void vtkOpenGLVolumeTextureMapper3D::RenderPolygons( vtkRenderer *ren,
     // z (last four). The first region limit is the lower bound for
     // that axis, the next two are the region planes along that axis, and
     // the final one in the upper bound for that axis.
-    float limit[12];
+    double limit[12];    
     for ( i = 0; i < 3; i++ )
       {
       limit[i*4  ] = volBounds[i*2];
@@ -436,7 +436,7 @@ void vtkOpenGLVolumeTextureMapper3D::RenderPolygons( vtkRenderer *ren,
         loc[2] = (region/9)%3;
 
         // compute the bounds and center
-        float center[3];
+        double center[3];
         for ( i = 0; i < 3; i++ )
           {
           bounds[numRegions][i*2  ] = limit[4*i+loc[i]];
@@ -462,8 +462,8 @@ void vtkOpenGLVolumeTextureMapper3D::RenderPolygons( vtkRenderer *ren,
       {
       for ( j = i; j > 0 && distance2[j] > distance2[j-1]; j-- )
         {
-        float tmpBounds[6];
-        float tmpDistance2;
+        double tmpBounds[6];
+        double tmpDistance2;
 
         for ( k = 0; k < 6; k++ )
           {
@@ -512,7 +512,7 @@ void vtkOpenGLVolumeTextureMapper3D::RenderPolygons( vtkRenderer *ren,
         return;
         }
 
-      float *ptr = this->PolygonBuffer + 36*i;
+      double *ptr = this->PolygonBuffer + 36*i;
 
       glBegin( GL_TRIANGLE_FAN );
 
@@ -527,10 +527,10 @@ void vtkOpenGLVolumeTextureMapper3D::RenderPolygons( vtkRenderer *ren,
           {
           if ( stages[k] )
             {
-            vtkgl::MultiTexCoord3fv( vtkgl::TEXTURE0 + k, ptr );
+            vtkgl::MultiTexCoord3dv( vtkgl::TEXTURE0 + k, ptr );
             }
           }
-        glVertex3fv( ptr+3 );
+        glVertex3dv( ptr+3 );
 
         ptr += 6;
         }
@@ -725,7 +725,7 @@ void vtkOpenGLVolumeTextureMapper3D::SetupRegisterCombinersShadeNV( vtkRenderer 
   this->GetLightInformation( ren, vol, lightDirection, lightDiffuseColor,
                              lightSpecularColor, halfwayVector, ambientColor );
 
-  float specularPower = vol->GetProperty()->GetSpecularPower();
+  double specularPower = vol->GetProperty()->GetSpecularPower();
 
   glEnable(vtkgl::REGISTER_COMBINERS_NV);
   glEnable( vtkgl::PER_STAGE_CONSTANTS_NV );
@@ -1293,7 +1293,6 @@ void vtkOpenGLVolumeTextureMapper3D::RenderOneIndependentNoShadeFP(
   GLuint fragmentProgram;
   vtkgl::GenProgramsARB( 1, &fragmentProgram );
 
-
   vtkgl::BindProgramARB( vtkgl::FRAGMENT_PROGRAM_ARB, fragmentProgram );
 
   vtkgl::ProgramStringARB( vtkgl::FRAGMENT_PROGRAM_ARB,
@@ -1496,9 +1495,9 @@ void vtkOpenGLVolumeTextureMapper3D::GetLightInformation(
   GLfloat halfwayVector[2][4],
   GLfloat ambientColor[4] )
 {
-  float ambient = vol->GetProperty()->GetAmbient();
-  float diffuse  = vol->GetProperty()->GetDiffuse();
-  float specular = vol->GetProperty()->GetSpecular();
+  double ambient = vol->GetProperty()->GetAmbient();
+  double diffuse  = vol->GetProperty()->GetDiffuse();
+  double specular = vol->GetProperty()->GetSpecular();
 
   vtkTransform *volumeTransform = vtkTransform::New();
 
@@ -1539,8 +1538,8 @@ void vtkOpenGLVolumeTextureMapper3D::GetLightInformation(
 
   for ( lightIndex = 0; lightIndex < 2; lightIndex++ )
     {
-    float dir[3] = {0,0,0};
-    float half[3] = {0,0,0};
+    double dir[3] = {0,0,0};
+    double half[3] = {0,0,0};
 
     if ( light[lightIndex] == NULL ||
          light[lightIndex]->GetSwitch() == 0 )
@@ -1633,10 +1632,10 @@ void vtkOpenGLVolumeTextureMapper3D::SetupProgramLocalsForShadingFP(
   GLfloat halfwayVector[2][4];
   GLfloat ambientColor[4];
 
-  float ambient       = vol->GetProperty()->GetAmbient();
-  float diffuse       = vol->GetProperty()->GetDiffuse();
-  float specular      = vol->GetProperty()->GetSpecular();
-  float specularPower = vol->GetProperty()->GetSpecularPower();
+  double ambient       = vol->GetProperty()->GetAmbient();
+  double diffuse       = vol->GetProperty()->GetDiffuse();
+  double specular      = vol->GetProperty()->GetSpecular();
+  double specularPower = vol->GetProperty()->GetSpecularPower();
 
   vtkTransform *volumeTransform = vtkTransform::New();
 
@@ -1677,8 +1676,8 @@ void vtkOpenGLVolumeTextureMapper3D::SetupProgramLocalsForShadingFP(
 
   for ( lightIndex = 0; lightIndex < 2; lightIndex++ )
     {
-    float dir[3] = {0,0,0};
-    float half[3] = {0,0,0};
+    double dir[3] = {0,0,0};
+    double half[3] = {0,0,0};
 
     if ( light[lightIndex] == NULL ||
          light[lightIndex]->GetSwitch() == 0 )
