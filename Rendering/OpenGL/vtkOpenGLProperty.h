@@ -85,6 +85,8 @@ public:
   virtual void AddShaderVariable(const char *name, int numVars, int *x);
   virtual void AddShaderVariable(const char *name, int numVars, float *x);
   virtual void AddShaderVariable(const char *name, int numVars, double *x);
+  virtual void AddShaderVariableArray(const char *name, 
+    int numberOfComponents, int numberOfElements, float *x);
 
   // Description:
   // Helper method to set OpenGL material properties.

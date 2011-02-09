@@ -43,7 +43,7 @@
 //
 // Currently, calculations are computed using 8 bits per RGBA channel.
 // In the future this should be expanded to handle newer boards that
-// can support 15 bit float compositing.
+// can support 15 bit double compositing.
 //
 // This mapper supports two main families of graphics hardware:
 // nvidia and ATI. There are two different implementations of
@@ -80,6 +80,7 @@ class vtkImageData;
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;
 class vtkVolumeProperty;
+class vtkIntArray;
 
 class VTKRENDERINGVOLUME_EXPORT vtkVolumeTextureMapper3D : public vtkVolumeMapper
 {
@@ -94,8 +95,8 @@ public:
   // may not be honored for interactive renders. An interactive
   // render is defined as one that has less than 1 second of
   // allocated render time.
-  vtkSetMacro( SampleDistance, float );
-  vtkGetMacro( SampleDistance, float );
+  vtkSetMacro( SampleDistance, double );
+  vtkGetMacro( SampleDistance, double );
 
   // Description:
   // These are the dimensions of the 3D texture
@@ -103,7 +104,7 @@ public:
 
   // Description:
   // This is the spacing of the 3D texture
-  vtkGetVectorMacro( VolumeSpacing,    float, 3 );
+  vtkGetVectorMacro( VolumeSpacing,    double, 3 );
 
   // Description:
   // Based on hardware and properties, we may or may not be able to
@@ -120,9 +121,15 @@ public:
   vtkGetMacro( NumberOfPolygons, int );
 
   // Description:
+  // By default the number of user slices is zero, but if the user sets
+  // a value, it overrides the automatic slice calculation.
+  vtkSetMacro( NumberOfUserSlices, int );
+  vtkGetMacro( NumberOfUserSlices, int );
+  
+  // Description:
   // Allow access to the actual sample distance used to render
   // the image.
-  vtkGetMacro( ActualSampleDistance, float );
+  vtkGetMacro( ActualSampleDistance, double );
 
 //BTX
 
@@ -175,9 +182,10 @@ protected:
   vtkVolumeTextureMapper3D();
   ~vtkVolumeTextureMapper3D();
 
-  float                    *PolygonBuffer;
-  float                    *IntersectionBuffer;
+  double                   *PolygonBuffer;
+  double                   *IntersectionBuffer;
   int                       NumberOfPolygons;
+  int                       NumberOfUserSlices;
   int                       BufferSize;
 
   unsigned char            *Volume1;
@@ -186,35 +194,36 @@ protected:
   int                       VolumeSize;
   int                       VolumeComponents;
   int                       VolumeDimensions[3];
-  float                     VolumeSpacing[3];
+  double                    VolumeSpacing[3];
 
-  float                     SampleDistance;
-  float                     ActualSampleDistance;
+  double                    SampleDistance;
+  double                    ActualSampleDistance;
 
-  vtkImageData             *SavedTextureInput;
-  vtkImageData             *SavedParametersInput;
+  vtkDataArray             *SavedVolumeScalars;
+  vtkDataArray             *SavedLookupScalars;
 
   vtkColorTransferFunction *SavedRGBFunction;
   vtkPiecewiseFunction     *SavedGrayFunction;
   vtkPiecewiseFunction     *SavedScalarOpacityFunction;
   vtkPiecewiseFunction     *SavedGradientOpacityFunction;
   int                       SavedColorChannels;
-  float                     SavedSampleDistance;
-  float                     SavedScalarOpacityDistance;
+  double                    SavedSampleDistance;
+  double                    SavedScalarOpacityDistance;
 
+  vtkIntArray              *HistogramValues;
   unsigned char             ColorLookup[65536*4];
   unsigned char             AlphaLookup[65536];
-  float                     TempArray1[3*4096];
-  float                     TempArray2[4096];
+  double                    TempArray1[3*4096];
+  double                    TempArray2[4096];
   int                       ColorTableSize;
-  float                     ColorTableScale;
-  float                     ColorTableOffset;
+  double                    ColorTableScale;
+  double                    ColorTableOffset;
 
   unsigned char             DiffuseLookup[65536*4];
   unsigned char             SpecularLookup[65536*4];
 
-  vtkTimeStamp              SavedTextureMTime;
-  vtkTimeStamp              SavedParametersMTime;
+  vtkTimeStamp              VolumeBuildTime;
+  vtkTimeStamp              LookupBuildTime;
 
   int                       RenderMethod;
   int                       PreferredRenderMethod;
@@ -229,8 +238,8 @@ protected:
   // Description:
   // Update the internal RGBA representation of the volume. Return 1 if
   // anything change, 0 if nothing changed.
-  int    UpdateVolumes( vtkVolume * );
-  int    UpdateColorLookup( vtkVolume * );
+  virtual int    UpdateVolumes( vtkVolume * );
+  virtual int    UpdateColorLookup( vtkVolume * );
 
   // Description:
   // Impemented in subclass - check is texture size is OK.
