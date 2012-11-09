@@ -171,6 +171,9 @@ static const H5FD_class_t H5FD_dsm_g = {
 #endif
     NULL,                       /*alloc         */
     NULL,                       /*free          */
+#ifdef H5_HAVE_VFD_EXTENSIONS
+    NULL,
+#endif
     H5FD_dsm_get_eoa,           /*get_eoa       */
     H5FD_dsm_set_eoa,           /*set_eoa       */
     H5FD_dsm_get_eof,           /*get_eof       */
