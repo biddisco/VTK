@@ -1,3 +1,6 @@
+find_package(HDF5 NO_MODULE)
+include_directories(${HDF5_INCLUDE_DIR})
+
 set(Module_SRCS
   vtkAMRDataSetCache.cxx
   vtkAMRBaseParticlesReader.cxx
@@ -23,3 +26,4 @@ set_source_files_properties(
   )
 
 vtk_module_library(vtkIOAMR ${Module_SRCS})
+target_link_libraries(vtkIOAMR hdf5)

@@ -3,7 +3,6 @@ vtk_module(vtkIOAMR
     StandAlone
   DEPENDS
     vtkParallelCore
-    vtkhdf5
     vtkFiltersAMR
   TEST_DEPENDS
     vtkIOXML
