@@ -5,6 +5,9 @@ INCLUDE_REGULAR_EXPRESSION(".*")
 SET(VERSION "4.1.2")
 SET(PACKAGE "netcdf")
 
+find_package(HDF5 REQUIRED NO_MODULE)
+include_directories(${HDF5_INCLUDE_DIR})
+
 # Include all the necessary files for macros
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckFunctionExists)
