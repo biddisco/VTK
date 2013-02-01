@@ -260,7 +260,7 @@ int vtkStreamingDemandDrivenPipeline
       int inNumberOfPieces = inInfo->Get(UPDATE_NUMBER_OF_PIECES());
       if(inNumberOfPieces != outNumberOfPieces)
         {
-        N2E = 1;
+        N2E = 0;
         }
       else
         {
