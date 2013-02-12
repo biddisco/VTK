@@ -264,7 +264,7 @@ T* vtkDataArrayTemplate<T>::ResizeAndExtend(vtkIdType sz)
   // OS X's realloc does not free memory if the new block is smaller.  This
   // is a very serious problem and causes huge amount of memory to be
   // wasted. Do not use realloc on the Mac.
-  bool dontUseRealloc=false;
+  bool dontUseRealloc=true;
   #if defined __APPLE__
   dontUseRealloc=true;
   #endif
