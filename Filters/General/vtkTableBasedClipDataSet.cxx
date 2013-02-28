@@ -3446,17 +3446,22 @@ void vtkTableBasedClipDataSet::ClipUnstructuredGridData( vtkDataSet * inputGrd,
     vtkUnstructuredGrid * visItGrd = vtkUnstructuredGrid::New();
     visItVFV->ConstructDataSet( unstruct, visItGrd, theCords );
 
-    vtkAppendFilter * appender = vtkAppendFilter::New();
-    appender->AddInputData( vtkUGrid );
-    appender->AddInputData( visItGrd );
-    appender->Update();
+    if (visItGrd->GetNumberOfCells()>0) {
+      vtkAppendFilter * appender = vtkAppendFilter::New();
+      appender->AddInputData( vtkUGrid );
+      appender->AddInputData( visItGrd );
+      appender->Update();
 
-    outputUG->ShallowCopy( appender->GetOutput() );
+      outputUG->ShallowCopy( appender->GetOutput() );
+      appender->Delete();
+      appender = NULL;
+    }
+    else {
+      outputUG->ShallowCopy( vtkUGrid );
+    }
 
-    appender->Delete();
     visItGrd->Delete();
     vtkUGrid->Delete();
-    appender = NULL;
     vtkUGrid = NULL;
     visItGrd = NULL;
     }
