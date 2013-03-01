@@ -302,6 +302,7 @@ int vtkAppendFilter::RequestData(
         if (ug && ds->GetCellType(cellId) == VTK_POLYHEDRON )
           {
           vtkIdType nfaces, *facePtIds;
+          vtkIdType index = newPtIds->GetNumberOfIds();
           ug->GetFaceStream(cellId,nfaces,facePtIds);
           for(vtkIdType id=0; id < nfaces; ++id)
             {
@@ -312,7 +313,7 @@ int vtkAppendFilter::RequestData(
               newPtIds->InsertNextId(*(++facePtIds)+ptOffset);
               }
             }
-          output->InsertNextCell(VTK_POLYHEDRON,nfaces,newPtIds->GetPointer(0));
+          output->InsertNextCell(VTK_POLYHEDRON,nfaces,newPtIds->GetPointer(index));
           }
         else
           {
