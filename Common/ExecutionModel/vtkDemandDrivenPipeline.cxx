@@ -807,13 +807,13 @@ int vtkDemandDrivenPipeline::InputTypeIsValid
       }
     if(input && !foundMatch)
       {
-      vtkErrorMacro("Input for connection index " << index
-                    << " on input port index " << port
-                    << " for algorithm " << this->Algorithm->GetClassName()
-                    << "(" << this->Algorithm << ") is of type "
-                    << input->GetClassName() << ", but a "
-                    << info->Get(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), 0)
-                    << " is required.");
+      //vtkErrorMacro("Input for connection index " << index
+      //              << " on input port index " << port
+      //              << " for algorithm " << this->Algorithm->GetClassName()
+      //              << "(" << this->Algorithm << ") is of type "
+      //              << input->GetClassName() << ", but a "
+      //              << info->Get(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), 0)
+      //              << " is required.");
       return 0;
       }
     }

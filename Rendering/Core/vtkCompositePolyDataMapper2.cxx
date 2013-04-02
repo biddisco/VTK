@@ -78,7 +78,7 @@ void vtkCompositePolyDataMapper2::ComputeBounds()
   // the bounds of the input polydata.
   if (!input)
     {
-    this->Superclass::ComputeBounds();
+//    this->Superclass::ComputeBounds();
     return;
     }
 
