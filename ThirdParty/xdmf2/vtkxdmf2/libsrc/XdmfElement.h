@@ -32,7 +32,7 @@
 #define XDMF_ELEMENT_STATE_HEAVY_READ    2
 
 class XdmfDOM;
-class XdmfDsmBuffer;
+class H5FDdsmManager;
 
 //! Basic XML Based Element
 /*!
@@ -178,9 +178,9 @@ public:
     //! Follow a Refernce Chain one step, if it exists
     XdmfXmlNode FollowReference(XdmfXmlNode Element);
     //! Get DSM Buffer
-    XdmfGetValueMacro(DsmBuffer, XdmfDsmBuffer *);
+    XdmfGetValueMacro(DsmManager, H5FDdsmManager *);
     //! Set DSM Buffer
-    XdmfSetValueMacro(DsmBuffer, XdmfDsmBuffer *);
+    XdmfSetValueMacro(DsmManager, H5FDdsmManager *);
     //! Delete the Element when the XdmfGrid container is deleted. Default = 0
     XdmfSetValueMacro(DeleteOnGridDelete, XdmfInt32);
     //! Delete the Element when the XdmfGrid container is deleted. Default = 0
@@ -205,7 +205,7 @@ protected:
     XdmfInt32   IsReference;
     // Copy, don't copy data out of reference element. Default is to copy.
     XdmfInt32   CopyReferenceData;
-    XdmfDsmBuffer *DsmBuffer;
+    H5FDdsmManager *DsmManager;
     XdmfXmlNode RootWhenParsed;
     XdmfInt32   DeleteOnGridDelete;
 };

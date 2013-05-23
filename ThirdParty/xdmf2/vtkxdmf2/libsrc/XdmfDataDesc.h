@@ -32,7 +32,7 @@
 #define XDMF_HYPERSLAB    1
 #define XDMF_COORDINATES  2
 
-class XdmfDsmBuffer;
+class H5FDdsmManager;
 
 
 //! Number Type and Shape
@@ -203,9 +203,9 @@ public :
 //! Get the name of the Heavy Data Set when written (if applicable)
   XdmfGetStringMacro(HeavyDataSetName);
 //! Get DSM Buffer
-  XdmfGetValueMacro(DsmBuffer, XdmfDsmBuffer *);
+  XdmfGetValueMacro(DsmManager, H5FDdsmManager *);
 //! Set DSM Buffer
-  XdmfSetValueMacro(DsmBuffer, XdmfDsmBuffer *);
+  XdmfSetValueMacro(DsmManager, H5FDdsmManager *);
 
 
 
@@ -239,7 +239,7 @@ protected:
   void SetShapeString(XdmfConstString shape);
   XdmfString ShapeString;
   XdmfString   HeavyDataSetName;
-  XdmfDsmBuffer *DsmBuffer;
+  H5FDdsmManager *DsmManager;
 };
 
 #endif // __XdmfDataDesc_h

@@ -22,8 +22,11 @@
 /*                                                                 */
 /*******************************************************************/
 #include "XdmfHDF.h"
-#include "XdmfDsmBuffer.h"
-#include "XdmfH5Driver.h"
+#ifdef HAVE_H5FD_DSM
+#include "H5FDdsm.h"
+#include "H5FDdsmManager.h"
+#include "H5FDdsmComm.h"
+#endif
 
 #include <cstring>
 
@@ -56,22 +59,35 @@ XdmfHDF::XdmfHDF() {
   MPI_Initialized(&valid);
   if (valid) 
   {
+#ifdef HAVE_H5FD_DSM
+    
+    MPI_Comm comm = H5FDdsmManager::GetGlobalMPICommunicator();
+    if (comm==MPI_COMM_NULL) {
+      MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
+//      XdmfErrorMessage("Major error with no DSM Global Communicator");
+    }
+    else {
+      MPI_Comm_size(comm,&nprocs);
+    }
+#else
     MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
+#endif
   }
   if (nprocs<=1) 
   {
-    this->UseSerialFile = 1;
+//    this->UseSerialFile = 1;
   }
+    this->UseSerialFile = 0;
 #endif
 
-  this->DsmBuffer = 0;
+  this->DsmManager = 0;
   strcpy( this->CwdName, "" );
 }
 
 XdmfHDF::~XdmfHDF() {
   XdmfInt32 i;
 
-  this->Close();
+  this->Close(NULL);
   for( i = 0 ; i < this->NumberOfChildren ; i++ ){
     delete this->Child[ i ];
   }
@@ -321,6 +337,13 @@ XdmfHDF::DoClose() {
       this->Dataset = H5I_BADID;
     }
 
+#ifdef HAVE_H5FD_DSM
+    // prevent xdmf from violating our handles
+    if (this->DsmManager && this->File != H5I_BADID) {
+      this->DsmManager->CloseDSM();
+      this->File = H5I_BADID;
+    }
+#endif
     if (this->File != H5I_BADID ) {
       XdmfDebug("Closing File");
       H5Fclose(this->File);  
@@ -629,7 +652,8 @@ XdmfHDF::DoOpen( XdmfConstString DataSetName, XdmfConstString access ) {
   // XdmfString Domain, *File, *Path;
   XdmfString lastcolon;
   XdmfString firstcolon;
-  XdmfInt32  status, flags = H5F_ACC_RDWR;
+  XdmfInt32  status;
+  XdmfUInt32 flags = H5F_ACC_RDWR;
   XdmfInt32  AllowCreate = 0;
   ostrstream FullFileName;
 
@@ -729,15 +753,19 @@ XdmfHDF::DoOpen( XdmfConstString DataSetName, XdmfConstString access ) {
       //      H5Pset_fapl_core( this->AccessPlist, 1000000, 1 );
       H5Pset_fapl_core( this->AccessPlist, 1000000, 0 );
     } else if( STRCASECMP( this->Domain, "DSM" ) == 0 ) {
+#ifdef HAVE_H5FD_DSM
       XdmfDebug("Using DSM Interface");  
-      if(!this->DsmBuffer){
-        XdmfErrorMessage("Cannot Open a DSM HDF5 File Until DsmBuffer has been set");
+      if(!this->DsmManager){
+        XdmfErrorMessage("Cannot Open a DSM HDF5 File Until DsmManager has been set");
         return(XDMF_FAIL);
       }
-      H5FD_dsm_init();
-      this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
-      XdmfDebug("DsmBuffer = " << this->DsmBuffer);
-      H5Pset_fapl_dsm( this->AccessPlist, H5FD_DSM_INCREMENT, this->DsmBuffer);
+      if (!this->DsmManager->IsOpenDSM()) {
+        this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
+        this->DsmManager->OpenDSM(flags);
+      }
+#else
+      XdmfErrorMessage("DSM Interface is unavailable");
+#endif
     } else if( STRCASECMP( this->Domain, "NDGM" ) == 0 ) {
       XdmfErrorMessage("NDGM Interface is unavailable");
       return( XDMF_FAIL );  
@@ -749,7 +777,7 @@ XdmfHDF::DoOpen( XdmfConstString DataSetName, XdmfConstString access ) {
         XdmfDebug("Using Parallel File Interface, Path = " << this->GetWorkingDirectory() );
 
         this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
-        H5Pset_fapl_mpio(this->AccessPlist, MPI_COMM_WORLD, MPI_INFO_NULL);
+//        H5Pset_fapl_mpio(this->AccessPlist, MPI_COMM_WORLD, MPI_INFO_NULL);
       }else{
         XdmfDebug("Using Serial File Interface (Specified in DOMAIN), Path = " << this->GetWorkingDirectory() );
       }
@@ -772,31 +800,44 @@ XdmfHDF::DoOpen( XdmfConstString DataSetName, XdmfConstString access ) {
         this->File = H5Fopen(FullFileName.str(), flags, this->AccessPlist);
       } H5E_END_TRY;
     } else {
-      this->File = H5Fopen(FullFileName.str(), flags, this->AccessPlist);
+#ifdef HAVE_H5FD_DSM
+      if (!this->DsmManager || (this->DsmManager && !this->DsmManager->IsOpenDSM()))
+#endif
+        this->File = H5Fopen(FullFileName.str(), flags, this->AccessPlist);
     }
-XdmfDebug("this->File = " << this->File);
-  FullFileName.rdbuf()->freeze(0);
-  if( this->File < 0 ){
+    XdmfDebug("this->File = " << this->File);
+    FullFileName.rdbuf()->freeze(0);
+#ifdef HAVE_H5FD_DSM
+    if( (!this->DsmManager && this->File < 0) || (this->DsmManager && !this->DsmManager->IsOpenDSM())) {
+#else
+    if( this->File < 0 ){
+#endif
     XdmfDebug("Open failed, Checking for Create");
-    if( AllowCreate ) {
-      // File Doesn't Exist
-      // So Create it and Return
-      if( STRCASECMP( this->Domain, "CORE" ) == 0 ) {
-        XdmfDebug("Using CORE Interface");  
-        if( this->AccessPlist != H5P_DEFAULT ) {
-          H5Pclose( this->AccessPlist );
-        }
-        this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
-        //      H5Pset_fapl_core( this->AccessPlist, 1000000, 1);
-        H5Pset_fapl_core( this->AccessPlist, 1000000, 0);
-      } else if( STRCASECMP( this->Domain, "DSM" ) == 0 ) {
-        if(!this->DsmBuffer){
-          XdmfErrorMessage("Cannot Open a DSM HDF5 File Until DsmBuffer has been set");
-          return(XDMF_FAIL);
-        }
-        H5FD_dsm_init();
-        this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
-        H5Pset_fapl_dsm( this->AccessPlist, H5FD_DSM_INCREMENT, this->DsmBuffer);
+      if( AllowCreate ) {
+        // File Doesn't Exist
+        // So Create it and Return
+        if( STRCASECMP( this->Domain, "CORE" ) == 0 ) {
+          XdmfDebug("Using CORE Interface");  
+          if( this->AccessPlist != H5P_DEFAULT ) {
+            H5Pclose( this->AccessPlist );
+          }
+          this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
+          //      H5Pset_fapl_core( this->AccessPlist, 1000000, 1);
+          H5Pset_fapl_core( this->AccessPlist, 1000000, 0);
+        } else if( STRCASECMP( this->Domain, "DSM" ) == 0 ) {
+#ifdef HAVE_H5FD_DSM
+          if(!this->DsmManager){
+            XdmfErrorMessage("Cannot Open a DSM HDF5 File Until DsmManager has been set");
+            return(XDMF_FAIL);
+          }
+          if (!this->DsmManager->IsOpenDSM()) {
+              this->AccessPlist = H5Pcreate( H5P_FILE_ACCESS );
+              this->DsmManager->OpenDSM(H5F_ACC_RDONLY);
+          }
+
+#else
+        XdmfErrorMessage("DSM interface is unavailable");
+#endif
       } else if( STRCASECMP( this->Domain, "NDGM" ) == 0 ) {
         XdmfErrorMessage("NDGM interface is unavailable");
         return( XDMF_FAIL );
@@ -818,6 +859,11 @@ XdmfDebug("this->File = " << this->File);
     }
   }
 #if (!H5_USE_16_API && ((H5_VERS_MAJOR>1)||((H5_VERS_MAJOR==1)&&(H5_VERS_MINOR>=8))))
+#ifdef HAVE_H5FD_DSM
+    if (this->DsmManager && this->DsmManager->IsOpenDSM())
+      this->Cwd = H5Gopen(this->DsmManager->GetCachedFileHandle(), "/", H5P_DEFAULT);
+    else
+#endif
     this->Cwd = H5Gopen(this->File, "/", H5P_DEFAULT);
 #else
     this->Cwd = H5Gopen(this->File, "/");
@@ -880,14 +926,14 @@ XdmfArray *CopyArray( XdmfArray *Source, XdmfArray *Target ) {
     Dimensions[0] = Source->GetSelectionSize();
     Hdf.SetShape( 1, Dimensions );
   }
-Hdf.Open( str.str(), "rw" );
+  Hdf.Open(NULL, str.str(), "rw" );
   if( Hdf.CreateDataset( str.str()) != XDMF_SUCCESS ){
     XdmfErrorMessage("Can't Create Temp Dataset " << str.str());
     str.rdbuf()->freeze(0);
     if( NewArray ){
       delete NewArray;
     }
-    Hdf.Close();
+    Hdf.Close(NULL);
     return( NULL );
   }
   str.rdbuf()->freeze(0);
@@ -896,7 +942,7 @@ Hdf.Open( str.str(), "rw" );
     if( NewArray ){
       delete NewArray;
     }
-  Hdf.Close();
+  Hdf.Close(NULL);
     return( NULL );
   }
   if( Hdf.Read( Target ) == NULL ){
@@ -904,10 +950,10 @@ Hdf.Open( str.str(), "rw" );
     if( NewArray ){
       delete NewArray;
     }
-  Hdf.Close();
+  Hdf.Close(NULL);
     return( NULL );
   }
-Hdf.Close();
+Hdf.Close(NULL);
   return( Target );
 }
 /*
