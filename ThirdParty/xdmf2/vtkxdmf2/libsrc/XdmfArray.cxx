@@ -209,7 +209,12 @@ array->Array = this;
 Tag << "_" << XDMF_64BIT_CAST GlobalTimeCntr << "_XdmfArray" << ends;
 }
 
-XdmfArray::XdmfArray() {
+XdmfArray::XdmfArray() :
+  mOpenCB( NULL ),
+  mReadCB( NULL ),
+  mWriteCB( NULL ),
+  mCloseCB( NULL )
+  {
   XdmfDebug("XdmfArray Constructor");
   this->AllowAllocate = 1;
   this->DataPointer = NULL;
@@ -1366,4 +1371,21 @@ istr >>i;
   i = (XDMF_64_INT)d;
 #endif
 return istr;
+}
+
+void XdmfArray::setOpenCallback( XdmfOpenCallback* cb )
+{
+  this->mOpenCB = cb;
+}
+void XdmfArray::setReadCallback( XdmfReadCallback* cb )
+{
+  this->mReadCB = cb;
+}
+void XdmfArray::setWriteCallback( XdmfWriteCallback* cb )
+{
+  this->mWriteCB = cb;
+}
+void XdmfArray::setCloseCallback( XdmfCloseCallback* cb )
+{
+  this->mCloseCB = cb;
 }

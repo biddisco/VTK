@@ -39,7 +39,7 @@ XdmfDataDesc::XdmfDataDesc() {
   this->Compression = 0;
   this->ShapeString = 0;
   this->HeavyDataSetName = 0;
-  this->DsmBuffer = NULL;
+  this->DsmManager = NULL;
 }
 
 XdmfDataDesc::~XdmfDataDesc() {

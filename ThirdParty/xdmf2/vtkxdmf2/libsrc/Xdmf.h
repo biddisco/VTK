@@ -30,13 +30,6 @@
 #include "XdmfDataTransform.h"
 #include "XdmfDomain.h"
 #include "XdmfDOM.h"
-#include "XdmfDsm.h"
-#include "XdmfDsmBuffer.h"
-#include "XdmfDsmComm.h"
-#include "XdmfDsmMsg.h"
-#ifndef XDMF_NO_MPI
-#include "XdmfDsmCommMpi.h"
-#endif /* XDMF_NO_MPI */
 #include "XdmfElement.h"
 #include "XdmfExpression.h"
 #include "XdmfGeometry.h"

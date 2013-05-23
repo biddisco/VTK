@@ -332,7 +332,7 @@ if( this->AttributeType == XDMF_ATTRIBUTE_TYPE_NONE ){
 ValuesNode = this->DOM->FindDataElement( 0, Element );
 if( ValuesNode ){
   ValueReader.SetDOM( this->DOM );
-  ValueReader.SetDsmBuffer(this->DsmBuffer);
+  ValueReader.SetDsmManager(this->DsmManager);
   if( this->ValuesAreMine && this->Values ){
     delete this->Values;
     this->Values = NULL;

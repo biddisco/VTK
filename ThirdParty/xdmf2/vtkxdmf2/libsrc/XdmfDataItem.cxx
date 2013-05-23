@@ -123,7 +123,7 @@ XdmfDataItem::Copy(XdmfElement *Source){
     // this->SetDOM(ds->GetDOM());
     this->SetFormat(ds->GetFormat());
     this->SetHeavyDataSetName(ds->GetHeavyDataSetName());
-    this->SetDsmBuffer(ds->GetDsmBuffer());
+    this->SetDsmManager(ds->GetDsmManager());
     this->DataDesc->CopyType(ds->GetDataDesc());
     this->DataDesc->CopyShape(ds->GetDataDesc());
     this->DataDesc->CopySelection(ds->GetDataDesc());
@@ -437,6 +437,7 @@ XdmfInt32 XdmfDataItem::UpdateFunction(){
                 }
                 Argument = this->DOM->FindDataElement(Id, this->Element );
                 TmpItem = new XdmfDataItem();
+                if (this->DsmManager) TmpItem->SetDsmManager(this->DsmManager);
                 TmpItem->SetDOM(this->DOM);
                 TmpItem->SetElement(Argument);
                 TmpItem->UpdateInformation();
@@ -523,9 +524,9 @@ XdmfInt32 XdmfDataItem::Update(){
     switch (this->Format) {
         case XDMF_FORMAT_HDF :
             this->Values->SetDebug(this->GetDebug());
-            // this->SetDsmBuffer(this->Values->GetDsmBuffer());
-            // cout << "Setting Values Dsm to " << this->DsmBuffer << endl;
-            this->Values->SetDsmBuffer(this->DsmBuffer);
+            // this->SetDsmManager(this->Values->GetDsmManager());
+            // cout << "Setting Values Dsm to " << this->DsmManager << endl;
+            this->Values->SetDsmManager(this->DsmManager);
             XdmfDebug("Reading Data");
             if(!((XdmfValuesHDF *)this->Values)->Read(this->Array)){
                 XdmfErrorMessage("Reading Values Failed");
@@ -785,7 +786,7 @@ XdmfInt32 XdmfDataItem::Build(){
         case XDMF_FORMAT_HDF :
             XdmfDebug("Writing Values in HDF Format");
             Values->SetHeavyDataSetName(this->GetHeavyDataSetName());
-            Values->SetDsmBuffer(this->GetDsmBuffer());
+            Values->SetDsmManager(this->GetDsmManager());
             if(((XdmfValuesHDF *)Values)->Write(this->Array) != XDMF_SUCCESS){
                 XdmfErrorMessage("Writing Values Failed");
                 return(XDMF_FAIL);

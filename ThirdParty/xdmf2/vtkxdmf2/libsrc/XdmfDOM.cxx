@@ -203,7 +203,7 @@ XdmfDOM::SetInputFileName( XdmfConstString Filename ){
   }
   if( XDMF_WORD_CMP( Filename, "stdin" ) ) {
     this->Input = &cin;
-  } else {
+  } else if (Filename) {
     ifstream        *NewInput = new ifstream( Filename );
     if( !NewInput ) {
       XdmfErrorMessage("Can't Open Input File " << Filename );
