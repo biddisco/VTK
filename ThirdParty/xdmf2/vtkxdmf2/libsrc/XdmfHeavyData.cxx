@@ -93,9 +93,12 @@ void XdmfHeavyData::SetFileName( XdmfConstString String )
     }
 }
 
-XdmfInt32 XdmfHeavyData::Open( XdmfConstString name, XdmfConstString access ) {
+XdmfInt32 XdmfHeavyData::Open( XdmfArray* array, XdmfConstString name, XdmfConstString access ) {
   if ( mOpenCB ) {
     return mOpenCB->DoOpen( this, name, access );
+  }
+  else if (array && array->mOpenCB) {
+    return array->mOpenCB->DoOpen( this, name, access );
   } else {
     return DoOpen( name, access );
   }
@@ -104,6 +107,9 @@ XdmfInt32 XdmfHeavyData::Open( XdmfConstString name, XdmfConstString access ) {
 XdmfArray* XdmfHeavyData::Read( XdmfArray* array ) {
   if ( mReadCB ) {
     return mReadCB->DoRead( this, array );
+  }
+  else if (array && array->mReadCB) {
+    return array->mReadCB->DoRead( this, array );
   } else {
     return DoRead( array );
   }
@@ -112,14 +118,21 @@ XdmfArray* XdmfHeavyData::Read( XdmfArray* array ) {
 XdmfInt32 XdmfHeavyData::Write( XdmfArray* array ) {
   if ( mWriteCB ) {
     return mWriteCB->DoWrite( this, array );
-  } else {
+  }
+  else if (array && array->mWriteCB) {
+    return array->mWriteCB->DoWrite( this, array );
+  }
+  else {
     return DoWrite( array );
   }
 }
 
-XdmfInt32 XdmfHeavyData::Close() {
+XdmfInt32 XdmfHeavyData::Close( XdmfArray* array ) {
   if ( mCloseCB ) {
     return mCloseCB->DoClose( this );
+  }
+  else if (array && array->mCloseCB) {
+    return array->mCloseCB->DoClose( this );
   } else {
     return DoClose();
   }
