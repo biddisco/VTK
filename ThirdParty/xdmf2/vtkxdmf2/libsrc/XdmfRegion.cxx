@@ -190,7 +190,7 @@ if( this->RegionType == XDMF_REGION_TYPE_UNSET ){
 ValuesNode = this->DOM->FindDataElement( 0, Element );
 if( ValuesNode ){
   ValueReader.SetDOM( this->DOM );
-  ValueReader.SetDsmBuffer(this->DsmBuffer);
+  ValueReader.SetDsmManager(this->DsmManager);
   if( this->ValuesAreMine && this->Values ){
     delete this->Values;
     this->Values = NULL;
