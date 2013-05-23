@@ -34,8 +34,8 @@
 
 namespace xdmf2
 {
+class H5FDdsmManager;
 
-class XdmfDsmBuffer;
 
 
 //! Number Type and Shape
@@ -206,9 +206,9 @@ public :
 //! Get the name of the Heavy Data Set when written (if applicable)
   XdmfGetStringMacro(HeavyDataSetName);
 //! Get DSM Buffer
-  XdmfGetValueMacro(DsmBuffer, XdmfDsmBuffer *);
+  XdmfGetValueMacro(DsmManager, H5FDdsmManager *);
 //! Set DSM Buffer
-  XdmfSetValueMacro(DsmBuffer, XdmfDsmBuffer *);
+  XdmfSetValueMacro(DsmManager, H5FDdsmManager *);
 
 
 
@@ -242,7 +242,7 @@ protected:
   void SetShapeString(XdmfConstString shape);
   XdmfString ShapeString;
   XdmfString   HeavyDataSetName;
-  XdmfDsmBuffer *DsmBuffer;
+  H5FDdsmManager *DsmManager;
 };
 
 }
