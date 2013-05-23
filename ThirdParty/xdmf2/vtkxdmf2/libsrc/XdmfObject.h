@@ -79,6 +79,8 @@
 #  include <sys/param.h>
 # endif
 
+#include <string.h>
+
 # ifdef UNIX
 #  include "sys/file.h"
 #  include "strings.h"

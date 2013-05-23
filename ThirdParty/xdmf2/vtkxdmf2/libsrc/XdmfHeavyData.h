@@ -101,13 +101,13 @@ values can be :
   //-- public interface functions for manipulating heavy data --//
 
   /// Open a heavy dataset for reading or writing.
-  XdmfInt32 Open( XdmfConstString name = NULL, XdmfConstString access = NULL );
+  XdmfInt32 Open( XdmfArray* array, XdmfConstString name = NULL, XdmfConstString access = NULL );
   /// Read an array from a heavy dataset.
   XdmfArray* Read( XdmfArray* array = NULL );
   /// Write to the heavy dataset that is currently open.
   XdmfInt32 Write( XdmfArray* array );
   /// Close a heavy dataset.
-  XdmfInt32 Close();
+  XdmfInt32 Close( XdmfArray* array);
 
   //-- Implementation Functions for manipulating heavy data --//
 

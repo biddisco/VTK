@@ -49,7 +49,7 @@ XdmfElement::XdmfElement() {
     this->State = XDMF_ELEMENT_STATE_UNINITIALIZED;
     this->CopyReferenceData = 1;
     this->RootWhenParsed = 0;
-    this->DsmBuffer = NULL;
+    this->DsmManager = NULL;
     this->DataXml = 0;
     this->InsertedDataXml = 0;
     this->DeleteOnGridDelete = 0;
