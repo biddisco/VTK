@@ -57,7 +57,7 @@ XdmfValuesHDF::Read(XdmfArray *anArray){
     }
     XDMF_WORD_TRIM(DataSetName);
     //! Possible Read from DSM. Make sure we're connected.
-    if(!this->DsmBuffer) this->SetDsmBuffer(anArray->GetDsmBuffer());
+    if(!this->DsmManager) this->SetDsmManager(anArray->GetDsmManager());
     XdmfDebug("Opening HDF5 Data for Reading : " << DataSetName);
     // Allocate Array if Necessary
     if(!RetArray){
@@ -71,8 +71,8 @@ XdmfValuesHDF::Read(XdmfArray *anArray){
         RetArray->CopySelection(this->DataDesc);
         RetArray->Allocate();
     }
-    H5.SetDsmBuffer(this->DsmBuffer);
-    if( H5.Open( DataSetName, "r" ) == XDMF_FAIL ) {
+    H5.SetDsmManager(this->DsmManager);
+    if( H5.Open( NULL, DataSetName, "r" ) == XDMF_FAIL ) {
         XdmfErrorMessage("Can't Open Dataset " << DataSetName);
         if(!anArray) delete RetArray;
         RetArray = NULL;
@@ -115,7 +115,7 @@ XdmfValuesHDF::Read(XdmfArray *anArray){
         }else{
             this->SetHeavyDataSetName(DataSetName);
         }
-    H5.Close();
+    H5.Close(RetArray);
     }
     delete [] DataSetName;
     return(RetArray);
@@ -151,7 +151,7 @@ XdmfValuesHDF::Write(XdmfArray *anArray, XdmfConstString aHeavyDataSetName){
           }
     }
     // Possible Write to DSM. Make sure we're connected
-    if(!this->DsmBuffer) this->SetDsmBuffer(anArray->GetDsmBuffer());
+    if(!this->DsmManager) this->SetDsmManager(anArray->GetDsmManager());
     XdmfDebug("Writing Values to " << aHeavyDataSetName);
     if(!this->DataDesc ){
         XdmfErrorMessage("DataDesc has not been set");
@@ -168,19 +168,19 @@ XdmfValuesHDF::Write(XdmfArray *anArray, XdmfConstString aHeavyDataSetName){
     H5.CopyType(this->DataDesc);
     H5.CopyShape(this->DataDesc);
     H5.CopySelection(this->DataDesc);
-    H5.SetDsmBuffer(this->DsmBuffer);
-    if(H5.Open(hds, "rw") == XDMF_FAIL){
+    H5.SetDsmManager(this->DsmManager);
+    if(H5.Open(anArray, hds, "rw") == XDMF_FAIL){
         XdmfErrorMessage("Error Opening " << hds << " for Writing");
         delete [] hds ;
         return(XDMF_FAIL);
     }
     if(H5.Write(anArray) == XDMF_FAIL){
         XdmfErrorMessage("Error Writing " << hds );
-        H5.Close();
+        H5.Close(anArray);
         delete [] hds;
         return(XDMF_FAIL);
     }
-    H5.Close();
+    H5.Close(anArray);
     delete [] hds;
     return(XDMF_SUCCESS);
 }
@@ -191,7 +191,7 @@ XdmfString XdmfValuesHDF::DataItemFromHDF(XdmfConstString H5DataSet){
     char            *Ptr;
     static XdmfString ReturnString = NULL;
 
-    if(H5.Open(H5DataSet, "r") == XDMF_FAIL){
+    if(H5.Open(NULL, H5DataSet, "r") == XDMF_FAIL){
         XdmfErrorMessage("Can't open H5 Dataset " << H5DataSet << " for reading");
         return(NULL);
     }
@@ -203,7 +203,7 @@ XdmfString XdmfValuesHDF::DataItemFromHDF(XdmfConstString H5DataSet){
     StringOutput << H5.GetShapeAsString();
     StringOutput << "\">" << H5DataSet << "</DataItem>";
     StringOutput << ends;
-    H5.Close();
+    H5.Close(NULL);
 
     if ( ReturnString != NULL ) delete [] ReturnString;
     Ptr = StringOutput.str();
