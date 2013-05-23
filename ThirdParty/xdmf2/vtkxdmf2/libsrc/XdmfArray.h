@@ -25,6 +25,11 @@
 #ifndef __XdmfArray_h
 #define __XdmfArray_h
 
+class XdmfOpenCallback;
+class XdmfReadCallback;
+class XdmfWriteCallback;
+class XdmfCloseCallback;
+
 #include "XdmfDataDesc.h"
 
 #define XDMF_LONGEST_LENGTH     (XdmfInt64)~0
@@ -93,6 +98,10 @@ public:
 
 //! Get the undelying data for fast access \b CAUTION !!
   XdmfPointer  GetDataPointer( XdmfInt64 Index  = 0 );
+
+  void    DropDataPointer( ) {
+    this->DataIsMine = 0;
+  }
 
   void    SetDataPointer( XdmfPointer Pointer ){
         if( this->DataIsMine && this->DataPointer ){
@@ -434,6 +443,14 @@ XdmfInt32 SetValues( XdmfInt64 Index, XdmfArray *Values,
 //        this->Precision * NumberOfElements );  
 //    return ( XDMF_SUCCESS );
 //    };
+  void setOpenCallback( XdmfOpenCallback* cb );
+  void setReadCallback( XdmfReadCallback* cb );
+  void setWriteCallback( XdmfWriteCallback* cb );
+  void setCloseCallback( XdmfCloseCallback* cb );
+  XdmfOpenCallback* mOpenCB;
+  XdmfReadCallback* mReadCB;
+  XdmfWriteCallback* mWriteCB;
+  XdmfCloseCallback* mCloseCB;
 
 protected:
   XdmfPointer  DataPointer;

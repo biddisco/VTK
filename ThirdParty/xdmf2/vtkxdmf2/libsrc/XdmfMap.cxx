@@ -314,7 +314,7 @@ for(i=0 ; i < NumberOfDataItems ; i++){
     if( IdsNode ){
         XdmfDataItem ValueReader;
         ValueReader.SetDOM( this->DOM );
-        ValueReader.SetDsmBuffer(this->DsmBuffer);
+        ValueReader.SetDsmManager(this->DsmManager);
         if(ValueReader.SetElement(IdsNode) == XDMF_FAIL) return(XDMF_FAIL);
         if(ValueReader.UpdateInformation() == XDMF_FAIL) return(XDMF_FAIL);
         if(ValueReader.Update() == XDMF_FAIL) return(XDMF_FAIL);
