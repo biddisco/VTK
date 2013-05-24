@@ -289,6 +289,7 @@ endif()
 
 target_link_libraries(vtkxdmf2
   ${XDMF_LIBXML2_LIBRARIES}
+  ${H5FD_DSM_LIBRARY}
   ${XDMF_HDF5_LIBRARIES}
   ${XDMF_MPI_LIBRARIES}
   ${XDMF_ZLIB_LIBRARIES}
