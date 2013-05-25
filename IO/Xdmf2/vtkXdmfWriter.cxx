@@ -41,6 +41,7 @@
 #include "vtkPointData.h"
 #include "vtkCellData.h"
 #include "vtkTypeTraits.h"
+#include "vtkMath.h"
 
 #include "XdmfArray.h"
 #include "XdmfAttribute.h"
@@ -496,7 +497,7 @@ int vtkXdmfWriter::CreateTopology(vtkDataSet *ds, XdmfGrid *grid, vtkIdType PDim
     heavyDataSetName = std::string(this->HeavyDataFileName) + ":";
     if (this->HeavyDataGroupName)
       {
-      heavyDataSetName = heavyDataSetName + HeavyDataGroupName + "/Topology";
+      heavyDataSetName = heavyDataSetName + HeavyDataGroupName + XDMFW_GROUP_SEPARATOR + "Topology";
       }
     heavyName = heavyDataSetName.c_str();
     }
@@ -537,22 +538,41 @@ int vtkXdmfWriter::CreateTopology(vtkDataSet *ds, XdmfGrid *grid, vtkIdType PDim
     t->SetTopologyType(XDMF_3DCORECTMESH);
     t->SetLightDataLimit(this->LightDataLimit);
     vtkImageData *id = vtkImageData::SafeDownCast(ds);
-    int wExtent[6];
-    id->GetExtent(wExtent);
-    XdmfInt64 Dims[3];
-    Dims[2] = wExtent[1] - wExtent[0] + 1;
-    Dims[1] = wExtent[3] - wExtent[2] + 1;
-    Dims[0] = wExtent[5] - wExtent[4] + 1;
+
+    int UpdateExtent[6], WholeExtent[6];
+    id->GetExtent(UpdateExtent);
+    id->GetInformation()->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), WholeExtent);
+    int UsingPieces = false;
+    // if WholeEx inside (equals) UpdateEx, then we are not treating pieces
+    if (!vtkMath::ExtentIsWithinOtherExtent(WholeExtent, UpdateExtent)) {
+      UsingPieces = true;
+    }
+    XdmfInt64 Count[3], Start[3], Stride[3] = {1,1,1}, Dimension[3];
+    Count[2] = UpdateExtent[1] - UpdateExtent[0] + 1;
+    Count[1] = UpdateExtent[3] - UpdateExtent[2] + 1;
+    Count[0] = UpdateExtent[5] - UpdateExtent[4] + 1;
     XdmfDataDesc *dd = t->GetShapeDesc();
-    dd->SetShape(3, Dims);
+    if (UsingPieces) {
+      Dimension[2] = WholeExtent[1] - WholeExtent[0] + 1;
+      Dimension[1] = WholeExtent[3] - WholeExtent[2] + 1;
+      Dimension[0] = WholeExtent[5] - WholeExtent[4] + 1;
+      Start[2] = UpdateExtent[0];
+      Start[1] = UpdateExtent[2];
+      Start[0] = UpdateExtent[4];
+      dd->SetShape(3, Dimension);
+      dd->SelectHyperSlab( Start, Stride, Count);
+    }
+    else {
+      dd->SetShape(3, Count);
+    }
     //TODO: verify row/column major ordering
 
-    PDims[0] = Dims[0];
-    PDims[1] = Dims[1];
-    PDims[2] = Dims[2];
-    CDims[0] = Dims[0] - 1;
-    CDims[1] = Dims[1] - 1;
-    CDims[2] = Dims[2] - 1;
+    PDims[0] = Count[0];
+    PDims[1] = Count[1];
+    PDims[2] = Count[2];
+    CDims[0] = Count[0] - 1;
+    CDims[1] = Count[1] - 1;
+    CDims[2] = Count[2] - 1;
     }
     break;
   case VTK_RECTILINEAR_GRID:
@@ -582,7 +602,7 @@ int vtkXdmfWriter::CreateTopology(vtkDataSet *ds, XdmfGrid *grid, vtkIdType PDim
     vtkStructuredGrid *sgrid = vtkStructuredGrid::SafeDownCast(ds);
     int rank = CRank = PRank = sgrid->GetDataDimension();
     if( rank == 3 ){
-        t->SetTopologyType(XDMF_3DSMESH);
+    t->SetTopologyType(XDMF_3DSMESH);
     }
     else if( rank == 2){
         t->SetTopologyType(XDMF_2DSMESH);
@@ -692,6 +712,7 @@ int vtkXdmfWriter::CreateTopology(vtkDataSet *ds, XdmfGrid *grid, vtkIdType PDim
       hDim[0] = ds->GetNumberOfCells();
       hDim[1] = ppCell;
       di->SetShape(2, hDim);
+      this->SetXdmfArrayCallbacks(di);
       vtkIdList* il = cellTypes[*ct].GetPointer();
       vtkIdList* cellPoints = vtkIdList::New();
       vtkIdType cvnt=0;
@@ -745,8 +766,10 @@ int vtkXdmfWriter::CreateTopology(vtkDataSet *ds, XdmfGrid *grid, vtkIdType PDim
         {
         di->SetNumberType(XDMF_INT32_TYPE);
         }
+      this->SetXdmfArrayCallbacks(di);
       vtkIdTypeArray *da = vtkIdTypeArray::New();
       da->SetNumberOfComponents(1);
+      da->SetName("Topology");
       vtkUnstructuredGrid *ugrid = vtkUnstructuredGrid::SafeDownCast(ds);
       const int ESTIMATE=4; /*celltype+numids+id0+id1 or celtype+id0+id1+id2*/
       if (ugrid)
@@ -796,6 +819,7 @@ int vtkXdmfWriter::CreateTopology(vtkDataSet *ds, XdmfGrid *grid, vtkIdType PDim
           case VTK_PIXEL :
           case VTK_QUAD :
             da->InsertValue(cntr++, XDMF_POLYGON);
+            da->InsertValue(cntr++, 4);
             break;
           case VTK_TETRA :
             da->InsertValue(cntr++, XDMF_TET);
@@ -868,7 +892,7 @@ int vtkXdmfWriter::CreateGeometry(vtkDataSet *ds, XdmfGrid *grid, void *staticda
     heavyDataSetName = std::string(this->HeavyDataFileName) + ":";
     if (this->HeavyDataGroupName)
       {
-      heavyDataSetName = heavyDataSetName + HeavyDataGroupName + "/Geometry";
+      heavyDataSetName = heavyDataSetName + HeavyDataGroupName + XDMFW_GROUP_SEPARATOR + "Geometry";
       }
     heavyName = heavyDataSetName.c_str();
     }
@@ -919,14 +943,17 @@ int vtkXdmfWriter::CreateGeometry(vtkDataSet *ds, XdmfGrid *grid, void *staticda
     geo->SetVectorX(xdax, 1);
     da = rgrid->GetYCoordinates();
     len = da->GetNumberOfTuples();
+    this->SetXdmfArrayCallbacks(xdax);
     XdmfArray *xday = new XdmfArray;
     this->ConvertVToXArray(da, xday, 1, &len, 0, heavyName);
     geo->SetVectorY(xday, 1);
     da = rgrid->GetZCoordinates();
     len = da->GetNumberOfTuples();
+    this->SetXdmfArrayCallbacks(xday);
     XdmfArray *xdaz = new XdmfArray;
     this->ConvertVToXArray(da, xdaz, 1, &len, 0, heavyName);
     geo->SetVectorZ(xdaz, 1);
+    this->SetXdmfArrayCallbacks(xdaz);
     }
     break;
   case VTK_STRUCTURED_GRID:
@@ -946,6 +973,7 @@ int vtkXdmfWriter::CreateGeometry(vtkDataSet *ds, XdmfGrid *grid, void *staticda
     shape[0] = da->GetNumberOfTuples();
     this->ConvertVToXArray(da, xda, 1, shape, 0, heavyName);
     geo->SetPoints(xda);
+    this->SetXdmfArrayCallbacks(xda);
     }
     break;
   default:
@@ -1005,7 +1033,7 @@ int vtkXdmfWriter::WriteArrays(vtkFieldData* fd, XdmfGrid *grid, int association
       heavyDataSetName = std::string(this->HeavyDataFileName) + ":";
       if (this->HeavyDataGroupName)
         {
-        heavyDataSetName = heavyDataSetName + std::string(HeavyDataGroupName) + "/" + name;
+        heavyDataSetName = heavyDataSetName + std::string(HeavyDataGroupName) + XDMFW_GROUP_SEPARATOR + name;
         }
       heavyName = heavyDataSetName.c_str();
       }
@@ -1018,7 +1046,7 @@ int vtkXdmfWriter::WriteArrays(vtkFieldData* fd, XdmfGrid *grid, int association
       vtkDataArray *scalars = fd->GetArray(i);
       AttributeNames.push_back(scalars->GetName());
     }
-    std::sort(AttributeNames.begin(), AttributeNames.end());
+//    std::sort(AttributeNames.begin(), AttributeNames.end());
 
     for (unsigned int i = 0; i < AttributeNames.size(); i++)
       {
@@ -1049,17 +1077,19 @@ int vtkXdmfWriter::WriteArrays(vtkFieldData* fd, XdmfGrid *grid, int association
         attributeType = dsa->IsArrayAnAttribute(i);
         switch (attributeType) {
         case vtkDataSetAttributes::SCALARS:
-          attributeType = XDMF_ATTRIBUTE_TYPE_SCALAR; //TODO: Is XDMF ok with 3 component(RGB) active scalars?
+          if (da->GetNumberOfComponents()==1) {
+            attributeType = XDMF_ATTRIBUTE_TYPE_SCALAR; //TODO: Is XDMF ok with 3 component(RGB) active scalars? : No : JB 27/11/2009
+          }
           break;
         case vtkDataSetAttributes::VECTORS:
+        case vtkDataSetAttributes::TCOORDS:
+        case vtkDataSetAttributes::NORMALS:
           attributeType = XDMF_ATTRIBUTE_TYPE_VECTOR;
           break;
         case vtkDataSetAttributes::GLOBALIDS:
           attributeType = XDMF_ATTRIBUTE_TYPE_GLOBALID;
           break;
         case vtkDataSetAttributes::TENSORS: //TODO: vtk tensors are 9 component, xdmf tensors are 6?
-        case vtkDataSetAttributes::NORMALS: //TODO: mark as vectors?
-        case vtkDataSetAttributes::TCOORDS: //TODO: mark as vectors?
         case vtkDataSetAttributes::PEDIGREEIDS: //TODO: ? type is variable
         default:
           attributeType = 0;
@@ -1088,10 +1118,13 @@ int vtkXdmfWriter::WriteArrays(vtkFieldData* fd, XdmfGrid *grid, int association
           attr->SetAttributeType(XDMF_ATTRIBUTE_TYPE_TENSOR);
           }
         }
-
+      XdmfTopology *topo = grid->GetTopology();
+      XdmfDataDesc *desc = topo->GetShapeDesc();
       XdmfArray *xda = attr->GetValues();
+      this->ConvertVToXArray(da, xda, rank, dims, 0, heavyName, desc);
       this->ConvertVToXArray(da, xda, rank, dims, 0, heavyName);
       attr->SetValues(xda);
+      this->SetXdmfArrayCallbacks(xda);
       grid->Insert(attr);
       }
     }
@@ -1103,7 +1136,7 @@ int vtkXdmfWriter::WriteArrays(vtkFieldData* fd, XdmfGrid *grid, int association
 void vtkXdmfWriter::ConvertVToXArray(vtkDataArray *vda,
                                       XdmfArray *xda, vtkIdType rank,
                                       vtkIdType *dims, int allocStrategy,
-                                      const char *heavyprefix)
+                                      const char *heavyprefix, XdmfDataDesc *desc)
 {
   XdmfInt32 lRank = rank;
   XdmfInt64 *lDims = new XdmfInt64[rank+1];
@@ -1166,7 +1199,7 @@ void vtkXdmfWriter::ConvertVToXArray(vtkDataArray *vda,
     }
 
   if (heavyprefix) {
-    std::string dsname = std::string(heavyprefix) + "/" + std::string(vda->GetName());
+    std::string dsname = std::string(heavyprefix) + XDMFW_GROUP_SEPARATOR + std::string(vda->GetName());
     xda->SetHeavyDataSetName(dsname.c_str());
   }
 
@@ -1176,7 +1209,27 @@ void vtkXdmfWriter::ConvertVToXArray(vtkDataArray *vda,
     {
     //Do not let xdmf allocate its own buffer. xdmf just borrows vtk's and doesn't double mem size.
     xda->SetAllowAllocate(0);
-    xda->SetShape(lRank, lDims);
+    // if the SelectionType is set on the host desc (topology), then use the supplied hyperslab
+    if (desc && desc->GetSelectionType()==XDMF_HYPERSLAB) {
+      if (nc==1) {
+        xda->CopyShape(desc);
+        xda->CopySelection(desc);
+      }
+      else {
+        XdmfInt64 Start[4], Stride[4] = {1,1,1,1}, Count[4], Dimension[4];
+        desc->GetShape(Dimension);
+        Dimension[3] = nc;
+        desc->GetHyperSlab(Start, Stride, Count);
+        Count[3] = nc;
+        Start[3] = 0;
+        xda->SetShape(lRank, Dimension);
+        xda->SelectHyperSlab( Start, Stride, Count);
+      }
+    }
+
+    if (xda->GetSelectionType()!=XDMF_HYPERSLAB) {
+      xda->SetShape(lRank, lDims);
+    }
     xda->SetDataPointer(vda->GetVoidPointer(0));
     }
   else //(allocStrategy==0 && this->TopTemporalGrid) || allocStrategy==2)

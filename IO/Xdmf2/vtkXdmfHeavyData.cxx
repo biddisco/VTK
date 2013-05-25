@@ -72,6 +72,7 @@ vtkXdmfHeavyData::vtkXdmfHeavyData(vtkXdmfDomain* domain,
   this->Extents[1] = this->Extents[3] = this->Extents[5] = -1;
   this->Domain = domain;
   this->Stride[0] = this->Stride[1] = this->Stride[2] = 1;
+  this->DsmManager = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -225,10 +226,10 @@ vtkDataObject* vtkXdmfHeavyData::ReadTemporalCollection(
       // BUG #0013766.
       child->GetTime()->SetEpsilon(VTK_DBL_EPSILON);
       if (child->GetTime()->IsValid(this->Time, this->Time))
-        {
-        valid_children.push_back(child);
-        }
+      {
+      valid_children.push_back(child);
       }
+    }
     }
   // if no child matched this timestep, handle the case where the user didn't
   // specify any <Time /> element for the temporal collection.
@@ -295,6 +296,8 @@ vtkDataObject* vtkXdmfHeavyData::ReadUniformData(XdmfGrid* xmfGrid)
     // simply create an empty data-object of the correct type and return it.
     return vtkDataObjectTypes::NewDataObject(vtk_data_type);
     }
+
+  if (this->DsmManager) xmfGrid->SetDsmManager((H5FDdsmManager*)this->DsmManager);
 
   // Read heavy data for grid geometry/topology. This does not read any
   // data-arrays. They are read explicitly.
@@ -1120,6 +1123,8 @@ vtkDataArray* vtkXdmfHeavyData::ReadAttribute(XdmfAttribute* xmfAttribute,
       }
     xmfDataItem.GetDataDesc()->SelectHyperSlab(start, stride, count);
     }
+
+  if (this->DsmManager) xmfDataItem.SetDsmManager((H5FDdsmManager*)this->DsmManager);
 
   if (xmfDataItem.Update()==XDMF_FAIL)
     {
