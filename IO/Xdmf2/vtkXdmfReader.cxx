@@ -103,6 +103,7 @@ vtkXdmfReader::vtkXdmfReader()
   this->CellArraysCache = new vtkXdmfArraySelection;
   this->GridsCache = new vtkXdmfArraySelection;
   this->SetsCache = new vtkXdmfArraySelection;
+  this->DsmManager = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -154,6 +155,8 @@ bool vtkXdmfReader::PrepareDocument()
 {
   // Calling this method repeatedly is okay. It does work only when something
   // has changed.
+  if (this->DsmManager) this->PrepareDsmManagerDocument();
+
   if (this->GetReadFromInputString())
     {
     const char* data=0;
@@ -229,6 +232,11 @@ bool vtkXdmfReader::PrepareDocument()
   return (this->XdmfDocument->GetActiveDomain() != 0);
 }
 
+//----------------------------------------------------------------------------
+bool vtkXdmfReader::PrepareDsmManagerDocument()
+{
+  return true;
+}
 //----------------------------------------------------------------------------
 int vtkXdmfReader::RequestDataObject(vtkInformationVector *outputVector)
 {
@@ -324,7 +332,7 @@ int vtkXdmfReader::RequestInformation(vtkInformation *, vtkInformationVector **,
 
   if (time_steps.size() > 0)
     {
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), 
       &time_steps[0], static_cast<int>(time_steps.size()));
     double timeRange[2];
     timeRange[0] = time_steps.front();
@@ -402,6 +410,7 @@ int vtkXdmfReader::RequestData(vtkInformation *, vtkInformationVector **,
   dataReader.Stride[2] = this->Stride[2];
   dataReader.Time = this->XdmfDocument->GetActiveDomain()->GetTimeForIndex(
     this->LastTimeIndex);
+  dataReader.DsmManager = this->DsmManager;
 
   vtkDataObject* data = dataReader.ReadData();
   if (!data)
@@ -426,7 +435,7 @@ int vtkXdmfReader::RequestData(vtkInformation *, vtkInformationVector **,
   if (this->LastTimeIndex <
     this->XdmfDocument->GetActiveDomain()->GetTimeSteps().size())
     {
-    double time =
+    double time = 
       this->XdmfDocument->GetActiveDomain()->GetTimeForIndex(this->LastTimeIndex);
     output->GetInformation()->Set(vtkDataObject::DATA_TIME_STEP(), time);
     }
