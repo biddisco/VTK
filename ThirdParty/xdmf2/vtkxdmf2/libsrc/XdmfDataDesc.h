@@ -32,11 +32,10 @@
 #define XDMF_HYPERSLAB    1
 #define XDMF_COORDINATES  2
 
-namespace xdmf2
-{
 class H5FDdsmManager;
 
-
+namespace xdmf2
+{
 
 //! Number Type and Shape
 /*!

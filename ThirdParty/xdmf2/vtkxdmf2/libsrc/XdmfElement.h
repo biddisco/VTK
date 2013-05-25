@@ -27,6 +27,8 @@
 
 #include "XdmfLightData.h"
 
+class H5FDdsmManager;
+
 namespace xdmf2
 {
 
@@ -35,7 +37,6 @@ namespace xdmf2
 #define XDMF_ELEMENT_STATE_HEAVY_READ    2
 
 class XdmfDOM;
-class H5FDdsmManager;
 
 //! Basic XML Based Element
 /*!

@@ -112,7 +112,7 @@ private:
 };
 
 // I don't use vtkDataArraySelection since it's very slow when it comes to large
-// number of arrays.
+// number of arrays. 
 class vtkXdmfArraySelection : public std::map<std::string, bool>
 {
 public:
@@ -129,7 +129,7 @@ public:
     {
     (*this)[name] = status;
     }
-
+  
   bool ArrayIsEnabled(const char* name)
     {
     vtkXdmfArraySelection::iterator iter = this->find(name);
@@ -171,7 +171,7 @@ public:
         }
       cc++;
       }
-    return NULL;
+    return NULL; 
     }
 
   int GetNumberOfArrays()
@@ -263,7 +263,7 @@ public:
     std::map<int, XdmfFloat64>::iterator iter = this->TimeStepsRev.find(index);
     return (iter != this->TimeStepsRev.end()) ? iter->second : 0.0;
     }
-
+  
   //---------------------------------------------------------------------------
   // Description:
   // If xmfGrid is a temporal collection, returns the child-grid matching the
@@ -338,3 +338,5 @@ private:
 };
 
 #endif
+
+

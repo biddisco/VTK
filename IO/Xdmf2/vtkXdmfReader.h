@@ -118,7 +118,7 @@ public:
     { return this->GetSetName(index); }
   int GetSetArrayStatus(const char* name)
     { return this->GetSetStatus(name); }
-
+ 
   // Description:
   // Get/Set the stride used to skip points when reading structured datasets.
   // This affects all grids being read.
@@ -137,6 +137,13 @@ public:
   // SIL describes organization of/relationships between classifications
   // eg. blocks/materials/hierarchies.
   virtual vtkGraph* GetSIL();
+
+  // Get/Set the DsmManager
+  // Only for reading from memory instead of disk
+  //BTX
+  vtkGetMacro(DsmManager, void*);
+  vtkSetMacro(DsmManager, void*);
+  //ETX
 
 //BTX
   class XdmfDataSetTopoGeoPath
@@ -158,6 +165,8 @@ protected:
   vtkXdmfReader();
   ~vtkXdmfReader();
 
+  virtual bool PrepareDsmManagerDocument();
+
   virtual int ProcessRequest(vtkInformation *request,
     vtkInformationVector **inputVector,
     vtkInformationVector *outputVector);
@@ -173,7 +182,7 @@ protected:
   vtkXdmfArraySelection* GetGridSelection();
   vtkXdmfArraySelection* GetSetsSelection();
   void PassCachedSelections();
-
+  
   char* DomainName;
   // char* ActiveDomainName;
   int Stride[3];
@@ -198,7 +207,7 @@ protected:
   int SILUpdateStamp;
 
   XdmfReaderCachedData DataSetCache;
-
+  void* DsmManager;
 private:
   // Description:
   // Prepares the XdmfDocument.
@@ -218,3 +227,4 @@ private:
 };
 
 #endif
+
