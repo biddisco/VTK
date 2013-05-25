@@ -1391,3 +1391,5 @@ void XdmfArray::setCloseCallback( XdmfCloseCallback* cb )
 {
   this->mCloseCB = cb;
 }
+
+} //namespace

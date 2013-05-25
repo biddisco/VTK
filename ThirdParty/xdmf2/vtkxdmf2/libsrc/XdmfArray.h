@@ -25,11 +25,6 @@
 #ifndef __XdmfArray_h
 #define __XdmfArray_h
 
-class XdmfOpenCallback;
-class XdmfReadCallback;
-class XdmfWriteCallback;
-class XdmfCloseCallback;
-
 #include "XdmfDataDesc.h"
 
 #define XDMF_LONGEST_LENGTH     (XdmfInt64)~0
@@ -37,6 +32,12 @@ class XdmfCloseCallback;
 
 namespace xdmf2
 {
+
+class XdmfOpenCallback;
+class XdmfReadCallback;
+class XdmfWriteCallback;
+class XdmfCloseCallback;
+
 
 //! Self Describing Data Structure
 /*!
