@@ -41,10 +41,9 @@ public:
   vtkDataArray *FromArray( void );
 
   char *ToArray( void );
-
-  vtkDataArray *FromXdmfArray( char *ArrayName = NULL, int CopyShape = 1,
+  
+  vtkDataArray *FromXdmfArray( char *ArrayName = NULL, int CopyShape = 1, 
    int rank = 1, int Components = 1 , int MakeCopy = 1);
-
   char *ToXdmfArray( vtkDataArray *DataArray = NULL, int CopyShape = 1 );
 
   void SetArray( char *TagName );
@@ -64,5 +63,4 @@ private:
   vtkXdmfDataArray(const vtkXdmfDataArray&); // Not implemented
   void operator=(const vtkXdmfDataArray&); // Not implemented
 };
-
 #endif /* _vtkXdmfDataArray_h */
