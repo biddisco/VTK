@@ -43,6 +43,7 @@
 class vtkCellPointTraversal;
 class vtkIdTypeArray;
 class vtkCellArray;
+class vtkBoundingBox;
 
 class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocator
 {
@@ -58,11 +59,17 @@ class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocato
     // and number of buckets to 5.  Buckets are used in building the cell tree as described in the paper
     static vtkCellTreeLocator *New();
 
-     // Description:
+    // Description:
     // Test a point to find if it is inside a cell. Returns the cellId if inside
     // or -1 if not.
     virtual vtkIdType FindCell(double pos[3], double vtkNotUsed, vtkGenericCell *cell,  double pcoords[3],
                                        double* weights );
+
+    // Description:
+    // Tests cells against a point and returns a list of all whose bounding boxes overlap the point
+    // When using cached cell bounds, the test is very fast as no cell tests to compute 
+    // parametric coordinates are performed.
+    virtual bool FindCellsFast(double pos[3], vtkIdList *cells);
 
     // Description:
     // Return intersection point (if any) AND the cell which was intersected by
@@ -77,6 +84,7 @@ class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocato
     // user must provide the vtkIdList to populate. This method returns data
     // only after the locator has been built.
     virtual void FindCellsWithinBounds(double *bbox, vtkIdList *cells);
+    virtual void FindCellsWithinBounds(vtkBoundingBox &box, vtkIdList *cells);
 
     //BTX
     /*
@@ -147,10 +155,10 @@ class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocato
     };
 
     // Description:
-    // This class is the basic building block of the cell tree.
-    // Nodes consist of two split planes, LeftMax and RightMin,
-    // one which holds all cells assigned to the left, one for the right.
-    // The planes may overlap in the box, but cells are only assigned
+    // This class is the basic building block of the cell tree. 
+    // Nodes consist of two split planes, LeftMax and RightMin, 
+    // one which holds all cells assigned to the left, one for the right. 
+    // The planes may overlap in the box, but cells are only assigned 
     // to one side, so some searches must traverse both leaves until they have eliminated
     // candidates.
     // start is the location in the cell tree. e.g. for root node start is zero.
