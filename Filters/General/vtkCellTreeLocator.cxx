@@ -320,7 +320,7 @@ class vtkCellTreeBuilder
         }
 
       PerCell* begin = &(this->m_pc[start]);
-      PerCell* end   = &(this->m_pc[0])+start + size;
+      PerCell* end   = &(this->m_pc[start])+size;
       PerCell* mid = begin;
 
       const int nbuckets = 6;
