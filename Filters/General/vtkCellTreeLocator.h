@@ -44,6 +44,7 @@
 class vtkCellPointTraversal;
 class vtkIdTypeArray;
 class vtkCellArray;
+class vtkBoundingBox;
 
 class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocator
 {
@@ -67,14 +68,19 @@ class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocato
     vtkIdType FindCell(double pos[3], double vtkNotUsed, vtkGenericCell *cell,  double pcoords[3],
                        double* weights ) VTK_OVERRIDE;
 
-    /**
-     * Return intersection point (if any) AND the cell which was intersected by
-     * the finite line. The cell is returned as a cell id and as a generic cell.
-     */
-    int IntersectWithLine(double a0[3], double a1[3], double tol,
-                          double& t, double x[3], double pcoords[3],
-                          int &subId, vtkIdType &cellId,
-                          vtkGenericCell *cell) VTK_OVERRIDE;
+    // Description:
+    // Tests cells against a point and returns a list of all whose bounding boxes overlap the point
+    // When using cached cell bounds, the test is very fast as no cell tests to compute 
+    // parametric coordinates are performed.
+    virtual bool FindCellsFast(double pos[3], vtkIdList *cells);
+
+    // Description:
+    // Return intersection point (if any) AND the cell which was intersected by
+    // the finite line. The cell is returned as a cell id and as a generic cell.
+    virtual int IntersectWithLine(double a0[3], double a1[3], double tol,
+                                      double& t, double x[3], double pcoords[3],
+                                      int &subId, vtkIdType &cellId,
+                                      vtkGenericCell *cell);
 
     /**
      * Return a list of unique cell ids inside of a given bounding box. The
@@ -82,6 +88,7 @@ class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocato
      * only after the locator has been built.
      */
     void FindCellsWithinBounds(double *bbox, vtkIdList *cells) VTK_OVERRIDE;
+    virtual void FindCellsWithinBounds(vtkBoundingBox &box, vtkIdList *cells);
 
     /*
       if the borland compiler is ever removed, we can use these declarations

@@ -137,7 +137,7 @@ class vtkCellPointTraversal
     }
 
         const vtkCellTreeLocator::vtkCellTreeNode* Next()  // this returns n (the location in the CellTree) if it is a leaf or 0 if the point doesn't contain in the data domain
-        {
+          {
           while( true )
           {
             if( this->m_sp == this->m_stack ) //This means the point is not within the domain
@@ -643,6 +643,53 @@ vtkIdType vtkCellTreeLocator::FindCell( double pos[3], double , vtkGenericCell *
 
   return -1;
 }
+
+//----------------------------------------------------------------------------
+bool vtkCellTreeLocator::FindCellsFast(double pos[3], vtkIdList *cells)
+{
+  if( this->Tree == 0 )
+    {
+    return -1;
+    }
+
+  double cellBounds[6];
+
+  const float _pos[3] = { pos[0], pos[1], pos[2] };
+  vtkCellPointTraversal pt( *(this->Tree), _pos );
+
+  while( const vtkCellTreeNode* n = pt.Next() )
+    {
+    const unsigned int* begin = &(this->Tree->Leaves[n->Start()]);
+    const unsigned int* end   = begin + n->Size();
+
+    for( ; begin!=end; ++begin )
+      {
+      double *boundsPtr = cellBounds;
+      if (this->CellBounds)
+        {
+        boundsPtr = this->CellBounds[*begin];
+        }
+      else
+        {
+        this->DataSet->GetCellBounds(*begin, boundsPtr);
+        }
+      bool inside = true;
+      for (int i=0; inside && i<3; i++)
+        {
+        if( (pos[i] < boundsPtr[2*i]) || (pos[i] > boundsPtr[2*i+1]))
+          {
+          inside = false;
+          }
+        }
+      if (inside) 
+        {
+        cells->InsertNextId(*begin);
+        }
+      }
+    }
+
+  return (cells->GetNumberOfIds()>0);
+  }
 
 //----------------------------------------------------------------------------
 
@@ -1367,13 +1414,12 @@ void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
   }
 }
 //---------------------------------------------------------------------------
-void vtkCellTreeLocator::FindCellsWithinBounds(double *bbox, vtkIdList *cells)
+void vtkCellTreeLocator::FindCellsWithinBounds(vtkBoundingBox &box, vtkIdList *cells)
 {
   this->BuildLocatorIfNeeded();
   //
   nodeinfostack  ns;
   double         cellBounds[6];
-  vtkBoundingBox TestBox(bbox);
   //
   vtkCellTreeNode *n0 = &this->Tree->Nodes.front();
   // create a box for the root
@@ -1385,7 +1431,7 @@ void vtkCellTreeLocator::FindCellsWithinBounds(double *bbox, vtkIdList *cells)
     n0 = ns.top().first;
     vtkBoundingBox &nodebox = ns.top().second.first;
     if (TestBox.Intersects(nodebox))
-    {
+      {
       if (n0->IsLeaf())
       {
         for (int i=0; i<(int)n0->Size(); i++)
@@ -1399,10 +1445,10 @@ void vtkCellTreeLocator::FindCellsWithinBounds(double *bbox, vtkIdList *cells)
           else
           {
             this->DataSet->GetCellBounds(cell_ID, boundsPtr);
-          }
+            }
           vtkBoundingBox box(boundsPtr);
           if (TestBox.Intersects(box))
-          {
+            {
             cells->InsertNextId(cell_ID);
           }
         }
@@ -1424,6 +1470,12 @@ void vtkCellTreeLocator::FindCellsWithinBounds(double *bbox, vtkIdList *cells)
       ns.pop();
     }
   }
+}
+//---------------------------------------------------------------------------
+void vtkCellTreeLocator::FindCellsWithinBounds(double *bbox, vtkIdList *cells)
+{
+  vtkBoundingBox TestBox(bbox);
+  return FindCellsWithinBounds(TestBox, cells);
 }
 //---------------------------------------------------------------------------
 
