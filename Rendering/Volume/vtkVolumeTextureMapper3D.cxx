@@ -1045,8 +1045,8 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
   }
 
   // Has the volume changed in some way?
-  if ( this->SavedVolumeScalars != scalars ||
-       this->VolumeBuildTime.GetMTime() < scalars->GetMTime() )
+  if ( this->SavedVolumeScalars != scalarArray ||
+       this->VolumeBuildTime.GetMTime() < scalarArray->GetMTime() )
     {
     needToUpdate = 1;
     }
@@ -1056,7 +1056,7 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
     return 0;
     }
 
-  this->SavedVolumeScalars = scalars;
+  this->SavedVolumeScalars = scalarArray;
   this->VolumeBuildTime.Modified();
 
   // How big does the Volume need to be?
