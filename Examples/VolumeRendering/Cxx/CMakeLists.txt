@@ -13,6 +13,7 @@ if(NOT VTK_BINARY_DIR)
     vtkRenderingCore
     vtkRenderingOpenGL
     vtkRenderingVolume
+    vtkRenderingVolumeOpenGL
   )
   include(${VTK_USE_FILE})
 endif()
