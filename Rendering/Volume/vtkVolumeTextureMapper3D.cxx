@@ -82,7 +82,6 @@ void vtkVolumeTextureMapper3DComputeScalars( T *dataPtr,
   me->GetVolumeDimensions( outputDimensions );
   me->GetVolumeSpacing( outputSpacing );
 
-  int components = me->GetNumberOfScalarComponents(input);
   double wx, wy, wz;
   double fx, fy, fz;
   int x, y, z;
@@ -437,7 +436,6 @@ void vtkVolumeTextureMapper3DComputeGradients( T *dataPtr,
   sampleRate[1] = outputSpacing[1] / static_cast<double>(spacing[1]);
   sampleRate[2] = outputSpacing[2] / static_cast<double>(spacing[2]);
 
-  int components = me->GetNumberOfScalarComponents(input);
 
   int dim[3];
   input->GetDimensions(dim);
@@ -1045,8 +1043,8 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
   }
 
   // Has the volume changed in some way?
-  if ( this->SavedVolumeScalars != scalarArray ||
-       this->VolumeBuildTime.GetMTime() < scalarArray->GetMTime() )
+  if ( this->SavedVolumeScalars != scalars ||
+       this->VolumeBuildTime.GetMTime() < scalars->GetMTime() )
     {
     needToUpdate = 1;
     }
@@ -1056,7 +1054,7 @@ int vtkVolumeTextureMapper3D::UpdateVolumes(vtkVolume *vtkNotUsed(vol))
     return 0;
     }
 
-  this->SavedVolumeScalars = scalarArray;
+  this->SavedVolumeScalars = scalars;
   this->VolumeBuildTime.Modified();
 
   // How big does the Volume need to be?
@@ -1298,7 +1296,6 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
       0.333 * (static_cast<double>(spacing[0]) + static_cast<double>(spacing[1]) + static_cast<double>(spacing[2]));
     }
 
-  int components = this->GetNumberOfScalarComponents(input);
   // Has the sample distance changed?
   if ( this->SavedSampleDistance != this->ActualSampleDistance )
     {
@@ -1391,7 +1388,6 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
   this->SavedParametersMTime.Modified();
 
   // Find the scalar range
-  double scalarRange[2];
   int cellFlag;
   vtkDataArray *scalarArray = this->GetScalars(input,this->ScalarMode,
                                                this->ArrayAccessMode,

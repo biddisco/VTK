@@ -201,6 +201,7 @@ protected:
 
   vtkDataArray             *SavedVolumeScalars;
   vtkDataArray             *SavedLookupScalars;
+  vtkImageData             *SavedParametersInput;
 
   vtkColorTransferFunction *SavedRGBFunction;
   vtkPiecewiseFunction     *SavedGrayFunction;
@@ -226,6 +227,7 @@ protected:
 
   vtkTimeStamp              VolumeBuildTime;
   vtkTimeStamp              LookupBuildTime;
+  vtkTimeStamp              SavedParametersMTime;
 
   int                       RenderMethod;
   int                       PreferredRenderMethod;
