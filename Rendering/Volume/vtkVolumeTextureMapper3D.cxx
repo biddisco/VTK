@@ -1278,7 +1278,7 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
     }
 
   // Has the scalar opacity transfer function changed in some way?
-  vtkPiecewiseFunction *scalarOpacityFunc =
+  vtkAbstractPiecewiseFunction *scalarOpacityFunc =
     vol->GetProperty()->GetScalarOpacity(0);
   if ( this->SavedScalarOpacityFunction != scalarOpacityFunc ||
        this->SavedParametersMTime.GetMTime() <
@@ -1288,7 +1288,7 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
     }
 
   // Has the gradient opacity transfer function changed in some way?
-  vtkPiecewiseFunction *gradientOpacityFunc =
+  vtkAbstractPiecewiseFunction *gradientOpacityFunc =
     vol->GetProperty()->GetGradientOpacity(0);
   if ( this->SavedGradientOpacityFunction != gradientOpacityFunc ||
        this->SavedParametersMTime.GetMTime() <
