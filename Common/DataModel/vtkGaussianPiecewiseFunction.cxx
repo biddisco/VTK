@@ -39,7 +39,7 @@ class vtkGaussianPiecewiseFunctionNode
         ~vtkGaussianPiecewiseFunctionNode() {};
     };
 
-// A comparison method for sorting nodes in increasing order
+// A comparison method for sorting nodes in increasing order along the x axis
 class vtkGaussianPiecewiseFunctionCompareNodes
 {
 public:
@@ -223,7 +223,8 @@ double *vtkGaussianPiecewiseFunction::GetDataPointer()
 // function. Note that the value at this point may be zero.
 double vtkGaussianPiecewiseFunction::GetFirstNonZeroValue()
 {
-	//TBD, currently made so it compiles, but what it does is wrong
+	//TBD, I think this actually works though. needs testing. Please note it doesn't
+	//return the first point where a value is above 0, but the first non zero node
   unsigned int   i;
   int   all_zero = 1;
   double x = 0.0;
@@ -255,7 +256,7 @@ double vtkGaussianPiecewiseFunction::GetFirstNonZeroValue()
     if( i > 0 )
       // Return the value of the point that precedes this one
       {
-      x = this->Internal->Nodes[i-1]->x;
+      x = this->Internal->Nodes[i]->x;
       }
     else
       // If this is the first point in the function, return its
@@ -342,7 +343,7 @@ int vtkGaussianPiecewiseFunction::SetNodeValue( int index, double val[5] )
 // Adds a point to the function and returns the array index of the point.
 int vtkGaussianPiecewiseFunction::AddGaussian( double x_,double h_,double w_,double bx_,double by_)
 {
-if (x_ > range[1] || x_ < range[0])
+if (x_ > this->Range[1] || x_ < this->Range[0])
 	return -1;
 //out of bounds / out of range
 
@@ -395,7 +396,7 @@ void vtkGaussianPiecewiseFunction::SortAndUpdateRange()
   std::sort( this->Internal->Nodes.begin(),
                 this->Internal->Nodes.end(),
                 this->Internal->CompareNodes );
-  //bool modifiedInvoked = this->UpdateRange();
+  bool modifiedInvoked = this->UpdateRange(false, this->GetRange());
   //TBD check if correct
   // If range is updated, Modified() has been called, don't call it again.
  /* if (!modifiedInvoked)
@@ -425,6 +426,31 @@ bool vtkGaussianPiecewiseFunction::UpdateRange()
     this->Range[1] = 0;
     }
   // If the rage is the same, then no need to call Modified()
+  if (oldRange[0] == this->Range[0] && oldRange[1] == this->Range[1])
+    {
+    return false;
+    }
+
+  this->Modified();
+  return true;
+}
+
+
+bool vtkGaussianPiecewiseFunction::UpdateRange(bool toNodes, double *range)
+{
+	//TBD
+	double oldRange[2];
+	if (toNodes){
+		return UpdateRange();
+	}
+	else{
+
+		  oldRange[0] = this->Range[0];
+		  oldRange[1] = this->Range[1];
+		this->Range[0]=range[0];
+		this->Range[1]=range[1];
+	}
+
   if (oldRange[0] == this->Range[0] && oldRange[1] == this->Range[1])
     {
     return false;
@@ -474,14 +500,9 @@ int vtkGaussianPiecewiseFunction::RemoveGaussian( double x )
     {
     delete *iter;
     this->Internal->Nodes.erase(iter);
-    // if the first or last point has been removed, then we update the range
     // No need to sort here as the order of points hasn't changed.
     bool modifiedInvoked = false;
-    if (i == 0 || i == this->Internal->Nodes.size())
-      {
-     // modifiedInvoked = this->UpdateRange();
-    	//don't think it needs to be updated
-      }
+
     if (!modifiedInvoked)
       {
       this->Modified();
@@ -501,13 +522,13 @@ int vtkGaussianPiecewiseFunction::RemoveGaussian( double x )
 // Removes all points from the function.
 void vtkGaussianPiecewiseFunction::RemoveAllPoints()
 {
+	//doesn't update range, since range is usually independent of nodes.
   for(unsigned int i=0;i<this->Internal->Nodes.size();i++)
     {
     delete this->Internal->Nodes[i];
     }
   this->Internal->Nodes.clear();
 
-  this->SortAndUpdateRange();
 }
 
 
@@ -526,7 +547,7 @@ double vtkGaussianPiecewiseFunction::GetValue( double x )
 int vtkGaussianPiecewiseFunction::AdjustRange(double range[2])
 {
 	//TBD
-	/*
+
   if (!range)
     {
     return 0;
@@ -534,25 +555,12 @@ int vtkGaussianPiecewiseFunction::AdjustRange(double range[2])
 
   double *function_range = this->GetRange();
 
+  function_range[0] = range[0];
+  function_range[1] = range[1];
+
   // Make sure we have points at each end of the range
 
-  if (function_range[0] < range[0])
-    {
-    this->AddGaussian(range[0], this->GetValue(range[0]));
-    }
-  else
-    {
-    this->AddGaussian(range[0], this->GetValue(function_range[0]));
-    }
 
-  if (function_range[1] > range[1])
-    {
-    this->AddGaussian(range[1], this->GetValue(range[1]));
-    }
-  else
-    {
-    this->AddGaussian(range[1], this->GetValue(function_range[1]));
-    }
 
   // Remove all points out-of-range
   int done;
@@ -562,8 +570,8 @@ int vtkGaussianPiecewiseFunction::AdjustRange(double range[2])
     {
     done = 1;
 
-    this->Internal->FindNodeOutOfRange.X1 = range[0];
-    this->Internal->FindNodeOutOfRange.X2 = range[1];
+    this->Internal->FindNodeOutOfRange.x1 = range[0];
+    this->Internal->FindNodeOutOfRange.x2 = range[1];
 
     std::vector<vtkGaussianPiecewiseFunctionNode*>::iterator iter =
       std::find_if(this->Internal->Nodes.begin(),
@@ -581,7 +589,7 @@ int vtkGaussianPiecewiseFunction::AdjustRange(double range[2])
 
   this->SortAndUpdateRange();
   return 1;
-  */
+
 	return 0;
 }
 
@@ -591,6 +599,74 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
                                      int stride )
 {
 	//TBD
+	//copy from gaussianopacitybar and modify
+	for (int i=0; i<size; i++) table[i] = 0;
+
+	double* tableptr = 0;
+	for (int p=0; p<this->Internal->Nodes.size(); p++)
+	{
+		double _pos    = Internal->Nodes[p]->x;
+		double _width  = Internal->Nodes[p]->w;
+		double _height = Internal->Nodes[p]->h;
+		double xbias  = Internal->Nodes[p]->bx;
+		double ybias  = Internal->Nodes[p]->by;
+		for (int i=0; i<size; i++)
+		{
+			tableptr = table + i*stride;
+			double _x = xStart + (double(i)/double(size-1))*(xEnd-xStart);
+
+			// clamp non-zero values to _pos +/- _width
+			if (_x > _pos+_width || _x < _pos-_width)
+			{
+				table[i] = table[i]>0.0?table[i]:0.0;
+				continue;
+			}
+
+			// non-zero _width
+			if (_width == 0)
+				_width = .00001f;
+
+			// translate the original x to a new x based on the xbias
+			double x0;
+			if (xbias==0 || _x == _pos+xbias)
+			{
+				x0 = _x;
+			}
+			else if (_x > _pos+xbias)
+			{
+				if (_width == xbias)
+					x0 = _pos;
+				else
+					x0 = _pos+(_x-_pos-xbias)*(_width/(_width-xbias));
+			}
+			else // (_x < _pos+xbias)
+			{
+				if (-_width == xbias)
+					x0 = _pos;
+				else
+					x0 = _pos-(_x-_pos-xbias)*(_width/(_width+xbias));
+			}
+
+			// center around 0 and normalize to -1,1
+			double x1 = (x0-_pos)/_width;
+
+			// do a linear interpolation between:
+			//    a gaussian and a parabola        if 0<ybias<1
+			//    a parabola and a step function   if 1<ybias<2
+			double h0a = exp(-(4*x1*x1));
+			double h0b = 1. - x1*x1;
+			double h0c = 1.;
+			double h1;
+			if (ybias < 1)
+				h1 = ybias*h0b + (1-ybias)*h0a;
+			else
+				h1 = (2-ybias)*h0b + (ybias-1)*h0c;
+			double h2 = _height * h1;
+
+			// perform the MAX over different guassians, not the sum
+			table[i] = table[i]>0.0?table[i]:h2;
+		}
+	}
 }
 
 // Copy from double table to float
@@ -598,6 +674,7 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
                                      int size, float* table,
                                      int stride )
 {
+	//tbd, make everything float stuff, also use the above function
   double *tmpTable = new double [size];
 
   this->GetTable( xStart, xEnd, size, tmpTable, 1 );
