@@ -78,6 +78,7 @@
 
 class vtkImageData;
 class vtkColorTransferFunction;
+class vtkAbstractPiecewiseFunction;
 class vtkPiecewiseFunction;
 class vtkVolumeProperty;
 
@@ -196,8 +197,8 @@ protected:
 
   vtkColorTransferFunction *SavedRGBFunction;
   vtkPiecewiseFunction     *SavedGrayFunction;
-  vtkPiecewiseFunction     *SavedScalarOpacityFunction;
-  vtkPiecewiseFunction     *SavedGradientOpacityFunction;
+  vtkAbstractPiecewiseFunction     *SavedScalarOpacityFunction;
+  vtkAbstractPiecewiseFunction     *SavedGradientOpacityFunction;
   int                       SavedColorChannels;
   float                     SavedSampleDistance;
   float                     SavedScalarOpacityDistance;
