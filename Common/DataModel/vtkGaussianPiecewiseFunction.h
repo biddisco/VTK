@@ -192,8 +192,10 @@ protected:
   void SortAndUpdateRange();
   // Returns true if the range has been updated and Modified() has been called
   bool UpdateRange();
+  bool UpdateRange(bool toNodes, double range[2]);
 
   int AllowMultipleGaussiansSamePoint;
+  int AllowDuplicateScalars;
 
 private:
   vtkGaussianPiecewiseFunction(const vtkGaussianPiecewiseFunction&);  // Not implemented.
