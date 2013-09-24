@@ -45,8 +45,8 @@ public:
  vtkTypeMacro(vtkAbstractPiecewiseFunction,vtkDataObject);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  virtual void DeepCopy( vtkDataObject *f ) = 0;
-  virtual void ShallowCopy( vtkDataObject *f ) = 0;
+  virtual void DeepCopy( vtkDataObject *f );
+  virtual void ShallowCopy( vtkDataObject *f );
 
   // Description:
   // Return what type of dataset this is.

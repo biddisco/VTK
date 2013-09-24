@@ -27,6 +27,7 @@ set(Module_SRCS
   vtkDataSetMapper.cxx
   vtkDefaultPainter.cxx
   vtkDiscretizableColorTransferFunction.cxx
+  vtkDiscretizableColorTransferFunctionCollection.cxx
   vtkDisplayListPainter.cxx
   vtkDistanceToCamera.cxx
   vtkFollower.cxx
