@@ -15,7 +15,9 @@
 #include "vtkVolumeProperty.h"
 
 #include "vtkObjectFactory.h"
+#include "vtkAbstractPiecewiseFunction.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkGaussianPiecewiseFunction.h"
 #include "vtkColorTransferFunction.h"
 
 vtkStandardNewMacro(vtkVolumeProperty);
@@ -73,6 +75,10 @@ vtkVolumeProperty::~vtkVolumeProperty()
       {
       this->GradientOpacity[i]->UnRegister(this);
       }
+    if (this->GaussianOpacity[i] != NULL)
+          {
+          this->GaussianOpacity[i]->UnRegister(this);
+          }
 
     if (this->DefaultGradientOpacity[i] != NULL)
       {
@@ -393,6 +399,26 @@ void vtkVolumeProperty::SetGradientOpacity( int index, vtkPiecewiseFunction *fun
     }
 }
 
+// Set the gaussian gradient opacity transfer function
+void vtkVolumeProperty::SetGaussianOpacity( int index, vtkGaussianPiecewiseFunction *function )
+{
+  if ( this->GaussianOpacity[index] != function )
+    {
+    if (this->GaussianOpacity[index] != NULL)
+      {
+      this->GaussianOpacity[index]->UnRegister(this);
+      }
+    this->GaussianOpacity[index]       = function;
+    if (this->GaussianOpacity[index] != NULL)
+      {
+      this->GaussianOpacity[index]->Register(this);
+      }
+
+    this->GaussianOpacityMTime[index].Modified();
+    this->Modified();
+    }
+}
+
 void vtkVolumeProperty::CreateDefaultGradientOpacity( int index )
 {
   if ( this->DefaultGradientOpacity[index] == NULL )
@@ -405,6 +431,15 @@ void vtkVolumeProperty::CreateDefaultGradientOpacity( int index )
   this->DefaultGradientOpacity[index]->RemoveAllPoints();
   this->DefaultGradientOpacity[index]->AddPoint(   0, 1.0 );
   this->DefaultGradientOpacity[index]->AddPoint( 255, 1.0 );
+}
+
+vtkAbstractPiecewiseFunction *vtkVolumeProperty::GetCurrentGradientOpacity(int index){
+	if(useGaussian){
+			return GetGaussianOpacity(index);
+		}
+	else{
+		GetGradientOpacity(index );
+	}
 }
 
 vtkPiecewiseFunction *vtkVolumeProperty::GetGradientOpacity( int index )
@@ -421,6 +456,20 @@ vtkPiecewiseFunction *vtkVolumeProperty::GetGradientOpacity( int index )
   return this->GetStoredGradientOpacity(index);
 }
 
+vtkGaussianPiecewiseFunction *vtkVolumeProperty::GetGaussianOpacity( int index )
+{
+  if (this->DisableGaussianOpacity[index])
+    {
+    if ( this->DefaultGaussianOpacity[index] == NULL )
+      {
+      //this->CreateDefaultGaussianOpacity(index);
+      }
+    return this->DefaultGaussianOpacity[index];
+    }
+
+  return this->GetStoredGaussianOpacity(index);
+}
+
 // Get the gradient opacity transfer function. Create one if none set.
 vtkPiecewiseFunction *vtkVolumeProperty::GetStoredGradientOpacity( int index )
 {
@@ -434,6 +483,20 @@ vtkPiecewiseFunction *vtkVolumeProperty::GetStoredGradientOpacity( int index )
     }
 
   return this->GradientOpacity[index];
+}
+
+vtkGaussianPiecewiseFunction *vtkVolumeProperty::GetStoredGaussianOpacity( int index )
+{
+  if ( this->GaussianOpacity[index] == NULL )
+    {
+    this->GaussianOpacity[index] = vtkGaussianPiecewiseFunction::New();
+    this->GaussianOpacity[index]->Register(this);
+    this->GaussianOpacity[index]->Delete();
+    this->GaussianOpacity[index]->AddGaussian(0,1,0.1,0,0);
+    this->GaussianOpacity[index]->AddGaussian(1,1,0.1,0,0);
+    }
+
+  return this->GaussianOpacity[index];
 }
 
 void vtkVolumeProperty::SetDisableGradientOpacity( int index, int value )

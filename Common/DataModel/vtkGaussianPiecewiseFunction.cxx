@@ -125,6 +125,12 @@ vtkGaussianPiecewiseFunction::~vtkGaussianPiecewiseFunction()
   delete this->Internal;
 }
 
+double vtkGaussianPiecewiseFunction::GetRangeAtIndex(int index){
+	if (index<2&&index>=0){
+		return Range[index];
+	}
+}
+
 void vtkGaussianPiecewiseFunction::DeepCopy( vtkDataObject *o )
 {
   vtkGaussianPiecewiseFunction *f = vtkGaussianPiecewiseFunction::SafeDownCast(o);
@@ -166,7 +172,7 @@ void vtkGaussianPiecewiseFunction::ShallowCopy( vtkDataObject *o )
     }
 
   // Do the superclass
-  this->vtkDataObject::ShallowCopy(o);
+  this->vtkAbstractPiecewiseFunction::ShallowCopy(o);
 }
 
 // This is a legacy method that is no longer needed
@@ -340,6 +346,11 @@ int vtkGaussianPiecewiseFunction::SetNodeValue( int index, double val[5] )
   return this->AddGaussian( x, y, 0.5, 0.0 );
 }*/
 
+
+
+
+
+
 // Adds a point to the function and returns the array index of the point.
 int vtkGaussianPiecewiseFunction::AddGaussian( double x_,double h_,double w_,double bx_,double by_)
 {
@@ -399,10 +410,10 @@ void vtkGaussianPiecewiseFunction::SortAndUpdateRange()
   bool modifiedInvoked = this->UpdateRange(false, this->GetRange());
   //TBD check if correct
   // If range is updated, Modified() has been called, don't call it again.
- /* if (!modifiedInvoked)
+  if (!modifiedInvoked)
     {
     this->Modified();
-    }*/
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -431,8 +442,26 @@ bool vtkGaussianPiecewiseFunction::UpdateRange()
     return false;
     }
 
+  scaleNodesXAxis((this->Range[1]-this->Range[0])/(oldRange[1]-oldRange[0]));
+
   this->Modified();
   return true;
+}
+
+void vtkGaussianPiecewiseFunction::SetRange(double min, double max){
+	//this is only for some synchronization between gui and function
+	double range[2]={min,max};
+	UpdateRange(false, range);
+
+}
+
+
+void vtkGaussianPiecewiseFunction::scaleNodesXAxis(double scale){
+	int count = this->Internal->Nodes.size();
+	for (int i = 0; i<count; i++){
+		this->Internal->Nodes[i]->x = this->Internal->Nodes[i]->x*scale;
+		this->Internal->Nodes[i]->w = this->Internal->Nodes[i]->w*scale;
+	}
 }
 
 
@@ -455,9 +484,15 @@ bool vtkGaussianPiecewiseFunction::UpdateRange(bool toNodes, double *range)
     {
     return false;
     }
-
+  scaleNodesXAxis((this->Range[1]-this->Range[0])/(oldRange[1]-oldRange[0]));
   this->Modified();
   return true;
+}
+
+
+void vtkGaussianPiecewiseFunction::RemoveGaussianAtIndex(int index){
+	this->Internal->Nodes.erase(this->Internal->Nodes.begin()+index);
+
 }
 
 // Removes a point from the function. If no point is found then function
@@ -521,6 +556,13 @@ int vtkGaussianPiecewiseFunction::RemoveGaussian( double x )
 
 // Removes all points from the function.
 void vtkGaussianPiecewiseFunction::RemoveAllPoints()
+{ //exists for some compatability reasons. may not be necessary function anymore.
+	//in any case, try not to use this.
+	this -> RemoveAllGaussians();
+
+}
+
+void vtkGaussianPiecewiseFunction::RemoveAllGaussians()
 {
 	//doesn't update range, since range is usually independent of nodes.
   for(unsigned int i=0;i<this->Internal->Nodes.size();i++)
@@ -608,8 +650,8 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
 		double _pos    = Internal->Nodes[p]->x;
 		double _width  = Internal->Nodes[p]->w;
 		double _height = Internal->Nodes[p]->h;
-		double xbias  = Internal->Nodes[p]->bx;
-		double ybias  = Internal->Nodes[p]->by;
+		double xbias   = Internal->Nodes[p]->bx;
+		double ybias   = Internal->Nodes[p]->by;
 		for (int i=0; i<size; i++)
 		{
 			tableptr = table + i*stride;
@@ -667,6 +709,47 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
 			table[i] = table[i]>0.0?table[i]:h2;
 		}
 	}
+}
+
+
+double vtkGaussianPiecewiseFunction::getX(int index){
+	return  Internal->Nodes[index]->x;
+}
+
+double vtkGaussianPiecewiseFunction::getH(int index){
+	return  Internal->Nodes[index]->h;
+}
+
+double vtkGaussianPiecewiseFunction::getW(int index){
+	return  Internal->Nodes[index]->w;
+}
+
+double vtkGaussianPiecewiseFunction::getBx(int index){
+	return  Internal->Nodes[index]->bx;
+}
+
+double vtkGaussianPiecewiseFunction::getBy(int index){
+	return Internal->Nodes[index]->by;
+}
+
+void vtkGaussianPiecewiseFunction::setX(int index, double _x){
+	Internal->Nodes[index]->x=_x;
+}
+
+void vtkGaussianPiecewiseFunction::setH(int index, double _h){
+	Internal->Nodes[index]->h=_h;
+}
+
+void vtkGaussianPiecewiseFunction::setW(int index, double _w){
+	Internal->Nodes[index]->w=_w;
+}
+
+void vtkGaussianPiecewiseFunction::setBx(int index, double _bx){
+	Internal->Nodes[index]->bx=_bx;
+}
+
+void vtkGaussianPiecewiseFunction::setBy(int index, double _by){
+	Internal->Nodes[index]->by=_by;
 }
 
 // Copy from double table to float
@@ -735,7 +818,7 @@ void vtkGaussianPiecewiseFunction::FillFromDataPointer(int nb, double *ptr)
 
 //----------------------------------------------------------------------------
 vtkGaussianPiecewiseFunction* vtkGaussianPiecewiseFunction::GetData(vtkInformation* info)
-{
+{ //TBD don't know if this is valid, so don't rely on it
   return
     info? vtkGaussianPiecewiseFunction::SafeDownCast(info->Get(DATA_OBJECT())) : 0;
 }
@@ -743,7 +826,7 @@ vtkGaussianPiecewiseFunction* vtkGaussianPiecewiseFunction::GetData(vtkInformati
 //----------------------------------------------------------------------------
 vtkGaussianPiecewiseFunction* vtkGaussianPiecewiseFunction::GetData(vtkInformationVector* v,
                                                     int i)
-{
+{//TBD don't know if this is valid, so don't rely on it
   return vtkGaussianPiecewiseFunction::GetData(v->GetInformationObject(i));
 }
 

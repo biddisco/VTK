@@ -47,7 +47,7 @@ class VTKCOMMONDATAMODEL_EXPORT vtkGaussianPiecewiseFunction : public vtkAbstrac
 {
 public:
   static vtkGaussianPiecewiseFunction *New();
-  vtkTypeMacro(vtkGaussianPiecewiseFunction,vtkDataObject);
+  vtkTypeMacro(vtkGaussianPiecewiseFunction,vtkAbstractPiecewiseFunction);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   void DeepCopy( vtkDataObject *f );
@@ -61,6 +61,8 @@ public:
   // Get the number of points used to specify the function
   int  GetSize();
 
+  void SetRange(double min, double max);
+
   // Description:
   // Add/Remove points to/from the function. If a duplicate point is added
   // then the function value is changed at that location.
@@ -68,15 +70,32 @@ public:
   //int AddPoint( double x, double y );
   int AddGaussian( double x_,double h_,double w_,double bx_,double by_);
   int RemoveGaussian( double x );
+  void RemoveGaussianAtIndex(int index);
 
   // Description:
   // Removes all points from the function.
   void RemoveAllPoints();
+  void RemoveAllGaussians();
+
+  bool UpdateRange(bool toNodes, double range[2]);
 
   // Description:
   // Returns the value of the function at the specified location using
   // the specified interpolation.
   double GetValue( double x );
+
+
+  double getX(int index);
+   double getH(int index);
+   double getW(int index);
+   double getBx(int index);
+   double getBy(int index);
+
+  void setX(int index, double _x);
+  void setH(int index, double _h);
+  void setW(int index, double _w);
+  void setBx(int index, double _bx);
+  void setBy(int index, double _by);
 
 
 
@@ -92,6 +111,7 @@ public:
   // Description:
   // Returns the min and max node locations of the function.
   vtkGetVector2Macro( Range, double );
+  double GetRangeAtIndex(int index);
 
   // Description:
   // Remove all points out of the new range, and make sure there is a point
@@ -163,9 +183,9 @@ public:
   // Description:
   // Toggle whether to allow duplicate scalar values in the piecewise
   // function (off by default).
-  vtkSetMacro(AllowDuplicateScalars, int);
-  vtkGetMacro(AllowDuplicateScalars, int);
-  vtkBooleanMacro(AllowDuplicateScalars, int);
+  vtkSetMacro(AllowMultipleGaussiansSamePoint, int);
+  vtkGetMacro(AllowMultipleGaussiansSamePoint, int);
+  vtkBooleanMacro(AllowMultipleGaussiansSamePoint, int);
 
 protected:
   vtkGaussianPiecewiseFunction();
@@ -192,10 +212,12 @@ protected:
   void SortAndUpdateRange();
   // Returns true if the range has been updated and Modified() has been called
   bool UpdateRange();
-  bool UpdateRange(bool toNodes, double range[2]);
+
+  void scaleNodesXAxis(double scale);
+
 
   int AllowMultipleGaussiansSamePoint;
-  int AllowDuplicateScalars;
+
 
 private:
   vtkGaussianPiecewiseFunction(const vtkGaussianPiecewiseFunction&);  // Not implemented.
