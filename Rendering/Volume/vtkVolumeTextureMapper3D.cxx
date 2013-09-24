@@ -21,6 +21,7 @@
 #include "vtkMath.h"
 #include "vtkMatrix4x4.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkGaussianPiecewiseFunction.h"
 #include "vtkPointData.h"
 #include "vtkRenderer.h"
 #include "vtkVolume.h"
@@ -1353,13 +1354,20 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
 
   // Has the gradient opacity transfer function changed in some way?
   vtkAbstractPiecewiseFunction *gradientOpacityFunc =
-    vol->GetProperty()->GetGradientOpacity(0);
+    vol->GetProperty()->GetCurrentGradientOpacity(0);
   if ( this->SavedGradientOpacityFunction != gradientOpacityFunc ||
        this->LookupBuildTime.GetMTime() < 
        gradientOpacityFunc->GetMTime() )
     {
     needToUpdate = 1;
     }
+
+/*  vtkGaussianPiecewiseFunction *gaussianOpacityFunc =
+     vol->GetProperty()->GetGaussianOpacity(0);
+      needToUpdate = 1;
+   //   std::cout<<gaussianOpacityFunc->GetRangeAtIndex(0) << " "<<gaussianOpacityFunc->GetRangeAtIndex(1)<< std::endl;
+
+*/
 
 
   double scalarOpacityDistance =
@@ -1424,6 +1432,12 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
   double goArray[256];
   gradientOpacityFunc->GetTable( 0, (scalarRange[1] - scalarRange[0])*0.25,
                                  256, goArray );
+
+ // double gogaussArray[256];
+//  gaussianOpacityFunc->GetTable( 0, (scalarRange[1] - scalarRange[0])*0.25,
+ //         256, gogaussArray );
+
+
 
   // Correct the opacity array for the spacing between the planes.
   int i;

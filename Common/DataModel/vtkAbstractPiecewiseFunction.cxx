@@ -46,7 +46,14 @@ void vtkAbstractPiecewiseFunction::Initialize()
 
 
 
+void vtkAbstractPiecewiseFunction::DeepCopy( vtkDataObject *f ){
+	this->Superclass::DeepCopy(f);
+}
 
+
+void vtkAbstractPiecewiseFunction::ShallowCopy( vtkDataObject *f ){
+	this->vtkDataObject::ShallowCopy(f);
+}
 
 
 
@@ -81,14 +88,7 @@ return 0;
 
 }
 
-void vtkAbstractPiecewiseFunction::DeepCopy( vtkDataObject *f ){
 
-}
-
-
-void vtkAbstractPiecewiseFunction::ShallowCopy( vtkDataObject *f ){
-
-}
 
 void vtkAbstractPiecewiseFunction::RemoveAllPoints(){
 

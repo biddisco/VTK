@@ -44,7 +44,9 @@
 #include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
 
+class vtkAbstractPiecewiseFunction;
 class vtkPiecewiseFunction;
+class vtkGaussianPiecewiseFunction;
 class vtkTimeStamp;
 class vtkColorTransferFunction;
 
@@ -173,15 +175,32 @@ public:
     { this->SetGradientOpacity(0, function); }
 
   // Description:
+  //gaussian based
+    // Set the opacity of a volume to an opacity transfer function based
+    // on gradient magnitude for the given component.
+    void SetGaussianOpacity(int index, vtkGaussianPiecewiseFunction *function);
+    void SetGaussianOpacity(vtkGaussianPiecewiseFunction *function)
+      { this->SetGaussianOpacity(0, function); }
+
+    void SwitchGaussianOpacity(bool useGauss){
+    	useGaussian = useGauss;
+    }
+
+  // Description:
   // Get the gradient magnitude opacity transfer function for
   // the given component.
   // If no transfer function has been set for this component, a default one
   // is created and returned.
   // This default function is always returned if DisableGradientOpacity is On
   // for that component.
+    bool useGaussian;
+    vtkAbstractPiecewiseFunction* GetCurrentGradientOpacity(int index);
   vtkPiecewiseFunction *GetGradientOpacity(int index);
   vtkPiecewiseFunction *GetGradientOpacity()
     { return this->GetGradientOpacity(0); }
+  vtkGaussianPiecewiseFunction *GetGaussianOpacity(int index);
+    vtkGaussianPiecewiseFunction *GetGaussianOpacity()
+      { return this->GetGaussianOpacity(0); }
 
   // Description:
   // Enable/Disable the gradient opacity function for the given component.
@@ -206,6 +225,10 @@ public:
   vtkPiecewiseFunction *GetStoredGradientOpacity(int index);
   vtkPiecewiseFunction *GetStoredGradientOpacity()
     { return this->GetStoredGradientOpacity(0); }
+
+  vtkGaussianPiecewiseFunction *GetStoredGaussianOpacity(int index);
+    vtkGaussianPiecewiseFunction *GetStoredGaussianOpacity()
+      { return this->GetStoredGaussianOpacity(0); }
 
   // Description:
   // Set/Get the shading of a volume. If shading is turned off, then
@@ -329,6 +352,12 @@ protected:
   vtkTimeStamp GradientOpacityMTime[VTK_MAX_VRCOMP];
   vtkPiecewiseFunction *DefaultGradientOpacity[VTK_MAX_VRCOMP];
   int DisableGradientOpacity[VTK_MAX_VRCOMP];
+
+  vtkGaussianPiecewiseFunction *GaussianOpacity[VTK_MAX_VRCOMP];
+    vtkTimeStamp GaussianOpacityMTime[VTK_MAX_VRCOMP];
+    vtkGaussianPiecewiseFunction *DefaultGaussianOpacity[VTK_MAX_VRCOMP];
+    int DisableGaussianOpacity[VTK_MAX_VRCOMP];
+
 
   int Shade[VTK_MAX_VRCOMP];
   double Ambient[VTK_MAX_VRCOMP];
