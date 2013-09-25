@@ -86,6 +86,10 @@ vtkVolumeProperty::~vtkVolumeProperty()
       {
       this->DefaultGradientOpacity[i]->UnRegister(this);
       }
+    if (this->DefaultGaussianOpacity[i] != NULL)
+	  {
+	  this->DefaultGaussianOpacity[i]->UnRegister(this);
+	  }
     }
 }
 
