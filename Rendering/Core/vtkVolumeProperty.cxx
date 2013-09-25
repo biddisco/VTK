@@ -550,6 +550,39 @@ int vtkVolumeProperty::GetDisableGradientOpacity( int index )
   return this->DisableGradientOpacity[index];
 }
 
+void vtkVolumeProperty::SetDisableGaussianOpacity( int index, int value )
+{
+  if (this->DisableGaussianOpacity[index] == value)
+    {
+    return;
+    }
+
+  this->DisableGaussianOpacity[index] = value;
+
+  // Make sure the default function is up-to-date (since the user
+  // could have modified the default function)
+
+  if (value)
+    {
+    this->CreateDefaultGaussianOpacity(index);
+    }
+
+  // Since this Ivar basically "sets" the Gaussian opacity function to be
+  // either a default one or the user-specified one, update the MTime
+  // accordingly
+
+  this->GaussianOpacityMTime[index].Modified();
+
+  this->Modified();
+}
+
+int vtkVolumeProperty::GetDisableGaussianOpacity( int index )
+{
+  return this->DisableGaussianOpacity[index];
+}
+
+
+
 void vtkVolumeProperty::SetComponentWeight(int index, double value)
 {
   if (index < 0 || index >= VTK_MAX_VRCOMP)

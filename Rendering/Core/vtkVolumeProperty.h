@@ -230,6 +230,31 @@ public:
     vtkGaussianPiecewiseFunction *GetStoredGaussianOpacity()
       { return this->GetStoredGaussianOpacity(0); }
 
+
+
+
+
+    virtual void SetDisableGaussianOpacity(int index, int value);
+      virtual void SetDisableGaussianOpacity(int value)
+        { this->SetDisableGaussianOpacity(0, value); }
+      virtual void DisableGaussianOpacityOn(int index )
+        { this->SetDisableGaussianOpacity(index, 1); }
+      virtual void DisableGaussianOpacityOn()
+        { this->DisableGaussianOpacityOn(0); }
+      virtual void DisableGaussianOpacityOff(int index)
+        { this->SetDisableGaussianOpacity(index, 0); }
+      virtual void DisableGaussianOpacityOff()
+        { this->DisableGaussianOpacityOff(0); }
+      virtual int GetDisableGaussianOpacity(int index);
+      virtual int GetDisableGaussianOpacity()
+        { return this->GetDisableGaussianOpacity(0); }
+
+
+
+
+
+
+
   // Description:
   // Set/Get the shading of a volume. If shading is turned off, then
   // the mapper for the volume will not perform shading calculations.
