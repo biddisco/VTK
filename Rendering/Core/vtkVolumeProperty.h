@@ -366,6 +366,7 @@ protected:
   double SpecularPower[VTK_MAX_VRCOMP];
 
   virtual void CreateDefaultGradientOpacity(int index);
+  virtual void  CreateDefaultGaussianOpacity( int index );
 
 private:
   vtkVolumeProperty(const vtkVolumeProperty&);  // Not implemented.

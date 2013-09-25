@@ -433,6 +433,20 @@ void vtkVolumeProperty::CreateDefaultGradientOpacity( int index )
   this->DefaultGradientOpacity[index]->AddPoint( 255, 1.0 );
 }
 
+void vtkVolumeProperty::CreateDefaultGaussianOpacity( int index )
+{
+  if ( this->DefaultGaussianOpacity[index] == NULL )
+    {
+    this->DefaultGaussianOpacity[index] = vtkGaussianPiecewiseFunction::New();
+    this->DefaultGaussianOpacity[index]->Register(this);
+    this->DefaultGaussianOpacity[index]->Delete();
+    }
+
+  this->DefaultGaussianOpacity[index]->RemoveAllPoints();
+  this->DefaultGaussianOpacity[index]->AddGaussian(0,0.5,0.1,0,0);
+  this->DefaultGaussianOpacity[index]->AddGaussian(1,0.5,0.1,0,0);
+}
+
 vtkAbstractPiecewiseFunction *vtkVolumeProperty::GetCurrentGradientOpacity(int index){
 	if(useGaussian){
 			return GetGaussianOpacity(index);
@@ -462,7 +476,7 @@ vtkGaussianPiecewiseFunction *vtkVolumeProperty::GetGaussianOpacity( int index )
     {
     if ( this->DefaultGaussianOpacity[index] == NULL )
       {
-      //this->CreateDefaultGaussianOpacity(index);
+      this->CreateDefaultGaussianOpacity(index);
       }
     return this->DefaultGaussianOpacity[index];
     }
