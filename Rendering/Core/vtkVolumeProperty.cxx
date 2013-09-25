@@ -38,6 +38,8 @@ vtkVolumeProperty::vtkVolumeProperty()
     this->ScalarOpacity[i]                   = NULL;
     this->ScalarOpacityUnitDistance[i]       = 1.0;
     this->GradientOpacity[i]                 = NULL;
+    this->GaussianOpacity[i]                 = NULL;
+    this->DefaultGaussianOpacity[i]          = NULL;
     this->DefaultGradientOpacity[i]          = NULL;
     this->DisableGradientOpacity[i]          = 0;
 
