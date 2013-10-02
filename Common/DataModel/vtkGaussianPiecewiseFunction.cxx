@@ -402,6 +402,7 @@ if (x_ > this->Range[1] || x_ < this->Range[0])
   return retVal;
 }
 
+
 // Sort the vector in increasing order, then fill in
 // the Range
 void vtkGaussianPiecewiseFunction::SortAndUpdateRange()
