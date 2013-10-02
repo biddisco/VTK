@@ -165,6 +165,7 @@ set(Module_SRCS
   vtkTriangle.cxx
   vtkTriangleStrip.cxx
   vtkTriQuadraticHexahedron.cxx
+  vtkTwoDTransferFunction.cxx
   vtkUndirectedGraph.cxx
   vtkUniformGrid.cxx
   vtkUnstructuredGrid.cxx

@@ -103,13 +103,15 @@ vtkGaussianPiecewiseFunction::vtkGaussianPiecewiseFunction()
 {
   this->Clamping = 1;
   this->Range[0] = 0;
-  this->Range[1] = 0;
+  this->Range[1] = 1;
 
   this->Function = NULL;
 
   this->AllowMultipleGaussiansSamePoint = 0;
 
   this->Internal = new vtkGaussianPiecewiseFunctionInternals;
+
+  this->Initialize();
 }
 
 // Destruct a vtkGaussianPiecewiseFunction
