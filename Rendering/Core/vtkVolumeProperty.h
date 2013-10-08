@@ -263,6 +263,14 @@ public:
 
 
 
+
+
+
+      vtkTwoDTransferFunction *GetStoredTwoDTransferFunction(int index);
+      vtkTwoDTransferFunction *GetStoredTwoDTransferFunction()
+            { return this->GetStoredTwoDTransferFunction(0); }
+
+
       virtual void SetDisableTwoDTransferFunction(int index, int value);
 		virtual void SetDisableTwoDTransferFunction(int value)
 		  { this->SetDisableTwoDTransferFunction(0, value); }

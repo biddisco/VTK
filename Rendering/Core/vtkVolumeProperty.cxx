@@ -598,6 +598,21 @@ vtkGaussianPiecewiseFunction *vtkVolumeProperty::GetStoredGaussianOpacity( int i
   return this->GaussianOpacity[index];
 }
 
+vtkTwoDTransferFunction *vtkVolumeProperty::GetStoredTwoDTransferFunction( int index )
+{
+  if ( this->TwoDTransferFunction[index] == NULL )
+    {
+    this->TwoDTransferFunction[index] = vtkTwoDTransferFunction::New();
+    this->TwoDTransferFunction[index]->Register(this);
+    this->TwoDTransferFunction[index]->Delete();
+    this->TwoDTransferFunction[index]->AddRegion(0.5,0.5,0.25,0.25,0,1);
+    }
+
+  return this->TwoDTransferFunction[index];
+}
+
+
+
 void vtkVolumeProperty::SetDisableGradientOpacity( int index, int value )
 {
   if (this->DisableGradientOpacity[index] == value)
