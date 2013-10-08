@@ -467,6 +467,27 @@ void vtkGaussianPiecewiseFunction::scaleNodesXAxis(double scale){
 	}
 }
 
+void vtkGaussianPiecewiseFunction::shiftNodes(double shift){
+        int count = this->Internal->Nodes.size();
+        for (int i = 0; i<count; i++){
+                this->Internal->Nodes[i]->x += shift;
+        }
+}
+
+void vtkGaussianPiecewiseFunction::scaleAndShift(double oldRange[2], double newRange[2]){
+double a = oldRange[0];
+double b = oldRange[1];
+double c = newRange[0];
+double d = newRange[1];
+
+
+int count = this->Internal->Nodes.size();
+for (int i = 0; i<count; i++){
+                this->Internal->Nodes[i]->x =  (this->Internal->Nodes[i]->x-a)/(b-a)*(d-c)+c;
+                this->Internal->Nodes[i]->w *= (d-c)/(b-a);
+        }
+}
+
 
 bool vtkGaussianPiecewiseFunction::UpdateRange(bool toNodes, double *range)
 {
@@ -487,7 +508,7 @@ bool vtkGaussianPiecewiseFunction::UpdateRange(bool toNodes, double *range)
     {
     return false;
     }
-  scaleNodesXAxis((this->Range[1]-this->Range[0])/(oldRange[1]-oldRange[0]));
+  scaleAndShift(oldRange,Range);
   this->Modified();
   return true;
 }
@@ -635,7 +656,6 @@ int vtkGaussianPiecewiseFunction::AdjustRange(double range[2])
   this->SortAndUpdateRange();
   return 1;
 
-	return 0;
 }
 
 // Returns a table of function values evaluated at regular intervals
