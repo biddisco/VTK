@@ -50,6 +50,7 @@ class vtkLookupTable;
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;
 class vtkGaussianPiecewiseFunction;
+class vtkTwoDTransferFunction;
 
 class VTKRENDERINGCORE_EXPORT vtkDiscretizableColorTransferFunctionCollection : public vtkDiscretizableColorTransferFunction
 {
@@ -63,6 +64,8 @@ public:
   virtual vtkPiecewiseFunction* GetGradientOpacityFunction() const;
   virtual void SetGaussianOpacityFunction(vtkGaussianPiecewiseFunction *function);
   virtual vtkGaussianPiecewiseFunction* GetGaussianOpacityFunction() const;
+  virtual void SetTwoDTransferFunction(vtkTwoDTransferFunction *function);
+    virtual vtkTwoDTransferFunction* GetTwoDTransferFunction() const;
 
 protected:
   vtkDiscretizableColorTransferFunctionCollection();
@@ -71,7 +74,10 @@ protected:
 
 vtkSmartPointer<vtkPiecewiseFunction> GradientOpacityFunction;
 vtkSmartPointer<vtkGaussianPiecewiseFunction> GaussianOpacityFunction;
-  unsigned long GradientOpacityFunctionObserverId;
+vtkSmartPointer<vtkTwoDTransferFunction> TwoDTransferFunction;
+  unsigned long GradientOpacityFunctionObserverId; //these three I don't think are being used.
+  unsigned long GaussianOpacityFunctionObserverId;
+  unsigned long TwoDTransferFunctionObserverId;
 
 private:
   vtkDiscretizableColorTransferFunctionCollection(const vtkDiscretizableColorTransferFunctionCollection&); // Not implemented.

@@ -19,6 +19,7 @@
 #include "vtkPiecewiseFunction.h"
 #include "vtkGaussianPiecewiseFunction.h"
 #include "vtkColorTransferFunction.h"
+#include "vtkTwoDTransferFunction.h"
 
 vtkStandardNewMacro(vtkVolumeProperty);
 
@@ -39,8 +40,10 @@ vtkVolumeProperty::vtkVolumeProperty()
     this->ScalarOpacityUnitDistance[i]       = 1.0;
     this->GradientOpacity[i]                 = NULL;
     this->GaussianOpacity[i]                 = NULL;
+    this->TwoDTransferFunction[i]			 = NULL;
     this->DefaultGaussianOpacity[i]          = NULL;
     this->DefaultGradientOpacity[i]          = NULL;
+    this->DefaultTwoDTransferFunction[i]	 = NULL;
     this->DisableGradientOpacity[i]          = 0;
 
     this->ComponentWeight[i]                 = 1.0;
@@ -78,9 +81,12 @@ vtkVolumeProperty::~vtkVolumeProperty()
       this->GradientOpacity[i]->UnRegister(this);
       }
     if (this->GaussianOpacity[i] != NULL)
-          {
-          this->GaussianOpacity[i]->UnRegister(this);
-          }
+	  {
+	  this->GaussianOpacity[i]->UnRegister(this);
+	  }
+    if(this->TwoDTransferFunction[i] != NULL){
+    	this->TwoDTransferFunction[i]->UnRegister(this);
+    }
 
     if (this->DefaultGradientOpacity[i] != NULL)
       {
@@ -90,8 +96,12 @@ vtkVolumeProperty::~vtkVolumeProperty()
 	  {
 	  this->DefaultGaussianOpacity[i]->UnRegister(this);
 	  }
-    }
+    if (this->DefaultTwoDTransferFunction[i] != NULL)
+
+      this->DefaultTwoDTransferFunction[i]->UnRegister(this);
+      }
 }
+
 
 void vtkVolumeProperty::DeepCopy(vtkVolumeProperty *p)
 {
@@ -152,6 +162,8 @@ void vtkVolumeProperty::UpdateMTimes()
     this->RGBTransferFunctionMTime[i].Modified();
     this->ScalarOpacityMTime[i].Modified();
     this->GradientOpacityMTime[i].Modified();
+    this->GaussianOpacityMTime[i].Modified();
+    this->TwoDTransferFunctionMTime[i].Modified();
     }
 }
 
@@ -215,6 +227,36 @@ unsigned long int vtkVolumeProperty::GetMTime()
         mTime = (mTime > time ? mTime : time);
         }
       }
+
+
+     if (this->GaussianOpacity[i])
+     {
+    	 time = this->GaussianOpacityMTime[i];
+		  mTime = (mTime > time ? mTime : time);
+
+		  if (!this->DisableGaussianOpacity[i])
+			{
+			// time that Gradient opacity transfer function was last modified
+			time = this->GaussianOpacity[i]->GetMTime();
+			mTime = (mTime > time ? mTime : time);
+			}
+      }
+     if (this->TwoDTransferFunction[i])
+         {
+        	 time = this->TwoDTransferFunctionMTime[i];
+    		  mTime = (mTime > time ? mTime : time);
+
+    		  if (!this->DisableTwoDTransferFunction[i])
+    			{
+    			// time that Gradient opacity transfer function was last modified
+    			time = this->TwoDTransferFunction[i]->GetMTime();
+    			mTime = (mTime > time ? mTime : time);
+    			}
+          }
+
+
+
+
     }
 
   return mTime;
@@ -425,6 +467,27 @@ void vtkVolumeProperty::SetGaussianOpacity( int index, vtkGaussianPiecewiseFunct
     }
 }
 
+void vtkVolumeProperty::SetTwoDTransferFunction(int index, vtkTwoDTransferFunction *function){
+	if ( this->TwoDTransferFunction[index] != function )
+	    {
+	    if (this->TwoDTransferFunction[index] != NULL)
+	      {
+	      this->TwoDTransferFunction[index]->UnRegister(this);
+	      }
+	    this->TwoDTransferFunction[index]       = function;
+	    if (this->TwoDTransferFunction[index] != NULL)
+	      {
+	      this->TwoDTransferFunction[index]->Register(this);
+	      }
+
+	    this->TwoDTransferFunctionMTime[index].Modified();
+	    this->Modified();
+	    }
+}
+
+
+
+
 void vtkVolumeProperty::CreateDefaultGradientOpacity( int index )
 {
   if ( this->DefaultGradientOpacity[index] == NULL )
@@ -453,12 +516,28 @@ void vtkVolumeProperty::CreateDefaultGaussianOpacity( int index )
   this->DefaultGaussianOpacity[index]->AddGaussian(1,0.5,0.1,0,0);
 }
 
+void vtkVolumeProperty::CreateDefaultTwoDTransferFunction( int index )
+{
+  if ( this->DefaultTwoDTransferFunction[index] == NULL )
+    {
+    this->DefaultTwoDTransferFunction[index] = vtkTwoDTransferFunction::New();
+    this->DefaultTwoDTransferFunction[index]->Register(this);
+    this->DefaultTwoDTransferFunction[index]->Delete();
+    }
+
+  this->DefaultTwoDTransferFunction[index]->RemoveAllRegions();
+  this->DefaultTwoDTransferFunction[index]->AddRegion(0.5,0.5,0.25,0.25,0,1);
+}
+
+
+
+
 vtkAbstractPiecewiseFunction *vtkVolumeProperty::GetCurrentGradientOpacity(int index){
 	if(useGaussian){
 			return GetGaussianOpacity(index);
 		}
 	else{
-		GetGradientOpacity(index );
+		return GetGradientOpacity(index );
 	}
 }
 
@@ -580,6 +659,43 @@ int vtkVolumeProperty::GetDisableGaussianOpacity( int index )
 {
   return this->DisableGaussianOpacity[index];
 }
+
+void vtkVolumeProperty::SetDisableTwoDTransferFunction( int index, int value )
+{
+  if (this->DisableTwoDTransferFunction[index] == value)
+    {
+    return;
+    }
+
+  this->DisableTwoDTransferFunction[index] = value;
+
+  // Make sure the default function is up-to-date (since the user
+  // could have modified the default function)
+
+  if (value)
+    {
+    this->CreateDefaultTwoDTransferFunction(index);
+    }
+
+  // Since this Ivar basically "sets" the Gaussian opacity function to be
+  // either a default one or the user-specified one, update the MTime
+  // accordingly
+
+  this->TwoDTransferFunctionMTime[index].Modified();
+
+  this->Modified();
+}
+
+int vtkVolumeProperty::GetDisableTwoDTransferFunction( int index )
+{
+  return this->DisableTwoDTransferFunction[index];
+}
+
+
+
+
+
+
 
 
 

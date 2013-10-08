@@ -49,6 +49,7 @@ class vtkPiecewiseFunction;
 class vtkGaussianPiecewiseFunction;
 class vtkTimeStamp;
 class vtkColorTransferFunction;
+class vtkTwoDTransferFunction;
 
 class VTKRENDERINGCORE_EXPORT vtkVolumeProperty : public vtkObject
 {
@@ -186,6 +187,16 @@ public:
     	useGaussian = useGauss;
     }
 
+    void SetTwoDTransferFunction(int index, vtkTwoDTransferFunction *function);
+        void SetTwoDTransferFunction(vtkTwoDTransferFunction *function)
+          { this->SetTwoDTransferFunction(0, function); }
+
+     /*   void SwitchTwoDTransferFunction(bool useGauss){
+        	useGaussian = useGauss;
+        }
+*/
+
+
   // Description:
   // Get the gradient magnitude opacity transfer function for
   // the given component.
@@ -250,6 +261,22 @@ public:
         { return this->GetDisableGaussianOpacity(0); }
 
 
+
+
+      virtual void SetDisableTwoDTransferFunction(int index, int value);
+		virtual void SetDisableTwoDTransferFunction(int value)
+		  { this->SetDisableTwoDTransferFunction(0, value); }
+		virtual void DisableTwoDTransferFunctionOn(int index )
+		  { this->SetDisableTwoDTransferFunction(index, 1); }
+		virtual void DisableTwoDTransferFunctionOn()
+		  { this->DisableTwoDTransferFunctionOn(0); }
+		virtual void DisableTwoDTransferFunctionOff(int index)
+		  { this->SetDisableTwoDTransferFunction(index, 0); }
+		virtual void DisableTwoDTransferFunctionOff()
+		  { this->DisableTwoDTransferFunctionOff(0); }
+		virtual int GetDisableTwoDTransferFunction(int index);
+		virtual int GetDisableTwoDTransferFunction()
+		  { return this->GetDisableTwoDTransferFunction(0); }
 
 
 
@@ -384,6 +411,12 @@ protected:
     int DisableGaussianOpacity[VTK_MAX_VRCOMP];
 
 
+    vtkTwoDTransferFunction *TwoDTransferFunction[VTK_MAX_VRCOMP];
+	vtkTimeStamp TwoDTransferFunctionMTime[VTK_MAX_VRCOMP];
+	vtkTwoDTransferFunction *DefaultTwoDTransferFunction[VTK_MAX_VRCOMP];
+	int DisableTwoDTransferFunction[VTK_MAX_VRCOMP];
+
+
   int Shade[VTK_MAX_VRCOMP];
   double Ambient[VTK_MAX_VRCOMP];
   double Diffuse[VTK_MAX_VRCOMP];
@@ -392,6 +425,7 @@ protected:
 
   virtual void CreateDefaultGradientOpacity(int index);
   virtual void  CreateDefaultGaussianOpacity( int index );
+  virtual void CreateDefaultTwoDTransferFunction( int index );
 
 private:
   vtkVolumeProperty(const vtkVolumeProperty&);  // Not implemented.

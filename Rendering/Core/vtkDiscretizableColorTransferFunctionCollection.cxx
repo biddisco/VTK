@@ -21,6 +21,7 @@
 #include "vtkPiecewiseFunction.h"
 #include "vtkTuple.h"
 #include "vtkGaussianPiecewiseFunction.h"
+#include "vtkTwoDTransferFunction.h"
 
 #include <vector>
 
@@ -62,6 +63,14 @@ vtkGaussianPiecewiseFunction* vtkDiscretizableColorTransferFunctionCollection::G
 void vtkDiscretizableColorTransferFunctionCollection::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
+}
+
+void vtkDiscretizableColorTransferFunctionCollection::SetTwoDTransferFunction(vtkTwoDTransferFunction *function){
+	this->TwoDTransferFunction = function;
+}
+
+vtkTwoDTransferFunction* vtkDiscretizableColorTransferFunctionCollection::GetTwoDTransferFunction() const{
+	return this->TwoDTransferFunction;
 }
 
 

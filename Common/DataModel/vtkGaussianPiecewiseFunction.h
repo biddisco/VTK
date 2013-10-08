@@ -214,6 +214,8 @@ protected:
   bool UpdateRange();
 
   void scaleNodesXAxis(double scale);
+  void shiftNodes(double shift);
+  void scaleAndShift(double oldRange[2], double newRange[2]);
 
 
   int AllowMultipleGaussiansSamePoint;
