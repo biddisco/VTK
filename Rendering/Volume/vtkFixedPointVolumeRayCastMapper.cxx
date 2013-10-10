@@ -32,6 +32,7 @@
 #include "vtkMath.h"
 #include "vtkMultiThreader.h"
 #include "vtkObjectFactory.h"
+#include "vtkAbstractPiecewiseFunction.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkPlaneCollection.h"
 #include "vtkPointData.h"
@@ -3074,7 +3075,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
   vtkColorTransferFunction *rgbFunc[4];
   vtkPiecewiseFunction     *grayFunc[4];
   vtkPiecewiseFunction     *scalarOpacityFunc[4];
-  vtkPiecewiseFunction     *gradientOpacityFunc[4];
+  vtkAbstractPiecewiseFunction     *gradientOpacityFunc[4];
   int                       colorChannels[4];
   float                     scalarOpacityDistance[4];
 
@@ -3094,7 +3095,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
       grayFunc[c]              = NULL;
       }
     scalarOpacityFunc[c]     = vol->GetProperty()->GetScalarOpacity(c);
-    gradientOpacityFunc[c]   = vol->GetProperty()->GetGradientOpacity(c);
+    gradientOpacityFunc[c]   = vol->GetProperty()->GetCurrentGradientOpacity(c);
     scalarOpacityDistance[c] = vol->GetProperty()->GetScalarOpacityUnitDistance(c);
 
     // Has the number of color channels changed?
