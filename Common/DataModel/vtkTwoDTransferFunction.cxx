@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "vtkTwoDTransferFunction.h"
 
 #include "vtkInformation.h"
@@ -9,7 +11,7 @@
 #include <set>
 #include <algorithm>
 #include <iterator>
-#include <cmath>
+
 
 vtkStandardNewMacro(vtkTwoDTransferFunction);
 //enum TransferFnMode {Uniform, Gaussian, RightHalf, LeftHalf, TopHalf, BottomHalf, Sine, RampRight, RampLeft};
