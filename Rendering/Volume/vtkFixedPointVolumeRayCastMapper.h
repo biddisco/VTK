@@ -76,6 +76,7 @@ class vtkTransform;
 class vtkRenderWindow;
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;
+class vtkAbstractPiecewiseFunction;
 class vtkFixedPointVolumeRayCastMIPHelper;
 class vtkFixedPointVolumeRayCastCompositeHelper;
 class vtkFixedPointVolumeRayCastCompositeGOHelper;
@@ -392,7 +393,7 @@ protected:
   vtkColorTransferFunction *SavedRGBFunction[4];
   vtkPiecewiseFunction     *SavedGrayFunction[4];
   vtkPiecewiseFunction     *SavedScalarOpacityFunction[4];
-  vtkPiecewiseFunction     *SavedGradientOpacityFunction[4];
+  vtkAbstractPiecewiseFunction     *SavedGradientOpacityFunction[4];
   int                       SavedColorChannels[4];
   float                     SavedScalarOpacityDistance[4];
   int                       SavedBlendMode;
