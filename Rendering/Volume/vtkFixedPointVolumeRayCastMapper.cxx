@@ -3074,7 +3074,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
 
   vtkColorTransferFunction *rgbFunc[4];
   vtkPiecewiseFunction     *grayFunc[4];
-  vtkPiecewiseFunction     *scalarOpacityFunc[4];
+  vtkAbstractPiecewiseFunction     *scalarOpacityFunc[4];
   vtkAbstractPiecewiseFunction     *gradientOpacityFunc[4];
   int                       colorChannels[4];
   float                     scalarOpacityDistance[4];
@@ -3094,7 +3094,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
       rgbFunc[c]               = vol->GetProperty()->GetRGBTransferFunction(c);
       grayFunc[c]              = NULL;
       }
-    scalarOpacityFunc[c]     = vol->GetProperty()->GetScalarOpacity(c);
+    scalarOpacityFunc[c]     = vol->GetProperty()->GetCurrentScalarOpacity(c);
     gradientOpacityFunc[c]   = vol->GetProperty()->GetCurrentGradientOpacity(c);
     scalarOpacityDistance[c] = vol->GetProperty()->GetScalarOpacityUnitDistance(c);
 

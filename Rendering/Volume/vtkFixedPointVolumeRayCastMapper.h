@@ -392,7 +392,7 @@ protected:
 
   vtkColorTransferFunction *SavedRGBFunction[4];
   vtkPiecewiseFunction     *SavedGrayFunction[4];
-  vtkPiecewiseFunction     *SavedScalarOpacityFunction[4];
+  vtkAbstractPiecewiseFunction     *SavedScalarOpacityFunction[4];
   vtkAbstractPiecewiseFunction     *SavedGradientOpacityFunction[4];
   int                       SavedColorChannels[4];
   float                     SavedScalarOpacityDistance[4];
