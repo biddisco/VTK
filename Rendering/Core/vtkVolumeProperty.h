@@ -151,9 +151,47 @@ public:
   // Get the scalar opacity transfer function for the given component.
   // If no transfer function has been set for this component, a default one
   // is created and returned.
+  vtkAbstractPiecewiseFunction* GetCurrentScalarOpacity(int index);
   vtkPiecewiseFunction *GetScalarOpacity(int index);
   vtkPiecewiseFunction *GetScalarOpacity()
     { return this->GetScalarOpacity(0); }
+
+
+
+  void SetScalarGaussianOpacity(int index, vtkGaussianPiecewiseFunction *function);
+      void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction *function)
+        { this->SetScalarGaussianOpacity(0, function); }
+
+  vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity(int index);
+      vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity()
+        { return this->GetGaussianOpacity(0); }
+
+
+      vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity(int index);
+          vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity()
+            { return this->GetStoredGaussianOpacity(0); }
+
+
+
+
+
+          virtual void SetDisableScalarGaussianOpacity(int index, int value);
+            virtual void SetDisableScalarGaussianOpacity(int value)
+              { this->SetDisableScalarGaussianOpacity(0, value); }
+            virtual void DisableScalarGaussianOpacityOn(int index )
+              { this->SetDisableScalarGaussianOpacity(index, 1); }
+            virtual void DisableScalarGaussianOpacityOn()
+              { this->DisableScalarGaussianOpacityOn(0); }
+            virtual void DisableScalarGaussianOpacityOff(int index)
+              { this->SetDisableScalarGaussianOpacity(index, 0); }
+            virtual void DisableScalarGaussianOpacityOff()
+              { this->DisableScalarGaussianOpacityOff(0); }
+            virtual int GetDisableScalarGaussianOpacity(int index);
+            virtual int GetDisableScalarGaussianOpacity()
+              { return this->GetDisableScalarGaussianOpacity(0); }
+
+
+
 
   // Description:
   // Set/Get the unit distance on which the scalar opacity transfer function
@@ -183,9 +221,12 @@ public:
     void SetGaussianOpacity(vtkGaussianPiecewiseFunction *function)
       { this->SetGaussianOpacity(0, function); }
 
-    void SwitchGaussianOpacity(bool useGauss){
+    void SwitchGradientOpacity(bool useGauss){
     	useGaussian = useGauss;
     }
+    void SwitchScalarOpacity(bool useGauss){
+            useScalarGaussian = useGauss;
+        }
 
     void SetTwoDTransferFunction(int index, vtkTwoDTransferFunction *function);
         void SetTwoDTransferFunction(vtkTwoDTransferFunction *function)
@@ -205,6 +246,7 @@ public:
   // This default function is always returned if DisableGradientOpacity is On
   // for that component.
     bool useGaussian;
+    bool useScalarGaussian;
     vtkAbstractPiecewiseFunction* GetCurrentGradientOpacity(int index);
   vtkPiecewiseFunction *GetGradientOpacity(int index);
   vtkPiecewiseFunction *GetGradientOpacity()
@@ -212,6 +254,9 @@ public:
   vtkGaussianPiecewiseFunction *GetGaussianOpacity(int index);
     vtkGaussianPiecewiseFunction *GetGaussianOpacity()
       { return this->GetGaussianOpacity(0); }
+    vtkTwoDTransferFunction *GetTwoDTransferFunction(int index);
+        vtkTwoDTransferFunction *GetTwoDTransferFunction()
+          { return this->GetTwoDTransferFunction(0); }
 
   // Description:
   // Enable/Disable the gradient opacity function for the given component.
@@ -414,9 +459,15 @@ protected:
   int DisableGradientOpacity[VTK_MAX_VRCOMP];
 
   vtkGaussianPiecewiseFunction *GaussianOpacity[VTK_MAX_VRCOMP];
-    vtkTimeStamp GaussianOpacityMTime[VTK_MAX_VRCOMP];
-    vtkGaussianPiecewiseFunction *DefaultGaussianOpacity[VTK_MAX_VRCOMP];
-    int DisableGaussianOpacity[VTK_MAX_VRCOMP];
+  vtkTimeStamp GaussianOpacityMTime[VTK_MAX_VRCOMP];
+  vtkGaussianPiecewiseFunction *DefaultGaussianOpacity[VTK_MAX_VRCOMP];
+  int DisableGaussianOpacity[VTK_MAX_VRCOMP];
+
+
+  vtkGaussianPiecewiseFunction *ScalarGaussianOpacity[VTK_MAX_VRCOMP];
+  vtkTimeStamp ScalarGaussianOpacityMTime[VTK_MAX_VRCOMP];
+  vtkGaussianPiecewiseFunction *DefaultScalarGaussianOpacity[VTK_MAX_VRCOMP];
+  int DisableScalarGaussianOpacity[VTK_MAX_VRCOMP];
 
 
     vtkTwoDTransferFunction *TwoDTransferFunction[VTK_MAX_VRCOMP];
@@ -432,6 +483,7 @@ protected:
   double SpecularPower[VTK_MAX_VRCOMP];
 
   virtual void CreateDefaultGradientOpacity(int index);
+  virtual void  CreateDefaultScalarGaussianOpacity( int index );
   virtual void  CreateDefaultGaussianOpacity( int index );
   virtual void CreateDefaultTwoDTransferFunction( int index );
 
