@@ -1281,7 +1281,7 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
 
   // Has the scalar opacity transfer function changed in some way?
   vtkAbstractPiecewiseFunction *scalarOpacityFunc =
-    vol->GetProperty()->GetScalarOpacity(0);
+    vol->GetProperty()->GetCurrentScalarOpacity(0);
   if ( this->SavedScalarOpacityFunction != scalarOpacityFunc ||
        this->SavedParametersMTime.GetMTime() <
        scalarOpacityFunc->GetMTime() )
@@ -1365,7 +1365,7 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
                                  256, goArray );
 
  // double gogaussArray[256];
-//  gaussianOpacityFunc->GetTable( 0, (scalarRange[1] - scalarRange[0])*0.25,
+//  std::cout << "current scalarop size " << scalarOpacityFunc->GetSize() << std::endl;
  //         256, gogaussArray );
 
 

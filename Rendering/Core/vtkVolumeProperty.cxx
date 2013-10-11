@@ -559,10 +559,9 @@ void vtkVolumeProperty::CreateDefaultScalarGaussianOpacity( int index )
     this->DefaultScalarGaussianOpacity[index]->Register(this);
     this->DefaultScalarGaussianOpacity[index]->Delete();
     }
-
+ this->DefaultScalarGaussianOpacity[index]->blankGaussian = true;
   this->DefaultScalarGaussianOpacity[index]->RemoveAllPoints();
   this->DefaultScalarGaussianOpacity[index]->AddGaussian(0,0.5,0.1,0,0);
-  this->DefaultScalarGaussianOpacity[index]->AddGaussian(1,0.5,0.1,0,0);
 }
 
 void vtkVolumeProperty::CreateDefaultGaussianOpacity( int index )
@@ -573,7 +572,7 @@ void vtkVolumeProperty::CreateDefaultGaussianOpacity( int index )
     this->DefaultGaussianOpacity[index]->Register(this);
     this->DefaultGaussianOpacity[index]->Delete();
     }
-
+  this->DefaultGaussianOpacity[index]->blankGaussian = true;
   this->DefaultGaussianOpacity[index]->RemoveAllPoints();
   this->DefaultGaussianOpacity[index]->AddGaussian(0,0.5,0.1,0,0);
   this->DefaultGaussianOpacity[index]->AddGaussian(1,0.5,0.1,0,0);
@@ -594,7 +593,7 @@ void vtkVolumeProperty::CreateDefaultTwoDTransferFunction( int index )
 
 
 vtkAbstractPiecewiseFunction *vtkVolumeProperty::GetCurrentScalarOpacity(int index){
-        if(useGaussian){
+        if(useScalarGaussian){
                         return GetScalarGaussianOpacity(index);
                 }
         else{

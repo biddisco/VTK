@@ -164,12 +164,12 @@ public:
 
   vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity(int index);
       vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity()
-        { return this->GetGaussianOpacity(0); }
+        { return this->GetScalarGaussianOpacity(0); }
 
 
       vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity(int index);
           vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity()
-            { return this->GetStoredGaussianOpacity(0); }
+            { return this->GetStoredScalarGaussianOpacity(0); }
 
 
 
