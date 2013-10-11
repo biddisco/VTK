@@ -60,6 +60,8 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Set/get the opacity function to use.
+  virtual void SetScalarGaussianOpacityFunction(vtkGaussianPiecewiseFunction *function);
+    virtual vtkGaussianPiecewiseFunction* GetScalarGaussianOpacityFunction() const;
   virtual void SetGradientOpacityFunction(vtkPiecewiseFunction *function);
   virtual vtkPiecewiseFunction* GetGradientOpacityFunction() const;
   virtual void SetGaussianOpacityFunction(vtkGaussianPiecewiseFunction *function);
@@ -71,10 +73,11 @@ protected:
   vtkDiscretizableColorTransferFunctionCollection();
   ~vtkDiscretizableColorTransferFunctionCollection();
 
-
+  vtkSmartPointer<vtkGaussianPiecewiseFunction> ScalarGaussianOpacityFunction;
 vtkSmartPointer<vtkPiecewiseFunction> GradientOpacityFunction;
 vtkSmartPointer<vtkGaussianPiecewiseFunction> GaussianOpacityFunction;
 vtkSmartPointer<vtkTwoDTransferFunction> TwoDTransferFunction;
+  unsigned long ScalarGaussianOpacityFunctionObserverId;
   unsigned long GradientOpacityFunctionObserverId; //these three I don't think are being used.
   unsigned long GaussianOpacityFunctionObserverId;
   unsigned long TwoDTransferFunctionObserverId;

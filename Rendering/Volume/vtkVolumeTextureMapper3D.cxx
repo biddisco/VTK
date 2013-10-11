@@ -1371,6 +1371,8 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
 
 
 
+
+
   // Correct the opacity array for the spacing between the planes.
   int i;
 
