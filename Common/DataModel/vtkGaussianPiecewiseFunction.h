@@ -79,6 +79,9 @@ public:
 
   bool UpdateRange(bool toNodes, double range[2]);
 
+
+  bool blankGaussian; //in case you want the table to always be one.
+
   // Description:
   // Returns the value of the function at the specified location using
   // the specified interpolation.

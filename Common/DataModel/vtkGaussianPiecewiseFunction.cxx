@@ -112,6 +112,7 @@ vtkGaussianPiecewiseFunction::vtkGaussianPiecewiseFunction()
   this->Internal = new vtkGaussianPiecewiseFunctionInternals;
 
   this->Initialize();
+  this->blankGaussian = false;
 }
 
 // Destruct a vtkGaussianPiecewiseFunction
@@ -658,6 +659,8 @@ int vtkGaussianPiecewiseFunction::AdjustRange(double range[2])
 
 }
 
+
+
 // Returns a table of function values evaluated at regular intervals
 void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
                                      int size, double* table,
@@ -665,9 +668,25 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
 {
 	//TBD
 	//copy from gaussianopacitybar and modify
-	for (int i=0; i<size; i++) table[i] = 0;
+	//for (int i=0; i<size; i++) table[i] = 0;
+  double* tableptr = 0;
+  if (blankGaussian){
+      for (int i=0; i<size; i++ )
+          {
+          tableptr = table + i*stride;
+          *tableptr = 1;
+          }
+      return;
 
-	double* tableptr = 0;
+  }
+  for (int i=0; i<size; i++ )
+            {
+            tableptr = table + i*stride;
+            *tableptr = 0;
+            }
+
+
+	tableptr = 0;
 	for (int p=0; p<this->Internal->Nodes.size(); p++)
 	{
 		double _pos    = Internal->Nodes[p]->x;
@@ -683,7 +702,7 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
 			// clamp non-zero values to _pos +/- _width
 			if (_x > _pos+_width || _x < _pos-_width)
 			{
-				table[i] = table[i]>0.0?table[i]:0.0;
+			    *tableptr = *tableptr>0.0?*tableptr:0.0;
 				continue;
 			}
 
@@ -729,7 +748,8 @@ void vtkGaussianPiecewiseFunction::GetTable( double xStart, double xEnd,
 			double h2 = _height * h1;
 
 			// perform the MAX over different guassians, not the sum
-			table[i] = table[i]>0.0?table[i]:h2;
+			*tableptr = *tableptr>h2?*tableptr:h2;
+
 		}
 	}
 }
