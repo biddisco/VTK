@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    vtkVolumeProperty.h
+ Program:   Visualization Toolkit
+ Module:    vtkVolumeProperty.h
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+ Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+ All rights reserved.
+ See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 
 // .NAME vtkVolumeProperty - represents the common properties for rendering a volume.
 //
@@ -34,10 +34,8 @@
 // only the first scalar opacity and gradient opacity transfer functions
 // will be used (and all color functions will be ignored). Omitting the
 // index parameter on the Set/Get methods will access index = 0.
-
 // .SECTION see also
 // vtkPiecewiseFunction vtkColorTransferFunction
-
 #ifndef __vtkVolumeProperty_h
 #define __vtkVolumeProperty_h
 
@@ -51,11 +49,11 @@ class vtkTimeStamp;
 class vtkColorTransferFunction;
 class vtkTwoDTransferFunction;
 
-class VTKRENDERINGCORE_EXPORT vtkVolumeProperty : public vtkObject
-{
+class VTKRENDERINGCORE_EXPORT vtkVolumeProperty: public vtkObject
+  {
 public:
-  static vtkVolumeProperty *New();
-  vtkTypeMacro(vtkVolumeProperty, vtkObject);
+  static vtkVolumeProperty *New();vtkTypeMacro(vtkVolumeProperty, vtkObject)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
   void DeepCopy(vtkVolumeProperty *p);
 
@@ -79,20 +77,26 @@ public:
   // The fourth component will be passed through the first scalar opacity
   // transfer function for opacity. Normals will be generated from the fourth
   // component.
-  vtkSetClampMacro(IndependentComponents, int, 0, 1);
-  vtkGetMacro(IndependentComponents, int);
-  vtkBooleanMacro(IndependentComponents, int);
+  vtkSetClampMacro(IndependentComponents, int, 0, 1)
+  ;vtkGetMacro(IndependentComponents, int)
+  ;vtkBooleanMacro(IndependentComponents, int)
+  ;
 
   // Description:
   // Set the interpolation type for sampling a volume. Initial value is
   // VTK_NEAREST_INTERPOLATION.
   vtkSetClampMacro(InterpolationType, int,
-    VTK_NEAREST_INTERPOLATION, VTK_LINEAR_INTERPOLATION);
-  vtkGetMacro(InterpolationType, int);
+	  VTK_NEAREST_INTERPOLATION, VTK_LINEAR_INTERPOLATION)
+  ;vtkGetMacro(InterpolationType, int)
+  ;
   void SetInterpolationTypeToNearest()
-    { this->SetInterpolationType(VTK_NEAREST_INTERPOLATION); }
+	{
+	this->SetInterpolationType(VTK_NEAREST_INTERPOLATION);
+	}
   void SetInterpolationTypeToLinear()
-    { this->SetInterpolationType(VTK_LINEAR_INTERPOLATION); }
+	{
+	this->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
+	}
   const char *GetInterpolationTypeAsString(void);
 
   // Description:
@@ -106,7 +110,9 @@ public:
   // color channels for this component to 1.
   void SetColor(int index, vtkPiecewiseFunction *function);
   void SetColor(vtkPiecewiseFunction *function)
-    { this->SetColor(0, function); }
+	{
+	this->SetColor(0, function);
+	}
 
   // Description:
   // Set the color of a volume to an RGB transfer function
@@ -115,14 +121,18 @@ public:
   // This will also recompute the color channels
   void SetColor(int index, vtkColorTransferFunction *function);
   void SetColor(vtkColorTransferFunction *function)
-    { this->SetColor(0, function); }
+	{
+	this->SetColor(0, function);
+	}
 
   // Description:
   // Get the number of color channels in the transfer function
   // for the given component.
   int GetColorChannels(int index);
   int GetColorChannels()
-    { return this->GetColorChannels(0); }
+	{
+	return this->GetColorChannels(0);
+	}
 
   // Description:
   // Get the gray transfer function.
@@ -130,7 +140,9 @@ public:
   // is created and returned.
   vtkPiecewiseFunction *GetGrayTransferFunction(int index);
   vtkPiecewiseFunction *GetGrayTransferFunction()
-    { return this->GetGrayTransferFunction(0); }
+	{
+	return this->GetGrayTransferFunction(0);
+	}
 
   // Description:
   // Get the RGB transfer function for the given component.
@@ -138,14 +150,18 @@ public:
   // is created and returned.
   vtkColorTransferFunction *GetRGBTransferFunction(int index);
   vtkColorTransferFunction *GetRGBTransferFunction()
-    { return this->GetRGBTransferFunction(0); }
+	{
+	return this->GetRGBTransferFunction(0);
+	}
 
   // Description:
   // Set the opacity of a volume to an opacity transfer function based
   // on scalar value for the component indicated by index.
   void SetScalarOpacity(int index, vtkPiecewiseFunction *function);
   void SetScalarOpacity(vtkPiecewiseFunction *function)
-    { this->SetScalarOpacity(0, function); }
+	{
+	this->SetScalarOpacity(0, function);
+	}
 
   // Description:
   // Get the scalar opacity transfer function for the given component.
@@ -154,44 +170,55 @@ public:
   vtkAbstractPiecewiseFunction* GetCurrentScalarOpacity(int index);
   vtkPiecewiseFunction *GetScalarOpacity(int index);
   vtkPiecewiseFunction *GetScalarOpacity()
-    { return this->GetScalarOpacity(0); }
+	{
+	return this->GetScalarOpacity(0);
+	}
 
-
-
-  void SetScalarGaussianOpacity(int index, vtkGaussianPiecewiseFunction *function);
-      void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction *function)
-        { this->SetScalarGaussianOpacity(0, function); }
+  void SetScalarGaussianOpacity(int index,
+	  vtkGaussianPiecewiseFunction *function);
+  void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction *function)
+	{
+	this->SetScalarGaussianOpacity(0, function);
+	}
 
   vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity(int index);
-      vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity()
-        { return this->GetScalarGaussianOpacity(0); }
+  vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity()
+	{
+	return this->GetScalarGaussianOpacity(0);
+	}
 
+  vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity(int index);
+  vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity()
+	{
+	return this->GetStoredScalarGaussianOpacity(0);
+	}
 
-      vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity(int index);
-          vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity()
-            { return this->GetStoredScalarGaussianOpacity(0); }
-
-
-
-
-
-          virtual void SetDisableScalarGaussianOpacity(int index, int value);
-            virtual void SetDisableScalarGaussianOpacity(int value)
-              { this->SetDisableScalarGaussianOpacity(0, value); }
-            virtual void DisableScalarGaussianOpacityOn(int index )
-              { this->SetDisableScalarGaussianOpacity(index, 1); }
-            virtual void DisableScalarGaussianOpacityOn()
-              { this->DisableScalarGaussianOpacityOn(0); }
-            virtual void DisableScalarGaussianOpacityOff(int index)
-              { this->SetDisableScalarGaussianOpacity(index, 0); }
-            virtual void DisableScalarGaussianOpacityOff()
-              { this->DisableScalarGaussianOpacityOff(0); }
-            virtual int GetDisableScalarGaussianOpacity(int index);
-            virtual int GetDisableScalarGaussianOpacity()
-              { return this->GetDisableScalarGaussianOpacity(0); }
-
-
-
+  virtual void SetDisableScalarGaussianOpacity(int index, int value);
+  virtual void SetDisableScalarGaussianOpacity(int value)
+	{
+	this->SetDisableScalarGaussianOpacity(0, value);
+	}
+  virtual void DisableScalarGaussianOpacityOn(int index)
+	{
+	this->SetDisableScalarGaussianOpacity(index, 1);
+	}
+  virtual void DisableScalarGaussianOpacityOn()
+	{
+	this->DisableScalarGaussianOpacityOn(0);
+	}
+  virtual void DisableScalarGaussianOpacityOff(int index)
+	{
+	this->SetDisableScalarGaussianOpacity(index, 0);
+	}
+  virtual void DisableScalarGaussianOpacityOff()
+	{
+	this->DisableScalarGaussianOpacityOff(0);
+	}
+  virtual int GetDisableScalarGaussianOpacity(int index);
+  virtual int GetDisableScalarGaussianOpacity()
+	{
+	return this->GetDisableScalarGaussianOpacity(0);
+	}
 
   // Description:
   // Set/Get the unit distance on which the scalar opacity transfer function
@@ -200,43 +227,53 @@ public:
   // This is adjusted for the actual sampling distance during rendering.
   void SetScalarOpacityUnitDistance(int index, double distance);
   void SetScalarOpacityUnitDistance(double distance)
-    { this->SetScalarOpacityUnitDistance(0, distance); }
+	{
+	this->SetScalarOpacityUnitDistance(0, distance);
+	}
   double GetScalarOpacityUnitDistance(int index);
   double GetScalarOpacityUnitDistance()
-    { return this->GetScalarOpacityUnitDistance(0); }
-
+	{
+	return this->GetScalarOpacityUnitDistance(0);
+	}
 
   // Description:
   // Set the opacity of a volume to an opacity transfer function based
   // on gradient magnitude for the given component.
   void SetGradientOpacity(int index, vtkPiecewiseFunction *function);
   void SetGradientOpacity(vtkPiecewiseFunction *function)
-    { this->SetGradientOpacity(0, function); }
+	{
+	this->SetGradientOpacity(0, function);
+	}
 
   // Description:
   //gaussian based
-    // Set the opacity of a volume to an opacity transfer function based
-    // on gradient magnitude for the given component.
-    void SetGaussianOpacity(int index, vtkGaussianPiecewiseFunction *function);
-    void SetGaussianOpacity(vtkGaussianPiecewiseFunction *function)
-      { this->SetGaussianOpacity(0, function); }
+  // Set the opacity of a volume to an opacity transfer function based
+  // on gradient magnitude for the given component.
+  void SetGaussianOpacity(int index, vtkGaussianPiecewiseFunction *function);
+  void SetGaussianOpacity(vtkGaussianPiecewiseFunction *function)
+	{
+	this->SetGaussianOpacity(0, function);
+	}
 
-    void SwitchGradientOpacity(bool useGauss){
-    	useGaussian = useGauss;
-    }
-    void SwitchScalarOpacity(bool useGauss){
-            useScalarGaussian = useGauss;
-        }
+  void SwitchGradientOpacity(bool useGauss)
+	{
+	useGaussian = useGauss;
+	}
+  void SwitchScalarOpacity(bool useGauss)
+	{
+	useScalarGaussian = useGauss;
+	}
 
-    void SetTwoDTransferFunction(int index, vtkTwoDTransferFunction *function);
-        void SetTwoDTransferFunction(vtkTwoDTransferFunction *function)
-          { this->SetTwoDTransferFunction(0, function); }
+  void SetTwoDTransferFunction(int index, vtkTwoDTransferFunction *function);
+  void SetTwoDTransferFunction(vtkTwoDTransferFunction *function)
+	{
+	this->SetTwoDTransferFunction(0, function);
+	}
 
-     /*   void SwitchTwoDTransferFunction(bool useGauss){
-        	useGaussian = useGauss;
-        }
-*/
-
+  /*   void SwitchTwoDTransferFunction(bool useGauss){
+   useGaussian = useGauss;
+   }
+   */
 
   // Description:
   // Get the gradient magnitude opacity transfer function for
@@ -245,18 +282,24 @@ public:
   // is created and returned.
   // This default function is always returned if DisableGradientOpacity is On
   // for that component.
-    bool useGaussian;
-    bool useScalarGaussian;
-    vtkAbstractPiecewiseFunction* GetCurrentGradientOpacity(int index);
+  bool useGaussian;
+  bool useScalarGaussian;
+  vtkAbstractPiecewiseFunction* GetCurrentGradientOpacity(int index);
   vtkPiecewiseFunction *GetGradientOpacity(int index);
   vtkPiecewiseFunction *GetGradientOpacity()
-    { return this->GetGradientOpacity(0); }
+	{
+	return this->GetGradientOpacity(0);
+	}
   vtkGaussianPiecewiseFunction *GetGaussianOpacity(int index);
-    vtkGaussianPiecewiseFunction *GetGaussianOpacity()
-      { return this->GetGaussianOpacity(0); }
-    vtkTwoDTransferFunction *GetTwoDTransferFunction(int index);
-        vtkTwoDTransferFunction *GetTwoDTransferFunction()
-          { return this->GetTwoDTransferFunction(0); }
+  vtkGaussianPiecewiseFunction *GetGaussianOpacity()
+	{
+	return this->GetGaussianOpacity(0);
+	}
+  vtkTwoDTransferFunction *GetTwoDTransferFunction(int index);
+  vtkTwoDTransferFunction *GetTwoDTransferFunction()
+	{
+	return this->GetTwoDTransferFunction(0);
+	}
 
   // Description:
   // Enable/Disable the gradient opacity function for the given component.
@@ -266,74 +309,101 @@ public:
   // GetStoredGradientOpacity().
   virtual void SetDisableGradientOpacity(int index, int value);
   virtual void SetDisableGradientOpacity(int value)
-    { this->SetDisableGradientOpacity(0, value); }
-  virtual void DisableGradientOpacityOn(int index )
-    { this->SetDisableGradientOpacity(index, 1); }
+	{
+	this->SetDisableGradientOpacity(0, value);
+	}
+  virtual void DisableGradientOpacityOn(int index)
+	{
+	this->SetDisableGradientOpacity(index, 1);
+	}
   virtual void DisableGradientOpacityOn()
-    { this->DisableGradientOpacityOn(0); }
+	{
+	this->DisableGradientOpacityOn(0);
+	}
   virtual void DisableGradientOpacityOff(int index)
-    { this->SetDisableGradientOpacity(index, 0); }
+	{
+	this->SetDisableGradientOpacity(index, 0);
+	}
   virtual void DisableGradientOpacityOff()
-    { this->DisableGradientOpacityOff(0); }
+	{
+	this->DisableGradientOpacityOff(0);
+	}
   virtual int GetDisableGradientOpacity(int index);
   virtual int GetDisableGradientOpacity()
-    { return this->GetDisableGradientOpacity(0); }
+	{
+	return this->GetDisableGradientOpacity(0);
+	}
   vtkPiecewiseFunction *GetStoredGradientOpacity(int index);
   vtkPiecewiseFunction *GetStoredGradientOpacity()
-    { return this->GetStoredGradientOpacity(0); }
+	{
+	return this->GetStoredGradientOpacity(0);
+	}
 
   vtkGaussianPiecewiseFunction *GetStoredGaussianOpacity(int index);
-    vtkGaussianPiecewiseFunction *GetStoredGaussianOpacity()
-      { return this->GetStoredGaussianOpacity(0); }
+  vtkGaussianPiecewiseFunction *GetStoredGaussianOpacity()
+	{
+	return this->GetStoredGaussianOpacity(0);
+	}
 
+  virtual void SetDisableGaussianOpacity(int index, int value);
+  virtual void SetDisableGaussianOpacity(int value)
+	{
+	this->SetDisableGaussianOpacity(0, value);
+	}
+  virtual void DisableGaussianOpacityOn(int index)
+	{
+	this->SetDisableGaussianOpacity(index, 1);
+	}
+  virtual void DisableGaussianOpacityOn()
+	{
+	this->DisableGaussianOpacityOn(0);
+	}
+  virtual void DisableGaussianOpacityOff(int index)
+	{
+	this->SetDisableGaussianOpacity(index, 0);
+	}
+  virtual void DisableGaussianOpacityOff()
+	{
+	this->DisableGaussianOpacityOff(0);
+	}
+  virtual int GetDisableGaussianOpacity(int index);
+  virtual int GetDisableGaussianOpacity()
+	{
+	return this->GetDisableGaussianOpacity(0);
+	}
 
+  vtkTwoDTransferFunction *GetStoredTwoDTransferFunction(int index);
+  vtkTwoDTransferFunction *GetStoredTwoDTransferFunction()
+	{
+	return this->GetStoredTwoDTransferFunction(0);
+	}
 
-
-
-    virtual void SetDisableGaussianOpacity(int index, int value);
-      virtual void SetDisableGaussianOpacity(int value)
-        { this->SetDisableGaussianOpacity(0, value); }
-      virtual void DisableGaussianOpacityOn(int index )
-        { this->SetDisableGaussianOpacity(index, 1); }
-      virtual void DisableGaussianOpacityOn()
-        { this->DisableGaussianOpacityOn(0); }
-      virtual void DisableGaussianOpacityOff(int index)
-        { this->SetDisableGaussianOpacity(index, 0); }
-      virtual void DisableGaussianOpacityOff()
-        { this->DisableGaussianOpacityOff(0); }
-      virtual int GetDisableGaussianOpacity(int index);
-      virtual int GetDisableGaussianOpacity()
-        { return this->GetDisableGaussianOpacity(0); }
-
-
-
-
-
-
-
-      vtkTwoDTransferFunction *GetStoredTwoDTransferFunction(int index);
-      vtkTwoDTransferFunction *GetStoredTwoDTransferFunction()
-            { return this->GetStoredTwoDTransferFunction(0); }
-
-
-      virtual void SetDisableTwoDTransferFunction(int index, int value);
-		virtual void SetDisableTwoDTransferFunction(int value)
-		  { this->SetDisableTwoDTransferFunction(0, value); }
-		virtual void DisableTwoDTransferFunctionOn(int index )
-		  { this->SetDisableTwoDTransferFunction(index, 1); }
-		virtual void DisableTwoDTransferFunctionOn()
-		  { this->DisableTwoDTransferFunctionOn(0); }
-		virtual void DisableTwoDTransferFunctionOff(int index)
-		  { this->SetDisableTwoDTransferFunction(index, 0); }
-		virtual void DisableTwoDTransferFunctionOff()
-		  { this->DisableTwoDTransferFunctionOff(0); }
-		virtual int GetDisableTwoDTransferFunction(int index);
-		virtual int GetDisableTwoDTransferFunction()
-		  { return this->GetDisableTwoDTransferFunction(0); }
-
-
-
-
+  virtual void SetDisableTwoDTransferFunction(int index, int value);
+  virtual void SetDisableTwoDTransferFunction(int value)
+	{
+	this->SetDisableTwoDTransferFunction(0, value);
+	}
+  virtual void DisableTwoDTransferFunctionOn(int index)
+	{
+	this->SetDisableTwoDTransferFunction(index, 1);
+	}
+  virtual void DisableTwoDTransferFunctionOn()
+	{
+	this->DisableTwoDTransferFunctionOn(0);
+	}
+  virtual void DisableTwoDTransferFunctionOff(int index)
+	{
+	this->SetDisableTwoDTransferFunction(index, 0);
+	}
+  virtual void DisableTwoDTransferFunctionOff()
+	{
+	this->DisableTwoDTransferFunctionOff(0);
+	}
+  virtual int GetDisableTwoDTransferFunction(int index);
+  virtual int GetDisableTwoDTransferFunction()
+	{
+	return this->GetDisableTwoDTransferFunction(0);
+	}
 
   // Description:
   // Set/Get the shading of a volume. If shading is turned off, then
@@ -347,52 +417,76 @@ public:
   // turned on/off per component.
   void SetShade(int index, int value);
   void SetShade(int value)
-    { this->SetShade(0,value); }
+	{
+	this->SetShade(0, value);
+	}
   int GetShade(int index);
   int GetShade()
-    { return this->GetShade(0); }
+	{
+	return this->GetShade(0);
+	}
   void ShadeOn(int index);
   void ShadeOn()
-    { this->ShadeOn(0); }
+	{
+	this->ShadeOn(0);
+	}
   void ShadeOff(int index);
   void ShadeOff()
-    { this->ShadeOff(0); }
+	{
+	this->ShadeOff(0);
+	}
 
   // Description:
   // Set/Get the ambient lighting coefficient.
   void SetAmbient(int index, double value);
   void SetAmbient(double value)
-    { this->SetAmbient(0, value); }
+	{
+	this->SetAmbient(0, value);
+	}
   double GetAmbient(int index);
   double GetAmbient()
-    { return this->GetAmbient(0); }
+	{
+	return this->GetAmbient(0);
+	}
 
   // Description:
   // Set/Get the diffuse lighting coefficient.
   void SetDiffuse(int index, double value);
   void SetDiffuse(double value)
-    { this->SetDiffuse(0, value); }
+	{
+	this->SetDiffuse(0, value);
+	}
   double GetDiffuse(int index);
   double GetDiffuse()
-    { return this->GetDiffuse(0); }
+	{
+	return this->GetDiffuse(0);
+	}
 
   // Description:
   // Set/Get the specular lighting coefficient.
   void SetSpecular(int index, double value);
   void SetSpecular(double value)
-    { this->SetSpecular(0, value); }
+	{
+	this->SetSpecular(0, value);
+	}
   double GetSpecular(int index);
   double GetSpecular()
-    { return this->GetSpecular(0); }
+	{
+	return this->GetSpecular(0);
+	}
 
   // Description:
   // Set/Get the specular power.
   void SetSpecularPower(int index, double value);
   void SetSpecularPower(double value)
-    { this->SetSpecularPower(0, value); }
+	{
+	this->SetSpecularPower(0, value);
+	}
   double GetSpecularPower(int index);
   double GetSpecularPower()
-    { return this->GetSpecularPower(0); }
+	{
+	return this->GetSpecularPower(0);
+	}
 
   //BTX
   // Description:
@@ -408,28 +502,36 @@ public:
   // Get the time that the gradient opacity transfer function was set
   vtkTimeStamp GetGradientOpacityMTime(int index);
   vtkTimeStamp GetGradientOpacityMTime()
-    { return this->GetGradientOpacityMTime(0); }
+	{
+	return this->GetGradientOpacityMTime(0);
+	}
 
   // Description:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
   // Get the time that the scalar opacity transfer function was set.
   vtkTimeStamp GetScalarOpacityMTime(int index);
   vtkTimeStamp GetScalarOpacityMTime()
-    { return this->GetScalarOpacityMTime(0); }
+	{
+	return this->GetScalarOpacityMTime(0);
+	}
 
   // Description:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
   // Get the time that the RGBTransferFunction was set
   vtkTimeStamp GetRGBTransferFunctionMTime(int index);
   vtkTimeStamp GetRGBTransferFunctionMTime()
-    { return this->GetRGBTransferFunctionMTime(0); }
+	{
+	return this->GetRGBTransferFunctionMTime(0);
+	}
 
   // Description:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
   // Get the time that the GrayTransferFunction was set
   vtkTimeStamp GetGrayTransferFunctionMTime(int index);
   vtkTimeStamp GetGrayTransferFunctionMTime()
-    { return this->GetGrayTransferFunctionMTime(0); }
+	{
+	return this->GetGrayTransferFunctionMTime(0);
+	}
   //ETX
 
 protected:
@@ -463,18 +565,15 @@ protected:
   vtkGaussianPiecewiseFunction *DefaultGaussianOpacity[VTK_MAX_VRCOMP];
   int DisableGaussianOpacity[VTK_MAX_VRCOMP];
 
-
   vtkGaussianPiecewiseFunction *ScalarGaussianOpacity[VTK_MAX_VRCOMP];
   vtkTimeStamp ScalarGaussianOpacityMTime[VTK_MAX_VRCOMP];
   vtkGaussianPiecewiseFunction *DefaultScalarGaussianOpacity[VTK_MAX_VRCOMP];
   int DisableScalarGaussianOpacity[VTK_MAX_VRCOMP];
 
-
-    vtkTwoDTransferFunction *TwoDTransferFunction[VTK_MAX_VRCOMP];
-	vtkTimeStamp TwoDTransferFunctionMTime[VTK_MAX_VRCOMP];
-	vtkTwoDTransferFunction *DefaultTwoDTransferFunction[VTK_MAX_VRCOMP];
-	int DisableTwoDTransferFunction[VTK_MAX_VRCOMP];
-
+  vtkTwoDTransferFunction *TwoDTransferFunction[VTK_MAX_VRCOMP];
+  vtkTimeStamp TwoDTransferFunctionMTime[VTK_MAX_VRCOMP];
+  vtkTwoDTransferFunction *DefaultTwoDTransferFunction[VTK_MAX_VRCOMP];
+  int DisableTwoDTransferFunction[VTK_MAX_VRCOMP];
 
   int Shade[VTK_MAX_VRCOMP];
   double Ambient[VTK_MAX_VRCOMP];
@@ -483,28 +582,28 @@ protected:
   double SpecularPower[VTK_MAX_VRCOMP];
 
   virtual void CreateDefaultGradientOpacity(int index);
-  virtual void  CreateDefaultScalarGaussianOpacity( int index );
-  virtual void  CreateDefaultGaussianOpacity( int index );
-  virtual void CreateDefaultTwoDTransferFunction( int index );
+  virtual void CreateDefaultScalarGaussianOpacity(int index);
+  virtual void CreateDefaultGaussianOpacity(int index);
+  virtual void CreateDefaultTwoDTransferFunction(int index);
 
 private:
   vtkVolumeProperty(const vtkVolumeProperty&);  // Not implemented.
   void operator=(const vtkVolumeProperty&);  // Not implemented.
-};
+  };
 
 // Description:
 // Return the interpolation type as a descriptive character string.
 inline const char *vtkVolumeProperty::GetInterpolationTypeAsString(void)
-{
+  {
   if (this->InterpolationType == VTK_NEAREST_INTERPOLATION)
-    {
-    return "Nearest Neighbor";
-    }
+	{
+	return "Nearest Neighbor";
+	}
   if (this->InterpolationType == VTK_LINEAR_INTERPOLATION)
-    {
-    return "Linear";
-    }
+	{
+	return "Linear";
+	}
   return "Unknown";
-}
+  }
 
 #endif
