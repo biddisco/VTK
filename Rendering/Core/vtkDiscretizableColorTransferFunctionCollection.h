@@ -62,10 +62,10 @@ public:
   // Set/get the opacity function to use.
   virtual void SetScalarGaussianOpacityFunction(vtkGaussianPiecewiseFunction *function);
     virtual vtkGaussianPiecewiseFunction* GetScalarGaussianOpacityFunction() const;
-  virtual void SetGradientOpacityFunction(vtkPiecewiseFunction *function);
-  virtual vtkPiecewiseFunction* GetGradientOpacityFunction() const;
-  virtual void SetGaussianOpacityFunction(vtkGaussianPiecewiseFunction *function);
-  virtual vtkGaussianPiecewiseFunction* GetGaussianOpacityFunction() const;
+  virtual void SetGradientLinearOpacityFunction(vtkPiecewiseFunction *function);
+  virtual vtkPiecewiseFunction* GetGradientLinearOpacityFunction() const;
+  virtual void SetGradientGaussianOpacityFunction(vtkGaussianPiecewiseFunction *function);
+  virtual vtkGaussianPiecewiseFunction* GetGradientGaussianOpacityFunction() const;
   virtual void SetTwoDTransferFunction(vtkTwoDTransferFunction *function);
     virtual vtkTwoDTransferFunction* GetTwoDTransferFunction() const;
 
@@ -74,12 +74,12 @@ protected:
   ~vtkDiscretizableColorTransferFunctionCollection();
 
   vtkSmartPointer<vtkGaussianPiecewiseFunction> ScalarGaussianOpacityFunction;
-vtkSmartPointer<vtkPiecewiseFunction> GradientOpacityFunction;
-vtkSmartPointer<vtkGaussianPiecewiseFunction> GaussianOpacityFunction;
+vtkSmartPointer<vtkPiecewiseFunction> GradientLinearOpacityFunction;
+vtkSmartPointer<vtkGaussianPiecewiseFunction> GradientGaussianOpacityFunction;
 vtkSmartPointer<vtkTwoDTransferFunction> TwoDTransferFunction;
   unsigned long ScalarGaussianOpacityFunctionObserverId;
-  unsigned long GradientOpacityFunctionObserverId; //these three I don't think are being used.
-  unsigned long GaussianOpacityFunctionObserverId;
+  unsigned long GradientLinearOpacityFunctionObserverId; //these three I don't think are being used.
+  unsigned long GradientGaussianOpacityFunctionObserverId;
   unsigned long TwoDTransferFunctionObserverId;
 
 private:

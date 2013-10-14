@@ -27,19 +27,24 @@
 
 vtkStandardNewMacro(vtkDiscretizableColorTransferFunctionCollection);
 vtkCxxSetObjectMacro(vtkDiscretizableColorTransferFunctionCollection,
-  GradientOpacityFunction, vtkPiecewiseFunction);
+  GradientLinearOpacityFunction, vtkPiecewiseFunction);
 vtkCxxSetObjectMacro(vtkDiscretizableColorTransferFunctionCollection,
-  GaussianOpacityFunction, vtkGaussianPiecewiseFunction);
+  GradientGaussianOpacityFunction, vtkGaussianPiecewiseFunction);
 vtkCxxSetObjectMacro(vtkDiscretizableColorTransferFunctionCollection,
   ScalarGaussianOpacityFunction, vtkGaussianPiecewiseFunction);
 //-----------------------------------------------------------------------------
 vtkDiscretizableColorTransferFunctionCollection::vtkDiscretizableColorTransferFunctionCollection()
 {
 
-  this->GradientOpacityFunction = 0;
+  this->GradientLinearOpacityFunction = 0;
   this->ScalarGaussianOpacityFunction = 0;
-  this->GaussianOpacityFunction = 0;
+  this->GradientGaussianOpacityFunction = 0;
   this->TwoDTransferFunction = 0;
+  this->GradientLinearOpacityFunctionObserverId = 0;
+  this->ScalarGaussianOpacityFunctionObserverId = 0;
+  this->TwoDTransferFunctionObserverId = 0;
+  this->GradientLinearOpacityFunctionObserverId = 0;
+  this->GradientGaussianOpacityFunctionObserverId = 0;
 
 }
 //-----------------------------------------------------------------------------
@@ -47,13 +52,14 @@ vtkDiscretizableColorTransferFunctionCollection::~vtkDiscretizableColorTransferF
 {
   // this removes any observer we may have setup for the
   // ScalarOpacityFunction.
-  this->SetGradientOpacityFunction(NULL);
-  this->SetGaussianOpacityFunction(NULL);
+  this->SetGradientLinearOpacityFunction(NULL);
+  this->SetScalarGaussianOpacityFunction(NULL);
+  this->SetGradientGaussianOpacityFunction(NULL);
 }
 //-----------------------------------------------------------------------------
-vtkPiecewiseFunction* vtkDiscretizableColorTransferFunctionCollection::GetGradientOpacityFunction() const
+vtkPiecewiseFunction* vtkDiscretizableColorTransferFunctionCollection::GetGradientLinearOpacityFunction() const
 {
-  return this->GradientOpacityFunction;
+  return this->GradientLinearOpacityFunction;
 }
 //-----------------------------------------------------------------------------
 
@@ -65,9 +71,9 @@ vtkGaussianPiecewiseFunction* vtkDiscretizableColorTransferFunctionCollection::G
 
 
 
-vtkGaussianPiecewiseFunction* vtkDiscretizableColorTransferFunctionCollection::GetGaussianOpacityFunction() const
+vtkGaussianPiecewiseFunction* vtkDiscretizableColorTransferFunctionCollection::GetGradientGaussianOpacityFunction() const
 {
-  return this->GaussianOpacityFunction;
+  return this->GradientGaussianOpacityFunction;
 }
 //-----------------------------------------------------------------------------
 void vtkDiscretizableColorTransferFunctionCollection::PrintSelf(ostream& os, vtkIndent indent)
