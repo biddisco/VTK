@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    vtkGaussianPiecewiseFunction.h
+ Program:   Visualization Toolkit
+ Module:    vtkGaussianPiecewiseFunction.h
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+ Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+ All rights reserved.
+ See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 
 // .NAME vtkGaussianPiecewiseFunction - Defines a 1D piecewise function.
 //
@@ -30,7 +30,6 @@
 // adding points  (which do not have Sharpness and Midpoint parameters)
 // will default to Midpoint = 0.5 (halfway between the control points) and
 // Sharpness = 0.0 (linear).
-
 #ifndef __vtkGaussianPiecewiseFunction_h
 #define __vtkGaussianPiecewiseFunction_h
 
@@ -39,27 +38,27 @@
 
 class vtkGaussianPiecewiseFunctionInternals;
 
-
-
-
-
-class VTKCOMMONDATAMODEL_EXPORT vtkGaussianPiecewiseFunction : public vtkAbstractPiecewiseFunction
-{
+class VTKCOMMONDATAMODEL_EXPORT vtkGaussianPiecewiseFunction: public vtkAbstractPiecewiseFunction
+  {
 public:
-  static vtkGaussianPiecewiseFunction *New();
-  vtkTypeMacro(vtkGaussianPiecewiseFunction,vtkAbstractPiecewiseFunction);
+  static vtkGaussianPiecewiseFunction *New();vtkTypeMacro(vtkGaussianPiecewiseFunction,vtkAbstractPiecewiseFunction)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  void DeepCopy( vtkDataObject *f );
-  void ShallowCopy( vtkDataObject *f );
+  void DeepCopy(vtkDataObject *f);
+  void ShallowCopy(vtkDataObject *f);
 
   // Description:
   // Return what type of dataset this is.
-  int GetDataObjectType() {return VTK_PIECEWISE_FUNCTION;};
+  int GetDataObjectType()
+	{
+	return VTK_PIECEWISE_FUNCTION;
+	}
+  ;
 
   // Description:
   // Get the number of points used to specify the function
-  int  GetSize();
+  int GetSize();
 
   void SetRange(double min, double max);
 
@@ -68,8 +67,8 @@ public:
   // then the function value is changed at that location.
   // Return the index of the point (0 based), or -1 on error.
   //int AddPoint( double x, double y );
-  int AddGaussian( double x_,double h_,double w_,double bx_,double by_);
-  int RemoveGaussian( double x );
+  int AddGaussian(double x_, double h_, double w_, double bx_, double by_);
+  int RemoveGaussian(double x);
   void RemoveGaussianAtIndex(int index);
 
   // Description:
@@ -79,28 +78,24 @@ public:
 
   bool UpdateRange(bool toNodes, double range[2]);
 
-
   bool blankGaussian; //in case you want the table to always be one.
 
   // Description:
   // Returns the value of the function at the specified location using
   // the specified interpolation.
-  double GetValue( double x );
-
+  double GetValue(double x);
 
   double getX(int index);
-   double getH(int index);
-   double getW(int index);
-   double getBx(int index);
-   double getBy(int index);
+  double getH(int index);
+  double getW(int index);
+  double getBx(int index);
+  double getBy(int index);
 
   void setX(int index, double _x);
   void setH(int index, double _h);
   void setW(int index, double _w);
   void setBx(int index, double _bx);
   void setBy(int index, double _by);
-
-
 
   // Description:
   // Returns a pointer to the data stored in the table.
@@ -113,7 +108,8 @@ public:
 
   // Description:
   // Returns the min and max node locations of the function.
-  vtkGetVector2Macro( Range, double );
+  vtkGetVector2Macro( Range, double )
+  ;
   double GetRangeAtIndex(int index);
 
   // Description:
@@ -125,25 +121,25 @@ public:
   // Description:
   // Fills in an array of function values evaluated at regular intervals.
   // Parameter "stride" is used to step through the output "table".
-  virtual void GetTable( double x1, double x2, int size, float *table, int stride=1 );
-  virtual void GetTable( double x1, double x2, int size, double *table, int stride=1 );
-
-
+  virtual void GetTable(double x1, double x2, int size, float *table,
+	  int stride = 1);
+  virtual void GetTable(double x1, double x2, int size, double *table,
+	  int stride = 1);
 
   // Description:
-   // For the node specified by index, set/get the
-   // location (X), value (Y), midpoint, and sharpness
-   // values at the node.
-   int GetNodeValue( int index, double val[4] );
-   int SetNodeValue( int index, double val[4] );
+  // For the node specified by index, set/get the
+  // location (X), value (Y), midpoint, and sharpness
+  // values at the node.
+  int GetNodeValue(int index, double val[4]);
+  int SetNodeValue(int index, double val[4]);
 
   // Description:
   // Constructs a piecewise function from a table.  Function range is
   // is set to [x1, x2], function size is set to size, and function points
   // are regularly spaced between x1 and x2.  Parameter "stride" is
   // is step through the input table.
-  void BuildFunctionFromTable( double x1, double x2, int size,
-                               double *table, int stride=1 );
+  void BuildFunctionFromTable(double x1, double x2, int size, double *table,
+	  int stride = 1);
 
   // Description:
   // When zero range clamping is Off, GetValue() returns 0.0 when a
@@ -152,9 +148,10 @@ public:
   // the value at the lowest point for a request below all points
   // specified and returns the value at the highest point for a request
   // above all points specified. On is the default.
-  vtkSetMacro( Clamping, int );
-  vtkGetMacro( Clamping, int );
-  vtkBooleanMacro( Clamping, int );
+  vtkSetMacro( Clamping, int )
+  ;vtkGetMacro( Clamping, int )
+  ;vtkBooleanMacro( Clamping, int )
+  ;
 
   // Description:
   // Return the type of function:
@@ -163,7 +160,7 @@ public:
   //    1 : NonDecreasing   (Always increasing or zero slope)
   //    2 : NonIncreasing   (Always decreasing or zero slope)
   //    3 : Varied          (Contains both decreasing and increasing slopes)
-  const char  *GetType();
+  const char *GetType();
 
   // Description:
   // Returns the first point location which precedes a non-zero segment of the
@@ -180,15 +177,17 @@ public:
   // Description:
   // Retrieve an instance of this class from an information object.
   static vtkGaussianPiecewiseFunction* GetData(vtkInformation* info);
-  static vtkGaussianPiecewiseFunction* GetData(vtkInformationVector* v, int i=0);
+  static vtkGaussianPiecewiseFunction* GetData(vtkInformationVector* v, int i =
+	  0);
   //ETX
 
   // Description:
   // Toggle whether to allow duplicate scalar values in the piecewise
   // function (off by default).
-  vtkSetMacro(AllowMultipleGaussiansSamePoint, int);
-  vtkGetMacro(AllowMultipleGaussiansSamePoint, int);
-  vtkBooleanMacro(AllowMultipleGaussiansSamePoint, int);
+  vtkSetMacro(AllowMultipleGaussiansSamePoint, int)
+  ;vtkGetMacro(AllowMultipleGaussiansSamePoint, int)
+  ;vtkBooleanMacro(AllowMultipleGaussiansSamePoint, int)
+  ;
 
 protected:
   vtkGaussianPiecewiseFunction();
@@ -201,7 +200,7 @@ protected:
   // Zero = always return 0.0 outside of defined points
   // One  = clamp to the lowest value below defined points and
   //        highest value above defined points
-  int   Clamping;
+  int Clamping;
 
   // Array of points (x,h,w,bx,by) groups
   double *Function;
@@ -220,15 +219,12 @@ protected:
   void shiftNodes(double shift);
   void scaleAndShift(double oldRange[2], double newRange[2]);
 
-
   int AllowMultipleGaussiansSamePoint;
 
-
 private:
-  vtkGaussianPiecewiseFunction(const vtkGaussianPiecewiseFunction&);  // Not implemented.
+  vtkGaussianPiecewiseFunction(const vtkGaussianPiecewiseFunction&); // Not implemented.
   void operator=(const vtkGaussianPiecewiseFunction&);  // Not implemented.
-};
+  };
 
 #endif
-
 
