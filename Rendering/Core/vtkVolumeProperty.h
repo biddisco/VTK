@@ -62,6 +62,10 @@ public:
   // with this object).
   unsigned long GetMTime();
 
+  inline bool gradientOpacityDisabled(int index){
+  	return DisableGradientGaussianOpacity[index] && DisableGradientLinearOpacity[index];
+    }
+
   // Description:
   // Does the data have independent components, or do some define color
   // only? If IndependentComponents is On (the default) then each component
@@ -261,6 +265,9 @@ public:
 	{
 	this->SetGradientGaussianOpacity(0, function);
 	}
+
+  vtkGetMacro(useGradientGaussian,bool);
+  vtkGetMacro(useScalarGaussian,bool);
 
   void SwitchGradientOpacity(bool useGauss)
 	{
@@ -625,6 +632,8 @@ protected:
   vtkTimeStamp GradientGaussianOpacityMTime[VTK_MAX_VRCOMP];
   vtkGaussianPiecewiseFunction *DefaultGradientGaussianOpacity[VTK_MAX_VRCOMP];
   int DisableGradientGaussianOpacity[VTK_MAX_VRCOMP];
+
+
 
   vtkGaussianPiecewiseFunction *ScalarGaussianOpacity[VTK_MAX_VRCOMP];
   vtkTimeStamp ScalarGaussianOpacityMTime[VTK_MAX_VRCOMP];

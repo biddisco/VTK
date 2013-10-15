@@ -60,6 +60,9 @@ vtkVolumeProperty::vtkVolumeProperty()
 	this->Specular[i] = 0.2;
 	this->SpecularPower[i] = 10.0;
 	}
+
+  this->useGradientGaussian = false;
+  this->useScalarGaussian = false;
   }
 
 // Destruct a vtkVolumeProperty

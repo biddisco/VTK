@@ -88,7 +88,28 @@ void vtkDiscretizableColorTransferFunctionCollection::SetTwoDTransferFunction(vt
 vtkTwoDTransferFunction* vtkDiscretizableColorTransferFunctionCollection::GetTwoDTransferFunction() const{
 	return this->TwoDTransferFunction;
 }
+/*
+//-----------------------------------------------------------------------------
+void vtkDiscretizableColorTransferFunction::SetUseLogScale(int useLogScale)
+{
+  if(this->UseLogScale != useLogScale)
+    {
+    this->UseLogScale = useLogScale;
+    if(this->UseLogScale)
+      {
+      this->LookupTable->SetScaleToLog10();
+      this->SetScaleToLog10();
+      }
+    else
+      {
+      this->LookupTable->SetScaleToLinear();
+      this->SetScaleToLinear();
+      }
 
+    this->Modified();
+    }
+}
+*/
 
 
 
