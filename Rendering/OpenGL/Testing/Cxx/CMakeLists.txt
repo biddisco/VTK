@@ -48,6 +48,7 @@ vtk_add_test_cxx(
   TestLightActor.cxx
   TestLODActor.cxx,NO_VALID
   TestManyActors.cxx,NO_VALID
+  TestMonitors.cxx,NO_VALID
   TestOffAxisStereo.cxx
   TestOrderedTriangulator.cxx
   TestOpacity.cxx
@@ -112,7 +113,7 @@ if(VTK_USE_DISPLAY)
     )
 endif()
 
-set(VTK_USE_GLSL_SHADERS TRUE)
+set(VTK_USE_GLSL_SHADERS FALSE)
 if(VTK_USE_GLSL_SHADERS)
   # Tests testing GLSL Shaders.
   vtk_add_test_cxx(
@@ -159,6 +160,7 @@ foreach(exe
     vtkInteractionStyle
     vtkImagingSources
     vtkImagingGeneral
+    vtkFiltersSources
     vtkIOCore
     ${OPENGL_gl_LIBRARY})
   if(APPLE)

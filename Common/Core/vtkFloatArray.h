@@ -31,9 +31,13 @@
 #include "vtkDataArrayTemplate.h" // Real Superclass
 
 // Fake the superclass for the wrappers.
+#ifndef __WRAP__
 #define vtkDataArray vtkDataArrayTemplate<float>
+#endif
 class VTKCOMMONCORE_EXPORT vtkFloatArray : public vtkDataArray
+#ifndef __WRAP__
 #undef vtkDataArray
+#endif
 {
 public:
   static vtkFloatArray* New();
@@ -148,7 +152,7 @@ public:
     { this->RealSuperclass::SetArray(array, size, save, deleteMethod); }
 
 protected:
-  vtkFloatArray(vtkIdType numComp=1);
+  vtkFloatArray();
   ~vtkFloatArray();
 
 private:

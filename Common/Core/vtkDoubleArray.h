@@ -31,9 +31,13 @@
 #include "vtkDataArrayTemplate.h" // Real Superclass
 
 // Fake the superclass for the wrappers.
+#ifndef __WRAP__
 #define vtkDataArray vtkDataArrayTemplate<double>
+#endif
 class VTKCOMMONCORE_EXPORT vtkDoubleArray : public vtkDataArray
+#ifndef __WRAP__
 #undef vtkDataArray
+#endif
 {
 public:
   static vtkDoubleArray* New();
@@ -148,7 +152,7 @@ public:
     { this->RealSuperclass::SetArray(array, size, save, deleteMethod); }
 
 protected:
-  vtkDoubleArray(vtkIdType numComp=1);
+  vtkDoubleArray();
   ~vtkDoubleArray();
 
 private:

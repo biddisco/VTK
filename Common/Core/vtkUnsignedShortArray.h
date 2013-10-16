@@ -31,9 +31,13 @@
 #include "vtkDataArrayTemplate.h" // Real Superclass
 
 // Fake the superclass for the wrappers.
+#ifndef __WRAP__
 #define vtkDataArray vtkDataArrayTemplate<unsigned short>
+#endif
 class VTKCOMMONCORE_EXPORT vtkUnsignedShortArray : public vtkDataArray
+#ifndef __WRAP__
 #undef vtkDataArray
+#endif
 {
 public:
   static vtkUnsignedShortArray* New();
@@ -148,7 +152,7 @@ public:
     { this->RealSuperclass::SetArray(array, size, save, deleteMethod); }
 
 protected:
-  vtkUnsignedShortArray(vtkIdType numComp=1);
+  vtkUnsignedShortArray();
   ~vtkUnsignedShortArray();
 
 private:
