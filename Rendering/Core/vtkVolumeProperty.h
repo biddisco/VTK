@@ -167,17 +167,23 @@ public:
 	this->SetScalarOpacity(0, function);
 	}
 
+
+  // Description:
+  // returns the scalar opacity functions that is currently in use. Can be either the gaussian or linear one.
+  vtkAbstractPiecewiseFunction* GetCurrentScalarOpacity(int index);
   // Description:
   // Get the scalar opacity transfer function for the given component.
   // If no transfer function has been set for this component, a default one
   // is created and returned.
-  vtkAbstractPiecewiseFunction* GetCurrentScalarOpacity(int index);
   vtkPiecewiseFunction *GetScalarOpacity(int index);
   vtkPiecewiseFunction *GetScalarOpacity()
 	{
 	return this->GetScalarOpacity(0);
 	}
 
+  // Description:
+    // Set the opacity of a volume to an opacity transfer function based
+    // on scalar value for the component indicated by index. Function consists of gaussians.
   void SetScalarGaussianOpacity(int index,
 	  vtkGaussianPiecewiseFunction *function);
   void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction *function)
@@ -185,12 +191,20 @@ public:
 	this->SetScalarGaussianOpacity(0, function);
 	}
 
+  // Description:
+    // Get the scalar gaussian opacity transfer function for the given component.
+    // If no transfer function has been set for this component, a default one
+    // is created and returned.
   vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity(int index);
   vtkGaussianPiecewiseFunction *GetScalarGaussianOpacity()
 	{
 	return this->GetScalarGaussianOpacity(0);
 	}
 
+  // Description:
+      // Get the scalar gaussian opacity transfer function for the given component.
+      // If no transfer function has been set for this component, a default one
+      // is created and returned.
   vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity(int index);
   vtkGaussianPiecewiseFunction *GetStoredScalarGaussianOpacity()
 	{
@@ -257,8 +271,7 @@ public:
   	}
 
   // Description:
-  //gaussian based
-  // Set the opacity of a volume to an opacity transfer function based
+  // Set the opacity of a volume to a gaussian opacity transfer function based
   // on gradient magnitude for the given component.
   void SetGradientGaussianOpacity(int index, vtkGaussianPiecewiseFunction *function);
   void SetGradientGaussianOpacity(vtkGaussianPiecewiseFunction *function)
