@@ -59,16 +59,7 @@ public:
   vtkTypeMacro(vtkDiscretizableColorTransferFunctionCollection, vtkDiscretizableColorTransferFunction);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Description:
-    // Get/Set if log scale must be used while mapping scalars
-    // to colors. The default is 0.
- //   virtual void SetUseLogScale(int useLogScale);
-    vtkGetMacro(UseLogScale, int);
-    // Description:
-      // This should return 1 is the subclass is using log scale for mapping scalars
-      // to colors.
-      virtual int UsingLogScale()
-        { return this->UseLogScale; }
+
 
   // Description:
   // Set/get the opacity function to use.
@@ -93,7 +84,6 @@ vtkSmartPointer<vtkTwoDTransferFunction> TwoDTransferFunction;
   unsigned long GradientLinearOpacityFunctionObserverId; //these three I don't think are being used.
   unsigned long GradientGaussianOpacityFunctionObserverId;
   unsigned long TwoDTransferFunctionObserverId;
-  int UseLogScale;
 
 private:
   vtkDiscretizableColorTransferFunctionCollection(const vtkDiscretizableColorTransferFunctionCollection&); // Not implemented.
