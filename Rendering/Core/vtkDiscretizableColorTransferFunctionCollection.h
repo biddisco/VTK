@@ -72,6 +72,8 @@ public:
   virtual void SetTwoDTransferFunction(vtkTwoDTransferFunction *function);
     virtual vtkTwoDTransferFunction* GetTwoDTransferFunction() const;
 
+    bool everythingInitialized;
+
 protected:
   vtkDiscretizableColorTransferFunctionCollection();
   ~vtkDiscretizableColorTransferFunctionCollection();

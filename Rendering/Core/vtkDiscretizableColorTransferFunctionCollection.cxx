@@ -46,6 +46,7 @@ vtkDiscretizableColorTransferFunctionCollection::vtkDiscretizableColorTransferFu
   this->GradientLinearOpacityFunctionObserverId = 0;
   this->GradientGaussianOpacityFunctionObserverId = 0;
   this->UseLogScale = false;
+  this->everythingInitialized = false;
 
 }
 //-----------------------------------------------------------------------------
