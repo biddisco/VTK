@@ -837,7 +837,34 @@ void vtkGaussianPiecewiseFunction::GetTable(double xStart, double xEnd,
 void vtkGaussianPiecewiseFunction::BuildFunctionFromTable(double xStart,
 	double xEnd, int size, double* table, int stride)
   {
-  //TBD
+  this->RemoveAllGaussians();
+
+
+  double inc = 0.0;
+    double *tptr = table;
+
+    if (size > 1)
+  	{
+  	inc = (xEnd - xStart) / static_cast<double>(size - 1);
+  	}
+
+
+    int i;
+      for (i = 0; i < size; i++)
+    	{
+    	vtkGaussianPiecewiseFunctionNode *node = new vtkGaussianPiecewiseFunctionNode;
+    	node->x = xStart + inc * i;
+    	node->h = *tptr;
+    	node->w = inc/2.0;
+    	node->bx = 0;
+    	node->by = 2;
+
+    	this->Internal->Nodes.push_back(node);
+    	tptr += stride;
+    	}
+
+      this->SortAndUpdateRange();
+
   }
 
 // Given a pointer to an array of values, build the piecewise function.
