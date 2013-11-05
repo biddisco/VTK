@@ -3002,7 +3002,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateGradients( vtkVolume *vol )
 
   for ( int c = 0; c < this->CurrentScalars->GetNumberOfComponents(); c++ )
     {
-    vtkPiecewiseFunction *f = vol->GetProperty()->GetGradientOpacity(c);
+    vtkAbstractPiecewiseFunction *f = vol->GetProperty()->GetCurrentGradientOpacity(c);
     if ( strcmp(f->GetType(), "Constant") || f->GetValue(0.0) != 1.0 )
       {
       needToUpdate = 1;
@@ -3080,6 +3080,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
   float                     scalarOpacityDistance[4];
 
   int c;
+
 
   for ( c = 0; c < ((vol->GetProperty()->GetIndependentComponents())?(components):(1)); c++ )
     {
