@@ -22,6 +22,10 @@ vtk_add_test_cxx(
   TestGPURayCastPerspectiveParallel.cxx
   TestProjectedHexahedra.cxx
   TestSmartVolumeMapper.cxx
+  TestSmartVolumeMapperScalarGaussian.cxx
+  TestSmartVolumeMapperScalarGaussianGradientLinear.cxx
+  TestSmartVolumeMapperScalarLinearGradientLinear.cxx
+  TestSmartVolumeMapperScalarGaussianGradientGaussian.cxx
   TestSmartVolumeMapperWindowLevel.cxx
   TestTM3DLightComponents.cxx
   ZsweepConcavities.cxx

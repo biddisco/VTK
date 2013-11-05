@@ -33,6 +33,7 @@ vtk_add_test_cxx(NO_DATA NO_VALID NO_OUTPUT
   otherColorTransferFunction.cxx
   otherEmptyCell.cxx
   otherFieldData.cxx
+  otherGaussianPiecewiseFunction.cxx
   otherRectilinearGrid.cxx
   otherStructuredGrid.cxx
   quadCellConsistency.cxx
