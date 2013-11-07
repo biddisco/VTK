@@ -66,31 +66,40 @@ public:
   // Add/Remove points to/from the function. If a duplicate point is added
   // then the function value is changed at that location.
   // Return the index of the point (0 based), or -1 on error.
-  //int AddPoint( double x, double y );
   int AddGaussian(double x_, double h_, double w_, double bx_, double by_);
   int RemoveGaussian(double x);
   void RemoveGaussianAtIndex(int index);
 
   // Description:
-  // Removes all points from the function.
+  // Removes all points/Gaussians from the function.
   void RemoveAllPoints();
   void RemoveAllGaussians();
 
+
+  // Description:
+  // Changes range and shifts gaussians to new range
   bool UpdateRange(bool toNodes, double range[2]);
 
-  bool blankGaussian; //in case you want the table to always be one.
+
+  // Description:
+  // in case you want the gettable function to return a table of ones.
+  bool blankGaussian;
 
   // Description:
   // Returns the value of the function at the specified location using
   // the specified interpolation.
   double GetValue(double x);
 
+  // Description:
+  // Returns specific value of a gaussian
   double getX(int index);
   double getH(int index);
   double getW(int index);
   double getBx(int index);
   double getBy(int index);
 
+  // Description:
+  // Sets specific value of a gaussian
   void setX(int index, double _x);
   void setH(int index, double _h);
   void setW(int index, double _w);
@@ -205,9 +214,12 @@ protected:
   // Array of points (x,h,w,bx,by) groups
   double *Function;
 
+  // Description:
   // Min and max range over which the gaussians can span. The range is INDEPENDENT of the gaussians
+  // However new gaussians can only be added inside the range
   double Range[2];
 
+  // Description:
   // Internal method to sort the vector and update the
   // Range whenever a node is added, edited or removed.
   // It always calls Modified().
@@ -215,10 +227,20 @@ protected:
   // Returns true if the range has been updated and Modified() has been called
   bool UpdateRange();
 
+  //Description:
+  // scale the nodes = multiply width and position by x
+  // i.e. scaling from one range to another
   void scaleNodesXAxis(double scale);
+  //Description:
+    // position (x) += shift
   void shiftNodes(double shift);
+  //Description:
+  // scale the nodes = multiply width and position by x
+  // and position (x) += shift
   void scaleAndShift(double oldRange[2], double newRange[2]);
 
+  //Description:
+  // allow more than one gaussian to have the same point
   int AllowMultipleGaussiansSamePoint;
 
 private:

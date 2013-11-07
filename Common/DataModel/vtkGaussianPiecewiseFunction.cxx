@@ -352,14 +352,7 @@ int vtkGaussianPiecewiseFunction::SetNodeValue(int index, double val[5])
   return 1;
   }
 
-// Adds a point to the function. If a duplicate point is inserted
-// then the function value at that location is set to the new value.
-// This is the legacy version that assumes midpoint = 0.5 and
-// sharpness = 0.0
-/*int vtkGaussianPiecewiseFunction::AddGaussian( double x, double y )
- {
- return this->AddGaussian( x, y, 0.5, 0.0 );
- }*/
+
 
 // Adds a point to the function and returns the array index of the point.
 int vtkGaussianPiecewiseFunction::AddGaussian(double x_, double h_, double w_,

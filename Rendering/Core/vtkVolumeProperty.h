@@ -257,25 +257,29 @@ public:
   vtkGetMacro(useGradientGaussian,bool);
   vtkGetMacro(useScalarGaussian,bool);
 
+
+  // Description:
+  // switch to gaussian (true) or linear (false);
   void SwitchGradientOpacity(bool useGauss)
 	{
 	useGradientGaussian = useGauss;
 	}
+  // Description:
+  // switch to gaussian (true) or linear (false);
   void SwitchScalarOpacity(bool useGauss)
 	{
 	useScalarGaussian = useGauss;
 	}
 
+  // Description:
+    // Set the opacity of a volume to a two dimensional transfer function for the given component.
   void SetTwoDTransferFunction(int index, vtkTwoDTransferFunction *function);
   void SetTwoDTransferFunction(vtkTwoDTransferFunction *function)
 	{
 	this->SetTwoDTransferFunction(0, function);
 	}
 
-  /*   void SwitchTwoDTransferFunction(bool useGauss){
-   useGaussian = useGauss;
-   }
-   */
+
 
   // Description:
   // Get the gradient magnitude opacity transfer function for

@@ -144,7 +144,6 @@ public:
   // Description:
   // Fills in an array of function values evaluated at regular intervals.
   // Parameter "stride" is used to step through the output "table".
-
   virtual void GetTable(double x1, double x2, double y1, double y2, int sizeX,
 	  int sizeY, float *table, int strideX, int strideY);
   virtual void GetTable(double x1, double x2, double y1, double y2, int sizeX,
