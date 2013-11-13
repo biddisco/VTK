@@ -132,7 +132,7 @@ int vtkImageGradientMagnitude::RequestUpdateExtent (
 template <class T>
 void vtkImageGradientMagnitudeExecute(vtkImageGradientMagnitude *self,
                                       vtkImageData *inData, T *inPtr,
-                                      vtkImageData *outData, T *outPtr,
+                                      vtkImageData *outData, double *outPtr,
                                       int outExt[6], int id)
 {
   int idxC, idxX, idxY, idxZ;
@@ -219,7 +219,7 @@ void vtkImageGradientMagnitudeExecute(vtkImageGradientMagnitude *self,
             d *= r[2]; // multiply by the data spacing
             sum += (d * d);
             }
-          *outPtr = static_cast<T>(sqrt(sum));
+          *outPtr = static_cast<double>(sqrt(sum));
           outPtr++;
           inPtr++;
           }
@@ -233,47 +233,67 @@ void vtkImageGradientMagnitudeExecute(vtkImageGradientMagnitude *self,
 }
 
 
+
+
+
 //----------------------------------------------------------------------------
 // This method contains a switch statement that calls the correct
-// templated function for the input data type.  The output data
-// must match input type.  This method does handle boundary conditions.
-void vtkImageGradientMagnitude::ThreadedExecute (vtkImageData *inData,
-                                                 vtkImageData *outData,
-                                                 int outExt[6], int id)
+// templated function for the input data type.  This method does handle
+// boundary conditions.
+void vtkImageGradientMagnitude::ThreadedRequestData(vtkInformation*,
+                                           vtkInformationVector** inputVector,
+                                           vtkInformationVector*,
+                                           vtkImageData*** inData,
+                                           vtkImageData** outData,
+                                           int outExt[6],
+                                           int threadId)
 {
-  void *inPtr;
-  void *outPtr = outData->GetScalarPointerForExtent(outExt);
-  inPtr = inData->GetScalarPointer();
+  // Get the input and output data objects.
+  vtkImageData* input = inData[0][0];
+  vtkImageData* output = outData[0];
 
-  // this filter expects that input is the same type as output.
-  if (inData->GetScalarType() != outData->GetScalarType())
+  // The ouptut scalar type must be double to store proper gradients.
+  if(output->GetScalarType() != VTK_DOUBLE)
     {
-    vtkErrorMacro(<< "Execute: input data type, "
-                  << inData->GetScalarType()
-                  << ", must match out ScalarType "
-                  << outData->GetScalarType());
+    vtkErrorMacro("Execute: output ScalarType is "
+                  << output->GetScalarType() << "but must be double.");
     return;
     }
 
-  switch (inData->GetScalarType())
+  vtkDataArray* inputArray = this->GetInputArrayToProcess(0, inputVector);
+  if (!inputArray)
+    {
+    vtkErrorMacro("No input array was found. Cannot execute");
+    return;
+    }
+
+  // Gradient makes sense only with one input component.  This is not
+  // a Jacobian filter.
+  if(inputArray->GetNumberOfComponents() != 1)
+    {
+    vtkErrorMacro(
+      "Execute: input has more than one component. "
+      "The input to gradient should be a single component image. "
+      "Think about it. If you insist on using a color image then "
+      "run it though RGBToHSV then ExtractComponents to get the V "
+      "components. That's probably what you want anyhow.");
+    return;
+    }
+
+  void* inPtr = inputArray->GetVoidPointer(0);
+  double* outPtr = static_cast<double *>(
+    output->GetScalarPointerForExtent(outExt));
+  switch(inputArray->GetDataType())
     {
     vtkTemplateMacro(
-      vtkImageGradientMagnitudeExecute(this,
-                                       inData, static_cast<VTK_TT *>(inPtr),
-                                       outData,
-                                       static_cast<VTK_TT *>(outPtr), outExt,
-                                       id));
+      vtkImageGradientMagnitudeExecute(this, input, static_cast<VTK_TT*>(inPtr),
+                              output, outPtr, outExt, threadId)
+      );
     default:
-      vtkErrorMacro(<< "Execute: Unknown ScalarType");
+      vtkErrorMacro("Execute: Unknown ScalarType " << input->GetScalarType());
       return;
     }
 }
-
-
-
-
-
-
 
 
 
