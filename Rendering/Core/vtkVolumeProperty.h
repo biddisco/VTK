@@ -86,6 +86,11 @@ public:
   ;vtkBooleanMacro(IndependentComponents, int)
   ;
 
+
+  vtkSetMacro(UseAdjustMapperGradientRangeFactor, bool);
+  vtkGetMacro(UseAdjustMapperGradientRangeFactor, bool);
+
+
   // Description:
   // Set the interpolation type for sampling a volume. Initial value is
   // VTK_NEAREST_INTERPOLATION.
@@ -617,6 +622,17 @@ protected:
   double ComponentWeight[VTK_MAX_VRCOMP];
 
   int InterpolationType;
+
+  //Description:
+  //This is can be used when the "gettable" function is called on the gradientfunctions in the mappers.
+  //The reason is the function gradient range can be different from the mapper gradient range (by several orders of magnitude)
+  //it has to do with the distances used for calculating the gradient. The mapper (at least raycast) cares about the
+  //ratio. The "distance" is equal to 1 between cells (affected by ratio). However the imageGradientMagnitude filter (which is why this
+  //thing actually exists), uses the the spacing to calculate the gradient. If the spacing is 100k in all dimensions, this can mean that
+  //the gradients in the raycastmapper can be 100k larger than the ones calculated by the gradient filter. If you base your gradientopacityfunction
+  //on what the filter gave you, it'll obviously end up a disaster.
+  //If you don't know what to do with this factor, leave it at 1 (the way it is initialized).
+  bool UseAdjustMapperGradientRangeFactor;;
 
   int ColorChannels[VTK_MAX_VRCOMP];
 

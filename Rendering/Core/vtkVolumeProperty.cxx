@@ -63,6 +63,8 @@ vtkVolumeProperty::vtkVolumeProperty()
 
   this->useGradientGaussian = false;
   this->useScalarGaussian = false;
+
+  UseAdjustMapperGradientRangeFactor = false;
   }
 
 // Destruct a vtkVolumeProperty

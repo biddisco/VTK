@@ -396,6 +396,8 @@ void vtkFixedPointVolumeRayCastMapperComputeGradients( T *dataPtr,
   unsigned short      *dirPtr, *cdirPtr;
   unsigned char       *magPtr, *cmagPtr;
 
+
+
   int thread_id = 0;
   int thread_count = 1;
 
@@ -561,7 +563,6 @@ void vtkFixedPointVolumeRayCastMapperComputeGradients( T *dataPtr,
             t = sqrt( (double)( n[0]*n[0] +
                                 n[1]*n[1] +
                                 n[2]*n[2] ) );
-
 
             // Encode this into an 8 bit value
             gvalue = t * scale[c];
@@ -3286,10 +3287,17 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
 
       if ( scalarRange[c][1] - scalarRange[c][0] )
         {
+    	double adjustfactor = 1.0;
+    	if(this->Volume->GetProperty()->GetUseAdjustMapperGradientRangeFactor())
+    	  {
+			vtkImageData *input = this->GetInput();
+			double spacing[3];
+			input->GetSpacing(spacing);
+			adjustfactor = (spacing[0]+spacing[1]+spacing[2])/3.0;
+    	  }
         gradientOpacityFunc[c]->GetTable( 0,
-                                          (scalarRange[c][1] - scalarRange[c][0])*0.25,
+                                          (scalarRange[c][1] - scalarRange[c][0])*0.25/adjustfactor,
                                           256, tmpArray );
-
         for ( i = 0; i < 256; i++ )
           {
           this->GradientOpacityTable[c][i] =
@@ -3370,11 +3378,19 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
 
       if ( scalarRange[components-1][1] - scalarRange[components-1][0] )
         {
+
+    	double adjustfactor = 1.0;
+		if(this->Volume->GetProperty()->GetUseAdjustMapperGradientRangeFactor())
+		  {
+			vtkImageData *input = this->GetInput();
+			double spacing[3];
+			input->GetSpacing(spacing);
+			adjustfactor = (spacing[0]+spacing[1]+spacing[2])/3.0;
+			    	  }
         gradientOpacityFunc[0]->GetTable( 0,
                                           (scalarRange[components-1][1] -
-                                           scalarRange[components-1][0])*0.25,
+                                           scalarRange[components-1][0])*0.25/adjustfactor,
                                           256, tmpArray );
-
         for ( i = 0; i < 256; i++ )
           {
           this->GradientOpacityTable[0][i] =
