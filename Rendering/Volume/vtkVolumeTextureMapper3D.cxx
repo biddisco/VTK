@@ -1360,17 +1360,21 @@ int vtkVolumeTextureMapper3D::UpdateColorLookup( vtkVolume *vol )
   scalarOpacityFunc->GetTable( scalarRange[0], scalarRange[1],
                                arraySizeNeeded, this->TempArray2 );
 
+
+  //add the stuff
   float goArray[256];
-  gradientOpacityFunc->GetTable( 0, (scalarRange[1] - scalarRange[0])*0.25,
+  if (vol->GetProperty()->GetUseAdjustMapperGradientRangeFactor()){
+	double spac[3];
+	this->GetInput()->GetSpacing(spac);
+	double adjust = (spac[0]+spac[1]+spac[2])/3.0;
+	gradientOpacityFunc->GetTable( 0, ((scalarRange[1] - scalarRange[0])*0.25)/adjust,
+	                                 256, goArray);
+  }
+  else
+	{
+	  gradientOpacityFunc->GetTable( 0, (scalarRange[1] - scalarRange[0])*0.25,
                                  256, goArray );
-
- // double gogaussArray[256];
-//  std::cout << "current scalarop size " << scalarOpacityFunc->GetSize() << std::endl;
- //         256, gogaussArray );
-
-
-
-
+	}
 
 
   // Correct the opacity array for the spacing between the planes.
