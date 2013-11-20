@@ -23,6 +23,8 @@
 #include "vtkCommand.h"
 #include "vtkGraphicsFactory.h"
 #include "vtkSphericalDirectionEncoder.h"
+#include "vtkFixedPointVolumeRayCastCompositeSCGOHelper.h"
+#include "vtkFixedPointVolumeRayCastCompositeSCGOShadeHelper.h"
 #include "vtkFixedPointVolumeRayCastCompositeGOHelper.h"
 #include "vtkFixedPointVolumeRayCastCompositeGOShadeHelper.h"
 #include "vtkFixedPointVolumeRayCastCompositeHelper.h"
@@ -34,6 +36,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkAbstractPiecewiseFunction.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkTwoDTransferFunction.h"
 #include "vtkPlaneCollection.h"
 #include "vtkPointData.h"
 #include "vtkRenderWindow.h"
@@ -660,11 +663,13 @@ vtkFixedPointVolumeRayCastMapper::vtkFixedPointVolumeRayCastMapper()
 
   this->RenderWindow           = NULL;
 
-  this->MIPHelper              = vtkFixedPointVolumeRayCastMIPHelper::New();
-  this->CompositeHelper        = vtkFixedPointVolumeRayCastCompositeHelper::New();
-  this->CompositeGOHelper      = vtkFixedPointVolumeRayCastCompositeGOHelper::New();
-  this->CompositeShadeHelper   = vtkFixedPointVolumeRayCastCompositeShadeHelper::New();
-  this->CompositeGOShadeHelper = vtkFixedPointVolumeRayCastCompositeGOShadeHelper::New();
+  this->MIPHelper                  = vtkFixedPointVolumeRayCastMIPHelper::New();
+  this->CompositeHelper            = vtkFixedPointVolumeRayCastCompositeHelper::New();
+  this->CompositeGOHelper          = vtkFixedPointVolumeRayCastCompositeGOHelper::New();
+  this->CompositeSCGOHelper        = vtkFixedPointVolumeRayCastCompositeSCGOHelper::New();
+  this->CompositeShadeHelper       = vtkFixedPointVolumeRayCastCompositeShadeHelper::New();
+  this->CompositeGOShadeHelper     = vtkFixedPointVolumeRayCastCompositeGOShadeHelper::New();
+  this->CompositeSCGOShadeHelper   = vtkFixedPointVolumeRayCastCompositeSCGOShadeHelper::New();
 
   this->IntermixIntersectingGeometry = 1;
 
@@ -700,6 +705,7 @@ vtkFixedPointVolumeRayCastMapper::vtkFixedPointVolumeRayCastMapper()
 
   this->ShadingRequired              = 0;
   this->GradientOpacityRequired      = 0;
+  this->TwoDOpacityRequired          = 1;
 
   this->CroppingRegionMask[0] = 1;
   for ( i = 1; i < 27; i++ )
@@ -781,8 +787,10 @@ vtkFixedPointVolumeRayCastMapper::~vtkFixedPointVolumeRayCastMapper()
   this->MIPHelper->Delete();
   this->CompositeHelper->Delete();
   this->CompositeGOHelper->Delete();
+  this->CompositeSCGOHelper->Delete();
   this->CompositeShadeHelper->Delete();
   this->CompositeGOShadeHelper->Delete();
+  this->CompositeSCGOShadeHelper->Delete();
 
   if ( this->RayCastImage )
     {
@@ -1585,7 +1593,11 @@ VTK_THREAD_RETURN_TYPE FixedPointVolumeRayCastMapper_CastRays( void *arg )
     {
     if ( me->GetShadingRequired() == 0 )
       {
-      if ( me->GetGradientOpacityRequired() == 0 )
+      if (me->GetTwoDOpacityRequired())
+        {
+        me->GetCompositeSCGOHelper()->GenerateImage(threadID, threadCount, vol, me);
+        }
+      else if ( me->GetGradientOpacityRequired() == 0 )
         {
         me->GetCompositeHelper()->GenerateImage( threadID, threadCount, vol, me );
         }
@@ -1596,7 +1608,11 @@ VTK_THREAD_RETURN_TYPE FixedPointVolumeRayCastMapper_CastRays( void *arg )
       }
     else
       {
-      if ( me->GetGradientOpacityRequired() == 0 )
+      if (me->GetTwoDOpacityRequired())
+        {
+        me->GetCompositeSCGOShadeHelper()->GenerateImage( threadID, threadCount, vol, me );
+        }
+      else if ( me->GetGradientOpacityRequired() == 0 )
         {
         me->GetCompositeShadeHelper()->GenerateImage( threadID, threadCount, vol, me );
         }
@@ -3077,6 +3093,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
   vtkPiecewiseFunction     *grayFunc[4];
   vtkAbstractPiecewiseFunction     *scalarOpacityFunc[4];
   vtkAbstractPiecewiseFunction     *gradientOpacityFunc[4];
+  vtkTwoDTransferFunction     *twoDTransferFunc[4];
   int                       colorChannels[4];
   float                     scalarOpacityDistance[4];
 
@@ -3099,6 +3116,7 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
     scalarOpacityFunc[c]     = vol->GetProperty()->GetCurrentScalarOpacity(c);
     gradientOpacityFunc[c]   = vol->GetProperty()->GetCurrentGradientOpacity(c);
     scalarOpacityDistance[c] = vol->GetProperty()->GetScalarOpacityUnitDistance(c);
+    twoDTransferFunc[c] = vol->GetProperty()->GetTwoDTransferFunction(c);
 
     // Has the number of color channels changed?
     if ( this->SavedColorChannels[c] != colorChannels[c] )
@@ -3144,6 +3162,12 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
 
     // Has the distance over which the scalar opacity function is defined changed?
     if ( this->SavedScalarOpacityDistance[c] != scalarOpacityDistance[c] )
+      {
+      needToUpdate = 1;
+      }
+    if ((this->SavedTwoDTransferFunction[c] != twoDTransferFunc[c] ||
+        this->SavedParametersMTime.GetMTime() < twoDTransferFunc[c]->GetMTime()) &&
+        GetTwoDOpacityRequired()) //if we aren't using the twod function, we don't need to update because of it.
       {
       needToUpdate = 1;
       }
@@ -3255,8 +3279,17 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
           static_cast<unsigned short>(tmpArray[3*i+2]*VTKKW_FP_SCALE + 0.5);
         }
 
-      scalarOpacityFunc[c]->GetTable( scalarRange[c][0], scalarRange[c][1],
-                                   this->TableSize[c], tmpArray );
+      if (this->GetTwoDOpacityRequired())
+        { //if we use the twodfunc, we need to "fake" the scalartable
+        twoDTransferFunc[c]->GetOneDScalarTable(scalarRange[c][0], scalarRange[c][1],
+            this->TableSize[c], tmpArray) ;
+        }
+      else
+        {
+        scalarOpacityFunc[c]->GetTable( scalarRange[c][0], scalarRange[c][1],
+                                           this->TableSize[c], tmpArray );
+        }
+
 
       // Correct the opacity array for the spacing between the planes if we are
       // using a composite blending operation
@@ -3287,14 +3320,14 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
 
       if ( scalarRange[c][1] - scalarRange[c][0] )
         {
-    	double adjustfactor = 1.0;
-    	if(this->Volume->GetProperty()->GetUseAdjustMapperGradientRangeFactor())
-    	  {
-			vtkImageData *input = this->GetInput();
-			double spacing[3];
-			input->GetSpacing(spacing);
-			adjustfactor = (spacing[0]+spacing[1]+spacing[2])/3.0;
-    	  }
+        double adjustfactor = 1.0;
+        if(this->Volume->GetProperty()->GetUseAdjustMapperGradientRangeFactor())
+          {
+          vtkImageData *input = this->GetInput();
+          double spacing[3];
+          input->GetSpacing(spacing);
+          adjustfactor = (spacing[0]+spacing[1]+spacing[2])/3.0;
+          }
         gradientOpacityFunc[c]->GetTable( 0,
                                           (scalarRange[c][1] - scalarRange[c][0])*0.25/adjustfactor,
                                           256, tmpArray );
@@ -3303,6 +3336,20 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
           this->GradientOpacityTable[c][i] =
             static_cast<unsigned short>(tmpArray[i]*VTKKW_FP_SCALE + 0.5);
           }
+
+        if (this->GetTwoDOpacityRequired())
+                { //get the twodopacitytable
+                  double* ttmpArray = new double[32768*256]; //some things are just too big for the stack
+                  twoDTransferFunc[0]->GetTable(scalarRange[c][0], scalarRange[c][1],
+                      0, (scalarRange[components-1][1] - scalarRange[components-1][0])*0.25/adjustfactor,
+                      32768, 256, ttmpArray);
+                  int size = 32768*256;
+                  for (int i = 0; i< size; i++)
+                    {
+                    this->TwoDOpacityTable[c][i] = static_cast<unsigned short>(ttmpArray[i]*VTKKW_FP_SCALE + 0.5);
+                    }
+                  delete [] ttmpArray;
+                }
         }
       else
         {
@@ -3349,8 +3396,16 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
       }
 
     // The opacity table is indexed with the last component
-    scalarOpacityFunc[0]->GetTable( scalarRange[components-1][0], scalarRange[components-1][1],
-                                    this->TableSize[components-1], tmpArray );
+    if (this->GetTwoDOpacityRequired())
+      { //if we use the twodfunc, we need to "fake" the scalartable
+   //   twoDTransferFunc[c]->GetOneDScalarTable(scalarRange[components-1][0], scalarRange[components-1][1],
+    //      this->TableSize[components-1], tmpArray ) ;
+      }
+    else
+      {
+      scalarOpacityFunc[0]->GetTable( scalarRange[components-1][0], scalarRange[components-1][1],
+                                          this->TableSize[components-1], tmpArray );
+      }
 
     // Correct the opacity array for the spacing between the planes if we are
     // using a composite blending operation
@@ -3386,17 +3441,39 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
 			double spacing[3];
 			input->GetSpacing(spacing);
 			adjustfactor = (spacing[0]+spacing[1]+spacing[2])/3.0;
-			    	  }
-        gradientOpacityFunc[0]->GetTable( 0,
-                                          (scalarRange[components-1][1] -
-                                           scalarRange[components-1][0])*0.25/adjustfactor,
-                                          256, tmpArray );
-        for ( i = 0; i < 256; i++ )
-          {
-          this->GradientOpacityTable[0][i] =
-            static_cast<unsigned short>(tmpArray[i]*VTKKW_FP_SCALE + 0.5);
-          }
+      }
+		if (this->GetTwoDOpacityRequired())
+		  { //need to fake gradient table
+		  twoDTransferFunc[0]->GetOneDGradientTable( 0, (scalarRange[components-1][1] -
+		                                             scalarRange[components-1][0])*0.25/adjustfactor,
+		                                            256, tmpArray );
+		  }
+		else
+		  {
+		  gradientOpacityFunc[0]->GetTable( 0, (scalarRange[components-1][1] -
+		                                             scalarRange[components-1][0])*0.25/adjustfactor,
+		                                            256, tmpArray );
+		  }
+
+      for ( i = 0; i < 256; i++ )
+        {
+        this->GradientOpacityTable[0][i] =
+          static_cast<unsigned short>(tmpArray[i]*VTKKW_FP_SCALE + 0.5);
         }
+      if (this->GetTwoDOpacityRequired())
+                { //get the twodopacitytable
+                  double* ttmpArray = new double[32768*256]; //some things are just too big for the stack
+                  twoDTransferFunc[0]->GetTable(scalarRange[c][0], scalarRange[c][1],
+                      0, (scalarRange[components-1][1] - scalarRange[components-1][0])*0.25/adjustfactor,
+                      32768, 256, ttmpArray);
+                  int size = 32768*256;
+                  for (int i = 0; i< size; i++)
+                    {
+                    this->TwoDOpacityTable[c][i] = static_cast<unsigned short>(ttmpArray[i]*VTKKW_FP_SCALE + 0.5);
+                    }
+                  delete [] ttmpArray;
+                }
+      }
       else
         {
         for ( i = 0; i < 256; i++ )

@@ -6,6 +6,8 @@ set(Module_SRCS
   vtkFixedPointRayCastImage.cxx
   vtkFixedPointVolumeRayCastCompositeGOHelper.cxx
   vtkFixedPointVolumeRayCastCompositeGOShadeHelper.cxx
+  vtkFixedPointVolumeRayCastCompositeSCGOHelper.cxx
+  vtkFixedPointVolumeRayCastCompositeSCGOShadeHelper.cxx
   vtkFixedPointVolumeRayCastCompositeHelper.cxx
   vtkFixedPointVolumeRayCastCompositeShadeHelper.cxx
   vtkFixedPointVolumeRayCastHelper.cxx

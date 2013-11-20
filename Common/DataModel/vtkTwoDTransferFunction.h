@@ -145,9 +145,23 @@ public:
   // Fills in an array of function values evaluated at regular intervals.
   // Parameter "stride" is used to step through the output "table".
   virtual void GetTable(double x1, double x2, double y1, double y2, int sizeX,
-	  int sizeY, float *table, int strideX, int strideY);
+	  int sizeY, float *table, int strideX = 1, int strideY = 1);
   virtual void GetTable(double x1, double x2, double y1, double y2, int sizeX,
-	  int sizeY, double *table, int strideX, int strideY);
+	  int sizeY, double *table, int strideX = 1, int strideY = 1);
+
+
+  // Description:
+    // Fills in an array of function values evaluated at regular intervals.
+    // Parameter "stride" is used to step through the output "table".
+    // The tables are calculated as if the function were one dimensional
+    virtual void GetOneDScalarTable(double x1, double x2, int sizeX,
+       float *table, int strideX = 1);
+    virtual void GetOneDScalarTable(double x1, double x2, int sizeX,
+      double *table, int strideX = 1);
+    virtual void GetOneDGradientTable(double x1, double x2, int sizeX,
+        float *table, int strideX = 1);
+    virtual void GetOneDGradientTable(double x1, double x2, int sizeX,
+        double *table, int strideX = 1);
 
   // Description:
   // Constructs a piecewise function from a table.  Function range is

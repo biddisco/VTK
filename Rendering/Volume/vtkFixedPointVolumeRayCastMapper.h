@@ -77,10 +77,13 @@ class vtkRenderWindow;
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;
 class vtkAbstractPiecewiseFunction;
+class vtkTwoDTransferFunction;
 class vtkFixedPointVolumeRayCastMIPHelper;
 class vtkFixedPointVolumeRayCastCompositeHelper;
 class vtkFixedPointVolumeRayCastCompositeGOHelper;
+class vtkFixedPointVolumeRayCastCompositeSCGOHelper;
 class vtkFixedPointVolumeRayCastCompositeGOShadeHelper;
+class vtkFixedPointVolumeRayCastCompositeSCGOShadeHelper;
 class vtkFixedPointVolumeRayCastCompositeShadeHelper;
 class vtkVolumeRayCastSpaceLeapingImageFilter;
 class vtkDirectionEncoder;
@@ -230,12 +233,16 @@ public:
   vtkGetObjectMacro( MIPHelper, vtkFixedPointVolumeRayCastMIPHelper );
   vtkGetObjectMacro( CompositeHelper, vtkFixedPointVolumeRayCastCompositeHelper );
   vtkGetObjectMacro( CompositeGOHelper, vtkFixedPointVolumeRayCastCompositeGOHelper );
+  vtkGetObjectMacro( CompositeSCGOHelper, vtkFixedPointVolumeRayCastCompositeSCGOHelper );
   vtkGetObjectMacro( CompositeGOShadeHelper, vtkFixedPointVolumeRayCastCompositeGOShadeHelper );
+  vtkGetObjectMacro( CompositeSCGOShadeHelper, vtkFixedPointVolumeRayCastCompositeSCGOShadeHelper );
   vtkGetObjectMacro( CompositeShadeHelper, vtkFixedPointVolumeRayCastCompositeShadeHelper );
   vtkGetVectorMacro( TableShift, float, 4 );
   vtkGetVectorMacro( TableScale, float, 4 );
   vtkGetMacro( ShadingRequired, int );
   vtkGetMacro( GradientOpacityRequired, int );
+  vtkGetMacro( TwoDOpacityRequired, int );
+
 
   vtkGetObjectMacro( CurrentScalars, vtkDataArray );
   vtkGetObjectMacro( PreviousScalars, vtkDataArray );
@@ -245,6 +252,7 @@ public:
   unsigned short  *GetColorTable(int c)           {return this->ColorTable[c];}
   unsigned short  *GetScalarOpacityTable(int c)   {return this->ScalarOpacityTable[c];}
   unsigned short  *GetGradientOpacityTable(int c) {return this->GradientOpacityTable[c];}
+  unsigned short  *GetTwoDOpacityTable(int c)     {return this->TwoDOpacityTable[c];}
   vtkVolume       *GetVolume()                    {return this->Volume;}
   unsigned short **GetGradientNormal()            {return this->GradientNormal;}
   unsigned char  **GetGradientMagnitude()         {return this->GradientMagnitude;}
@@ -394,6 +402,7 @@ protected:
   vtkPiecewiseFunction     *SavedGrayFunction[4];
   vtkAbstractPiecewiseFunction     *SavedScalarOpacityFunction[4];
   vtkAbstractPiecewiseFunction     *SavedGradientOpacityFunction[4];
+  vtkTwoDTransferFunction          *SavedTwoDTransferFunction[4];
   int                       SavedColorChannels[4];
   float                     SavedScalarOpacityDistance[4];
   int                       SavedBlendMode;
@@ -409,6 +418,7 @@ protected:
   unsigned short            ColorTable[4][32768*3];
   unsigned short            ScalarOpacityTable[4][32768];
   unsigned short            GradientOpacityTable[4][256];
+  unsigned short            TwoDOpacityTable[4][32768*256];
   int                       TableSize[4];
   float                     TableScale[4];
   float                     TableShift[4];
@@ -434,6 +444,7 @@ protected:
 
   int                        ShadingRequired;
   int                        GradientOpacityRequired;
+  int                        TwoDOpacityRequired;
 
   vtkDataArray              *CurrentScalars;
   vtkDataArray              *PreviousScalars;
@@ -470,8 +481,10 @@ protected:
   vtkFixedPointVolumeRayCastMIPHelper              *MIPHelper;
   vtkFixedPointVolumeRayCastCompositeHelper        *CompositeHelper;
   vtkFixedPointVolumeRayCastCompositeGOHelper      *CompositeGOHelper;
+  vtkFixedPointVolumeRayCastCompositeSCGOHelper    *CompositeSCGOHelper;
   vtkFixedPointVolumeRayCastCompositeShadeHelper   *CompositeShadeHelper;
   vtkFixedPointVolumeRayCastCompositeGOShadeHelper *CompositeGOShadeHelper;
+  vtkFixedPointVolumeRayCastCompositeSCGOShadeHelper *CompositeSCGOShadeHelper;
 
   // Some variables used for ray computation
   float ViewToVoxelsArray[16];

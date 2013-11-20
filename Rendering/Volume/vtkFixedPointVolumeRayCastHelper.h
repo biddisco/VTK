@@ -405,6 +405,17 @@
   COLOR[2] = static_cast<unsigned short>                                                \
     ((CTABLE[3*IDX+2]*COLOR[3] + 0x7fff)>>(VTKKW_FP_SHIFT));
 //ETX
+//BTX
+#define VTKKWRCHelper_LookupColorSCGOUS( CTABLE, OTABLE, IDX, IDX2, COLOR )             \
+  COLOR[3] = OTABLE[IDX*256 + IDX2];                                                  \
+  if ( !COLOR[3] ) {continue;}                                                          \
+  COLOR[0] = static_cast<unsigned short>                                                \
+    ((CTABLE[3*IDX  ]*COLOR[3] + 0x7fff)>>(VTKKW_FP_SHIFT));                            \
+  COLOR[1] = static_cast<unsigned short>                                                \
+    ((CTABLE[3*IDX+1]*COLOR[3] + 0x7fff)>>(VTKKW_FP_SHIFT));                            \
+  COLOR[2] = static_cast<unsigned short>                                                \
+    ((CTABLE[3*IDX+2]*COLOR[3] + 0x7fff)>>(VTKKW_FP_SHIFT));
+//ETX
 
 //BTX
 #define VTKKWRCHelper_LookupShading( DTABLE, STABLE, NORMAL, COLOR )                            \
@@ -505,6 +516,43 @@
   COLOR[2] = (_tmp[2]>32767)?(32767):(_tmp[2]);                                                                                 \
   COLOR[3] = (_tmp[3]>32767)?(32767):(_tmp[3]);
 //ETX
+
+//BTX
+#define VTKKWRCHelper_LookupAndCombineIndependentColorsSCGOUS( COLORTABLE, OTABLE,                                               \
+                                                           SCALAR, MAG, WEIGHTS,                                                \
+                                                           COMPONENTS, COLOR )                                                  \
+  unsigned int _tmp[4] = {0,0,0,0};                                                                                             \
+  unsigned short _alpha[4] = {0,0,0,0};                                                                                         \
+  unsigned int _totalAlpha = 0;                                                                                                 \
+                                                                                                                                \
+  {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
+    {                                                                                                                           \
+    _alpha[_idx] =  static_cast<unsigned short>(OTABLE[_idx][SCALAR[_idx]*256+MAG[_idx]]*WEIGHTS[_idx]);                                     \
+    if ( _alpha[_idx] )                                                                                                         \
+      {                                                                                                                         \
+      _totalAlpha += _alpha[_idx];                                                                                              \
+      }                                                                                                                         \
+    }}                                                                                                                          \
+                                                                                                                                \
+  if ( !_totalAlpha ) {continue;}                                                                                               \
+  {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
+    {                                                                                                                           \
+    if ( _alpha[_idx] )                                                                                                         \
+      {                                                                                                                         \
+      _tmp[0] += static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]  ])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmp[1] += static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+1])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmp[2] += static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+2])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmp[3] += ((_alpha[_idx]*_alpha[_idx])/_totalAlpha);                                                                     \
+      }                                                                                                                         \
+    }}                                                                                                                          \
+  if ( !_tmp[3] ) {continue;};                                                                                                  \
+  COLOR[0] = (_tmp[0]>32767)?(32767):(_tmp[0]);                                                                                 \
+  COLOR[1] = (_tmp[1]>32767)?(32767):(_tmp[1]);                                                                                 \
+  COLOR[2] = (_tmp[2]>32767)?(32767):(_tmp[2]);                                                                                 \
+  COLOR[3] = (_tmp[3]>32767)?(32767):(_tmp[3]);
+//ETX
+
+
 
 //BTX
 #define VTKKWRCHelper_LookupAndCombineIndependentColorsShadeUS( COLORTABLE, SOTABLE,                                            \
@@ -642,6 +690,95 @@
       _tmp[3] += ((_alpha[_idx]*_alpha[_idx])/_totalAlpha);                                                                     \
       }                                                                                                                         \
     }}                                                                                                                          \
+  if ( !_tmp[3] ) {continue;}                                                                                                   \
+  COLOR[0] = (_tmp[0]>32767)?(32767):(_tmp[0]);                                                                                 \
+  COLOR[1] = (_tmp[1]>32767)?(32767):(_tmp[1]);                                                                                 \
+  COLOR[2] = (_tmp[2]>32767)?(32767):(_tmp[2]);                                                                                 \
+  COLOR[3] = (_tmp[3]>32767)?(32767):(_tmp[3]);
+//ETX
+
+//BTX
+#define VTKKWRCHelper_LookupAndCombineIndependentColorsSCGOShadeUS( COLORTABLE, OTABLE,                                         \
+                                                                DTABLE, STABLE,                                                 \
+                                                                SCALAR, MAG, NORMAL, WEIGHTS,                                   \
+                                                                COMPONENTS, COLOR )                                             \
+  unsigned int _tmp[4] = {0,0,0,0};                                                                                             \
+  unsigned int _tmpC[3];                                                                                                        \
+  unsigned short _alpha[4] = {0,0,0,0};                                                                                         \
+  unsigned int _totalAlpha = 0;                                                                                                 \
+                                                                                                                                \
+  {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
+    {                                                                                                                           \
+    _alpha[_idx] =  static_cast<unsigned short>(OTABLE[_idx][SCALAR[_idx]*256+MAG[_idx]]*WEIGHTS[_idx]);                        \
+    if ( _alpha[_idx] )                                                                                                         \
+      {                                                                                                                         \
+      _totalAlpha += _alpha[_idx];                                                                                              \
+      }                                                                                                                         \
+    }}                                                                                                                          \
+                                                                                                                                \
+  if ( !_totalAlpha ) {continue;}                                                                                               \
+                                                                                                                                \
+  {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
+    {                                                                                                                           \
+    if ( _alpha[_idx] )                                                                                                         \
+      {                                                                                                                         \
+      _tmpC[0] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]  ])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmpC[1] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+1])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmpC[2] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+2])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmpC[0] = static_cast<unsigned short>((DTABLE[_idx][3*NORMAL[_idx]  ]*_tmpC[0]+0x7fff)>>VTKKW_FP_SHIFT);                 \
+      _tmpC[1] = static_cast<unsigned short>((DTABLE[_idx][3*NORMAL[_idx]+1]*_tmpC[1]+0x7fff)>>VTKKW_FP_SHIFT);                 \
+      _tmpC[2] = static_cast<unsigned short>((DTABLE[_idx][3*NORMAL[_idx]+2]*_tmpC[2]+0x7fff)>>VTKKW_FP_SHIFT);                 \
+      _tmpC[0] += (STABLE[_idx][3*NORMAL[_idx]  ]*_alpha[_idx] + 0x7fff)>>VTKKW_FP_SHIFT;                                       \
+      _tmpC[1] += (STABLE[_idx][3*NORMAL[_idx]+1]*_alpha[_idx] + 0x7fff)>>VTKKW_FP_SHIFT;                                       \
+      _tmpC[2] += (STABLE[_idx][3*NORMAL[_idx]+2]*_alpha[_idx] + 0x7fff)>>VTKKW_FP_SHIFT;                                       \
+      _tmp[0] += _tmpC[0];                                                                                                      \
+      _tmp[1] += _tmpC[1];                                                                                                      \
+      _tmp[2] += _tmpC[2];                                                                                                      \
+      _tmp[3] += ((_alpha[_idx]*_alpha[_idx])/_totalAlpha);                                                                     \
+      }                                                                                                                         \
+    }}                                                                                                                          \
+  if ( !_tmp[3] ) {continue;}                                                                                                   \
+  COLOR[0] = (_tmp[0]>32767)?(32767):(_tmp[0]);                                                                                 \
+  COLOR[1] = (_tmp[1]>32767)?(32767):(_tmp[1]);                                                                                 \
+  COLOR[2] = (_tmp[2]>32767)?(32767):(_tmp[2]);                                                                                 \
+  COLOR[3] = (_tmp[3]>32767)?(32767):(_tmp[3]);
+//ETX
+
+//BTX
+#define VTKKWRCHelper_LookupAndCombineIndependentColorsSCGOInterpolateShadeUS( COLORTABLE, OTABLE,                                \
+                                                                DTABLE, STABLE,                                                 \
+                                                                SCALAR, MAG, WEIGHTS,                                           \
+                                                                COMPONENTS, COLOR )                                             \
+  unsigned int _tmp[4] = {0,0,0,0};                                                                                             \
+  unsigned int _tmpC[4];                                                                                                        \
+  unsigned short _alpha[4] = {0,0,0,0};                                                                                         \
+  unsigned int _totalAlpha = 0;                                                                                                 \
+                                                                                                                                \
+  {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
+    {                                                                                                                           \
+    _alpha[_idx] =  static_cast<unsigned short>(OTABLE[_idx][SCALAR[_idx]*256+MAG[_idx]]*WEIGHTS[_idx]);                        \
+    if ( _alpha[_idx] )                                                                                                         \
+      {                                                                                                                         \
+      _totalAlpha += _alpha[_idx];                                                                                              \
+      }                                                                                                                         \
+    }}                                                                                                                          \
+                                                                                                                                \
+  if ( !_totalAlpha ) {continue;}                                                                                               \
+  {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
+    {                                                                                                                           \
+    if ( _alpha[_idx] )                                                                                                         \
+      {                                                                                                                         \
+      _tmpC[0] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]  ])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmpC[1] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+1])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmpC[2] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+2])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmpC[3] = _alpha[_idx];                                                                                                  \
+      VTKKWRCHelper_InterpolateShadingComponent( DTABLE, STABLE, _tmpC, _idx );                                                 \
+      _tmp[0] += _tmpC[0];                                                                                                      \
+      _tmp[1] += _tmpC[1];                                                                                                      \
+      _tmp[2] += _tmpC[2];                                                                                                      \
+      _tmp[3] += ((_alpha[_idx]*_alpha[_idx])/_totalAlpha);                                                                     \
+      }                                                                                                                         \
+    }}                                                                                                                           \
   if ( !_tmp[3] ) {continue;}                                                                                                   \
   COLOR[0] = (_tmp[0]>32767)?(32767):(_tmp[0]);                                                                                 \
   COLOR[1] = (_tmp[1]>32767)?(32767):(_tmp[1]);                                                                                 \
@@ -792,6 +929,70 @@
 //ETX
 
 //BTX
+#define VTKKWRCHelper_InitializeVariablesSCGO()                                                     \
+  int i, j;                                                                                     \
+  unsigned short *imagePtr;                                                                     \
+                                                                                                \
+  int imageInUseSize[2];                                                                        \
+  int imageMemorySize[2];                                                                       \
+  int imageViewportSize[2];                                                                     \
+  int imageOrigin[2];                                                                           \
+  int dim[3];                                                                                   \
+  float shift[4];                                                                               \
+  float scale[4];                                                                               \
+                                                                                                \
+  mapper->GetRayCastImage()->GetImageInUseSize(imageInUseSize);                                 \
+  mapper->GetRayCastImage()->GetImageMemorySize(imageMemorySize);                               \
+  mapper->GetRayCastImage()->GetImageViewportSize(imageViewportSize);                           \
+  mapper->GetRayCastImage()->GetImageOrigin(imageOrigin);                                       \
+  mapper->GetInput()->GetDimensions(dim);                                                       \
+  mapper->GetTableShift( shift );                                                               \
+  mapper->GetTableScale( scale );                                                               \
+                                                                                                \
+  int *rowBounds                     = mapper->GetRowBounds();                                  \
+  unsigned short *image              = mapper->GetRayCastImage()->GetImage();                   \
+  vtkRenderWindow *renWin            = mapper->GetRenderWindow();                               \
+  int components                     = mapper->GetInput()->GetNumberOfScalarComponents();       \
+  int cropping                       = (mapper->GetCropping() &&                                \
+                                        mapper->GetCroppingRegionFlags() != 0x2000 );           \
+                                                                                                \
+  unsigned short *colorTable[4];                                                                \
+  unsigned short *twoDOpacityTable[4];                          	                              \
+                                                                                                \
+  int c;                                                                                        \
+  for ( c = 0; c < 4; c++ )                                                                     \
+    {                                                                                           \
+    colorTable[c]         = mapper->GetColorTable(c);                                           \
+    (void)(colorTable[c]);                                                                      \
+    twoDOpacityTable[c] = mapper->GetTwoDOpacityTable(c);                           	          \
+    }                                                                                           \
+                                                                                                \
+  vtkIdType inc[3];                                                                             \
+  inc[0] = components;                                                                          \
+  inc[1] = inc[0]*dim[0];                                                                       \
+  inc[2] = inc[1]*dim[1];																				                                \
+                                                                                                \
+                                                                                                \
+  unsigned char **gradientMag = mapper->GetGradientMagnitude();     						                \
+																								                                                \
+	vtkIdType mInc[3];                                                   						              \
+	if ( vol->GetProperty()->GetIndependentComponents() )               						              \
+	  {                                                                                           \
+	  mInc[0] = inc[0];                                                                           \
+	  mInc[1] = inc[1];                                                                           \
+	  mInc[2] = inc[2];                                                                           \
+	  }                                                                                           \
+	else                                                                                          \
+	  {                                                                                           \
+	  mInc[0] = 1;                                                                                \
+	  mInc[1] = mInc[0]*dim[0];                                                                   \
+	  mInc[2] = mInc[1]*dim[1];                                                                   \
+	  }
+//ETX
+
+
+
+//BTX
 #define VTKKWRCHelper_InitializeWeights()                       \
   float weights[4];                                             \
   weights[0] = vol->GetProperty()->GetComponentWeight(0);       \
@@ -823,6 +1024,8 @@
     mInc[2] = mInc[1]*dim[1];                                           \
     }
 //ETX
+
+
 
 //BTX
 #define VTKKWRCHelper_InitializeVariablesShade()                        \
@@ -1117,6 +1320,19 @@
       VTKKWRCHelper_InnerInitialization();
 //ETX
 
+
+//BTX
+//needs to be altered
+#define VTKKWRCHelper_InitializationAndLoopStartSCGONN()          \
+  VTKKWRCHelper_InitializeVariablesSCGO();                          \
+  for ( j = 0; j < imageInUseSize[1]; j++ )                     \
+    {                                                           \
+    VTKKWRCHelper_OuterInitialization();                        \
+    for ( i = rowBounds[j*2]; i <= rowBounds[j*2+1]; i++ )      \
+      {                                                         \
+      VTKKWRCHelper_InnerInitialization();
+//ETX
+
 //BTX
 #define VTKKWRCHelper_InitializationAndLoopStartShadeNN()       \
   VTKKWRCHelper_InitializeVariables();                          \
@@ -1133,6 +1349,18 @@
 #define VTKKWRCHelper_InitializationAndLoopStartGOShadeNN()     \
   VTKKWRCHelper_InitializeVariables();                          \
   VTKKWRCHelper_InitializeVariablesGO();                        \
+  VTKKWRCHelper_InitializeVariablesShade();                     \
+  for ( j = 0; j < imageInUseSize[1]; j++ )                     \
+    {                                                           \
+    VTKKWRCHelper_OuterInitialization();                        \
+    for ( i = rowBounds[j*2]; i <= rowBounds[j*2+1]; i++ )      \
+      {                                                         \
+      VTKKWRCHelper_InnerInitialization();
+//ETX
+
+//BTX
+#define VTKKWRCHelper_InitializationAndLoopStartSCGOShadeNN()   \
+  VTKKWRCHelper_InitializeVariablesSCGO();                      \
   VTKKWRCHelper_InitializeVariablesShade();                     \
   for ( j = 0; j < imageInUseSize[1]; j++ )                     \
     {                                                           \
@@ -1169,6 +1397,19 @@
 //ETX
 
 //BTX
+#define VTKKWRCHelper_InitializationAndLoopStartSCGOTrilin()    \
+  VTKKWRCHelper_InitializeVariablesSCGO();                      \
+  VTKKWRCHelper_InitializeTrilinVariables();                    \
+  VTKKWRCHelper_InitializeTrilinVariablesGO();                  \
+  for ( j = 0; j < imageInUseSize[1]; j++ )                     \
+    {                                                           \
+    VTKKWRCHelper_OuterInitialization();                        \
+    for ( i = rowBounds[j*2]; i <= rowBounds[j*2+1]; i++ )      \
+      {                                                         \
+      VTKKWRCHelper_InnerInitialization();
+//ETX
+
+//BTX
 #define VTKKWRCHelper_InitializationAndLoopStartShadeTrilin()   \
   VTKKWRCHelper_InitializeVariables();                          \
   VTKKWRCHelper_InitializeVariablesShade();                     \
@@ -1187,6 +1428,20 @@
   VTKKWRCHelper_InitializeVariables();                          \
   VTKKWRCHelper_InitializeVariablesShade();                     \
   VTKKWRCHelper_InitializeVariablesGO();                        \
+  VTKKWRCHelper_InitializeTrilinVariables();                    \
+  VTKKWRCHelper_InitializeTrilinVariablesShade();               \
+  VTKKWRCHelper_InitializeTrilinVariablesGO();                  \
+  for ( j = 0; j < imageInUseSize[1]; j++ )                     \
+    {                                                           \
+    VTKKWRCHelper_OuterInitialization();                        \
+    for ( i = rowBounds[j*2]; i <= rowBounds[j*2+1]; i++ )      \
+      {                                                         \
+      VTKKWRCHelper_InnerInitialization();
+//ETX
+//BTX
+#define VTKKWRCHelper_InitializationAndLoopStartSCGOShadeTrilin() \
+  VTKKWRCHelper_InitializeVariablesSCGO();                          \
+  VTKKWRCHelper_InitializeVariablesShade();                     \
   VTKKWRCHelper_InitializeTrilinVariables();                    \
   VTKKWRCHelper_InitializeTrilinVariablesShade();               \
   VTKKWRCHelper_InitializeTrilinVariablesGO();                  \
