@@ -302,10 +302,14 @@ void vtkTwoDTransferFunction::GetTable(double x1, double x2, double y1,
     double sx = wx * wx;
     double cy = wy / 2.0;
     double sy = wy * wy;
+    double dx = (x2-x1)/double(sizeX);
+    double dy = (y2-y1)/double(sizeY);
+    double bx = 0;
 
-    for (int i = startX; i < endX; i += strideX)
+    for (int i = startX; i < endX; i += 1, bx+= dx)
       {
-      for (int j = startY; j < endY; j += strideY)
+      double by = 0;
+      for (int j = startY; j < endY; j += 1, by+=dy)
         {
 
         switch (this->Internal->Regions[r]->Mode)
@@ -314,34 +318,34 @@ void vtkTwoDTransferFunction::GetTable(double x1, double x2, double y1,
           intensity = 1.0;
           break;
         case Gaussian:
-          xx = (i - cx) * (i - cx) / sx;
-          yy = (j - cy) * (j - cy) / sy;
+          xx = (bx - cx) * (bx - cx) / sx;
+          yy = (by - cy) * (by - cy) / sy;
           intensity = exp((-8.0) * (xx + yy));
           break;
         case Sine:
-          intensity = 0.5 * (1.0 + cos(7.0 * M_PI * (i - cx) / cx));
+          intensity = 0.5 * (1.0 + cos(7.0 * M_PI * (bx - cx) / cx));
           break;
         case RightHalf:
-          xx = (i - 2 * cx) * (i - 2 * cx) / sx;
+          xx = (bx - 2 * cx) * (bx - 2 * cx) / sx;
           intensity = exp(-4.0 * xx);
           break;
         case LeftHalf:
-          xx = (i) * (i) / sx;
+          xx = (bx) * (bx) / sx;
           intensity = exp(-4.0 * xx);
           break;
         case TopHalf:
-          yy = (j) * (j) / sy;
+          yy = (by - 2 * cy) * (by - 2 * cy) / sy;
           intensity = exp(-4.0 * yy);
           break;
         case BottomHalf:
-          yy = (j - 2 * cy) * (j - 2 * cy) / sy;
+          yy = (by) * (by) / sy;
           intensity = exp(-4.0 * yy);
           break;
         case RampRight:
-          intensity = 1.0 + (i - wx) / wx;
+          intensity = 1.0 + (bx - wx) / wx;
           break;
         case RampLeft:
-          intensity = (wx - i) / wx;
+          intensity = (wx - bx) / wx;
           break;
           }
         intensity = this->Internal->Regions[r]->Maximum * intensity;
@@ -359,6 +363,19 @@ void vtkTwoDTransferFunction::GetOneDScalarTable(double x1, double x2,
     int sizeX, float *table, int strideX)
   {
 
+  /*double *tmpTable = new double[sizeX];
+
+    this->GetOneDScalarTable(x1, x2, sizeX, tmpTable, 1);
+
+    for (int i = 0; i < sizeX; i++)
+      {
+        table[i*strideX] = static_cast<float>(tmpTable[i]);
+      }
+    delete[] tmpTable;*/
+  for (int i = 0; i< sizeX; i++)
+      {
+      table[i] = 1;
+      }
   }
 
 void vtkTwoDTransferFunction::GetOneDScalarTable(double x1, double x2,
@@ -470,6 +487,10 @@ void vtkTwoDTransferFunction::GetOneDScalarTable(double x1, double x2,
 void vtkTwoDTransferFunction::GetOneDGradientTable(double x1, double x2,
     int sizeX, float *table, int strideX)
   {
+  for (int i = 0; i< sizeX; i++)
+    {
+    table[i] = 1;
+    }
 
   }
 void vtkTwoDTransferFunction::GetOneDGradientTable(double x1, double x2,
