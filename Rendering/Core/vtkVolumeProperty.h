@@ -65,6 +65,10 @@ public:
   inline bool gradientOpacityDisabled(int index){
   	return DisableGradientGaussianOpacity[index] && DisableGradientLinearOpacity[index];
     }
+  inline bool twoDTransferFunctionDisabled(int index){
+      return DisableTwoDTransferFunction[index];
+      }
+
 
   // Description:
   // Does the data have independent components, or do some define color

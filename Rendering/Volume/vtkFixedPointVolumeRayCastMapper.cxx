@@ -705,7 +705,7 @@ vtkFixedPointVolumeRayCastMapper::vtkFixedPointVolumeRayCastMapper()
 
   this->ShadingRequired              = 0;
   this->GradientOpacityRequired      = 0;
-  this->TwoDOpacityRequired          = 1;
+  this->TwoDOpacityRequired          = 0;
 
   this->CroppingRegionMask[0] = 1;
   for ( i = 1; i < 27; i++ )
@@ -3027,6 +3027,17 @@ int vtkFixedPointVolumeRayCastMapper::UpdateGradients( vtkVolume *vol )
       }
     }
 
+  for (int c = 0; c<4; c++)
+    {
+    if (this->Volume->GetProperty()->GetTwoDTransferFunction(c) && this->TwoDOpacityRequired)
+        {
+        if (strcmp(this->Volume->GetProperty()->GetTwoDTransferFunction(c)->GetType(), "Constant"))
+          {
+          needToUpdate = 1;
+          }
+        }
+    }
+
   if ( !needToUpdate )
     {
     return 0;
@@ -3117,6 +3128,12 @@ int vtkFixedPointVolumeRayCastMapper::UpdateColorTable( vtkVolume *vol )
     gradientOpacityFunc[c]   = vol->GetProperty()->GetCurrentGradientOpacity(c);
     scalarOpacityDistance[c] = vol->GetProperty()->GetScalarOpacityUnitDistance(c);
     twoDTransferFunc[c] = vol->GetProperty()->GetTwoDTransferFunction(c);
+    if (vol->GetProperty()->GetDisableTwoDTransferFunction(c))
+      TwoDOpacityRequired = 0;
+    else
+      {
+      TwoDOpacityRequired = 1;
+      }
 
     // Has the number of color channels changed?
     if ( this->SavedColorChannels[c] != colorChannels[c] )
