@@ -23,6 +23,7 @@
 #include "vtkPointData.h"
 
 #include <math.h>
+#include <vtksys/ios/sstream>
 
 vtkStandardNewMacro(vtkImageGradientMagnitude);
 
@@ -253,7 +254,13 @@ void vtkImageGradientMagnitude::ThreadedRequestData(vtkInformation*,
   vtkImageData* input = inData[0][0];
   vtkImageData* output = outData[0];
 
-  // The ouptut scalar type must be double to store proper gradients.
+  // The output scalar type must be double to store proper gradients.
+  vtksys_ios::ostringstream newname;
+  vtkDataArray *outArray = output->GetPointData()->GetScalars();
+  newname << (outArray->GetName()?outArray->GetName():"")
+    << "GradientMagnitude";
+  outArray->SetName(newname.str().c_str());
+
  /* if(output->GetScalarType() != VTK_DOUBLE)
     {
     vtkErrorMacro("Execute: output ScalarType is "

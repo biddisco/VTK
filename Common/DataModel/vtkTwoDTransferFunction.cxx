@@ -363,7 +363,7 @@ void vtkTwoDTransferFunction::GetOneDScalarTable(double x1, double x2,
     int sizeX, float *table, int strideX)
   {
 
-  /*double *tmpTable = new double[sizeX];
+  double *tmpTable = new double[sizeX];
 
     this->GetOneDScalarTable(x1, x2, sizeX, tmpTable, 1);
 
@@ -371,233 +371,235 @@ void vtkTwoDTransferFunction::GetOneDScalarTable(double x1, double x2,
       {
         table[i*strideX] = static_cast<float>(tmpTable[i]);
       }
-    delete[] tmpTable;*/
-  for (int i = 0; i< sizeX; i++)
-      {
-      table[i] = 1;
-      }
+    delete[] tmpTable;
   }
 
 void vtkTwoDTransferFunction::GetOneDScalarTable(double x1, double x2,
     int sizeX, double *table, int strideX)
   {
-  double* tableptr;
-  for (int i = 0; i < sizeX; i++)
-    {
-    tableptr = table + i * strideX;
-    *tableptr = 0;
-    }
-
   int count = this->Internal->Regions.size();
 
-  for (int r = 0; r < count; r++)
-    {
-    if (this->Internal->Regions[r]->Width <= 0
-        || this->Internal->Regions[r]->Height <= 0)
+    for (int j = 0; j < sizeX; j++)
       {
-      continue; //at best one dimensional. If width or height is negative, something went very wrong
+        table[j *strideX] = 0;
       }
 
-    if (((this->Internal->Regions[r]->X < x1
-        && this->Internal->Regions[r]->X + this->Internal->Regions[r]->Width
-            < x1) || (this->Internal->Regions[r]->X > x2)))
+    for (int r = 0; r < count; r++)
       {
-      continue; //not inside the table range
-      }
-
-    //find the starting and end positions on the table
-    int startX, startY, endX, endY;
-    if (x1 > this->Internal->Regions[r]->X)
-      {
-      startX = 0;
-      }
-    else
-      {
-      startX = std::max(
-          int((this->Internal->Regions[r]->X - x1) / (x2 - x1) * double(sizeX)),
-          0); //max in case of rounding or numerical
-      }
-    if (x2 < this->Internal->Regions[r]->X + this->Internal->Regions[r]->Width)
-      {
-      endX = sizeX;
-      }
-    else
-      {
-      endX = std::min(
-          int(
-              (this->Internal->Regions[r]->X + this->Internal->Regions[r]->Width
-                  - x1) / (x2 - x1) * double(sizeX) + 0.5), sizeX);
-      //min in case of rounding or numerical
-      //the +0.5 is so we can use < instead of <= later
-      }
-
-    double xx, intensity, cintensity;
-
-    double wx = this->Internal->Regions[r]->Width;
-    double wy = this->Internal->Regions[r]->Height;
-    double cx = wx / 2.0;
-    double sx = wx * wx;
-    double cy = wy / 2.0;
-    double sy = wy * wy;
-
-    for (int i = startX; i < endX; i += strideX)
-      {
-
-      switch (this->Internal->Regions[r]->Mode)
+      if (this->Internal->Regions[r]->Width <= 0
+          || this->Internal->Regions[r]->Height <= 0)
         {
-      case Uniform:
-        intensity = 1.0;
-        break;
-      case Gaussian:
-        xx = (i - cx) * (i - cx) / sx;
-        intensity = exp((-8.0) * (xx));
-        break;
-      case Sine:
-        intensity = 0.5 * (1.0 + cos(7.0 * M_PI * (i - cx) / cx));
-        break;
-      case RightHalf:
-        xx = (i - 2 * cx) * (i - 2 * cx) / sx;
-        intensity = exp(-4.0 * xx);
-        break;
-      case LeftHalf:
-        xx = (i) * (i) / sx;
-        intensity = exp(-4.0 * xx);
-        break;
-      case TopHalf:
-        intensity = 1.0;
-        break;
-      case BottomHalf:
-        intensity = 1.0;
-        break;
-      case RampRight:
-        intensity = 1.0 + (i - wx) / wx;
-        break;
-      case RampLeft:
-        intensity = (wx - i) / wx;
-        break;
+        continue; //at best one dimensional. If width or height is negative, something went very wrong
         }
-      intensity = this->Internal->Regions[r]->Maximum * intensity;
-      cintensity = table[strideX * i];
-      table[strideX * i] = cintensity > intensity ? cintensity : intensity;
+
+      if ((this->Internal->Regions[r]->X < x1
+          && this->Internal->Regions[r]->X + this->Internal->Regions[r]->Width
+              < x1) || (this->Internal->Regions[r]->X > x2))
+        {
+        continue; //not inside the table range
+        }
+
+      //find the starting and end positions on the table
+      int startX, endX;
+      if (x1 > this->Internal->Regions[r]->X)
+        {
+        startX = 0;
+        }
+      else
+        {
+        startX = std::max(
+            int((this->Internal->Regions[r]->X - x1) / (x2 - x1) * double(sizeX)),
+            0); //max in case of rounding or numerical
+        }
+      if (x2 < this->Internal->Regions[r]->X + this->Internal->Regions[r]->Width)
+        {
+        endX = sizeX;
+        }
+      else
+        {
+        endX = std::min(
+            int(
+                (this->Internal->Regions[r]->X + this->Internal->Regions[r]->Width
+                    - x1) / (x2 - x1) * double(sizeX) + 0.5), sizeX);
+        //min in case of rounding or numerical
+        //the +0.5 is so we can use < instead of <= later
+        }
+
+
+
+      double xx, intensity, cintensity;
+
+      double wx = this->Internal->Regions[r]->Width;
+      double wy = this->Internal->Regions[r]->Height;
+      double cx = wx / 2.0;
+      double sx = wx * wx;
+      double cy = wy / 2.0;
+      double sy = wy * wy;
+      double dx = (x2-x1)/double(sizeX);
+      double bx = 0;
+
+      for (int i = startX; i < endX; i += 1, bx+= dx)
+        {
+          switch (this->Internal->Regions[r]->Mode)
+            {
+          case Uniform:
+            intensity = 1.0;
+            break;
+          case Gaussian:
+            xx = (bx - cx) * (bx - cx) / sx;
+            intensity = exp((-8.0) * (xx));
+            break;
+          case Sine:
+            intensity = 0.5 * (1.0 + cos(7.0 * M_PI * (bx - cx) / cx));
+            break;
+          case RightHalf:
+            xx = (bx - 2 * cx) * (bx - 2 * cx) / sx;
+            intensity = exp(-4.0 * xx);
+            break;
+          case LeftHalf:
+            xx = (bx) * (bx) / sx;
+            intensity = exp(-4.0 * xx);
+            break;
+          case TopHalf:
+            intensity = 1;
+            break;
+          case BottomHalf:
+            intensity = 1;
+            break;
+          case RampRight:
+            intensity = 1.0 + (bx - wx) / wx;
+            break;
+          case RampLeft:
+            intensity = (wx - bx) / wx;
+            break;
+            }
+          intensity = this->Internal->Regions[r]->Maximum * intensity;
+          cintensity = table[i  * strideX];
+          table[i  * strideX] =
+              intensity > cintensity ? intensity : cintensity;
+          }
+
+        }
 
       }
-
-    }
-  }
 void vtkTwoDTransferFunction::GetOneDGradientTable(double x1, double x2,
     int sizeX, float *table, int strideX)
   {
-  for (int i = 0; i< sizeX; i++)
-    {
-    table[i] = 1;
-    }
+  double *tmpTable = new double[sizeX];
+
+      this->GetOneDGradientTable(x1, x2, sizeX, tmpTable, 1);
+
+      for (int i = 0; i < sizeX; i++)
+        {
+          table[i*strideX] = static_cast<float>(tmpTable[i]);
+        }
+      delete[] tmpTable;
 
   }
-void vtkTwoDTransferFunction::GetOneDGradientTable(double x1, double x2,
-    int sizeX, double *table, int strideX)
+void vtkTwoDTransferFunction::GetOneDGradientTable(double y1, double y2,
+    int sizeY, double *table, int strideY)
   {
   //don't let the variable names confuse you, this is all gradient (y axis)
-  double* tableptr;
-  for (int i = 0; i < sizeX; i++)
-    {
-    tableptr = table + i * strideX;
-    *tableptr = 0;
-    }
-
   int count = this->Internal->Regions.size();
 
-  for (int r = 0; r < count; r++)
-    {
-    if (this->Internal->Regions[r]->Width <= 0
-        || this->Internal->Regions[r]->Height <= 0)
+    for (int j = 0; j < sizeY; j++)
       {
-      continue; //at best one dimensional. If width or height is negative, something went very wrong
+        table[j * strideY] = 0;
       }
 
-    if (((this->Internal->Regions[r]->Y < x1
-        && this->Internal->Regions[r]->Y + this->Internal->Regions[r]->Height
-            < x1) || (this->Internal->Regions[r]->Y > x2)))
+    for (int r = 0; r < count; r++)
       {
-      continue; //not inside the table range
-      }
-
-    //find the starting and end positions on the table
-    int startX, startY, endX, endY;
-    if (x1 > this->Internal->Regions[r]->Y)
-      {
-      startX = 0;
-      }
-    else
-      {
-      startX = std::max(
-          int((this->Internal->Regions[r]->Y - x1) / (x2 - x1) * double(sizeX)),
-          0); //max in case of rounding or numerical
-      }
-    if (x2 < this->Internal->Regions[r]->Y + this->Internal->Regions[r]->Height)
-      {
-      endX = sizeX;
-      }
-    else
-      {
-      endX = std::min(
-          int(
-              (this->Internal->Regions[r]->Y + this->Internal->Regions[r]->Height
-                  - x1) / (x2 - x1) * double(sizeX) + 0.5), sizeX);
-      //min in case of rounding or numerical
-      //the +0.5 is so we can use < instead of <= later
-      }
-
-    double yy, intensity, cintensity;
-
-
-    double wy = this->Internal->Regions[r]->Height;
-    double cy = wy / 2.0;
-    double sy = wy * wy;
-
-    for (int i = startX; i < endX; i += strideX)
-      {
-
-      switch (this->Internal->Regions[r]->Mode)
+      if (this->Internal->Regions[r]->Width <= 0
+          || this->Internal->Regions[r]->Height <= 0)
         {
-      case Uniform:
-        intensity = 1.0;
-        break;
-      case Gaussian:
-        yy = (i - cy) * (i - cy) / sy;
-        intensity = exp((-8.0) * (yy));
-        break;
-      case Sine:
-        intensity = 1;
-        break;
-      case RightHalf:;
-        intensity = 1;
-        break;
-      case LeftHalf:
-        intensity = 1;
-        break;
-      case TopHalf:
-        yy = (i) * (i) / sy;
-        intensity = exp(-4.0 * yy);
-        break;
-      case BottomHalf:
-        yy = (i - 2 * cy) * (i - 2 * cy) / sy;
-        intensity = exp(-4.0 * yy);
-        break;
-      case RampRight:
-        intensity = 1;
-        break;
-      case RampLeft:
-        intensity = 1;
-        break;
+        continue; //at best one dimensional. If width or height is negative, something went very wrong
         }
-      intensity = this->Internal->Regions[r]->Maximum * intensity;
-      cintensity = table[strideX * i];
-      table[strideX * i] = cintensity > intensity ? cintensity : intensity;
+
+      if (((this->Internal->Regions[r]->Y < y1
+              && this->Internal->Regions[r]->Y + this->Internal->Regions[r]->Width
+                  < y1) || (this->Internal->Regions[r]->Y > y2)))
+        {
+        continue; //not inside the table range
+        }
+
+      //find the starting and end positions on the table
+      int  startY, endY;
+
+      if (y1 > this->Internal->Regions[r]->Y)
+        {
+        startY = 0;
+        }
+      else
+        {
+        startY = std::max(
+            int((this->Internal->Regions[r]->Y - y1) / (y2 - y1) * double(sizeY)),
+            0);
+        }
+
+      if (y2 < this->Internal->Regions[r]->Y + this->Internal->Regions[r]->Height)
+        {
+        endY = sizeY;
+        }
+      else
+        {
+        endY = std::min(
+            int(
+                (this->Internal->Regions[r]->Y + this->Internal->Regions[r]->Height
+                    - y1) / (y2 - y1) * double(sizeY) + 0.5), sizeY); //min in case of rounding or numerical
+        }
+
+      double  yy, intensity, cintensity;
+      double wy = this->Internal->Regions[r]->Height;
+      double cy = wy / 2.0;
+      double sy = wy * wy;
+      double dy = (y2-y1)/double(sizeY);
+
+        double by = 0;
+        for (int j = startY; j < endY; j += 1, by+=dy)
+          {
+
+          switch (this->Internal->Regions[r]->Mode)
+            {
+          case Uniform:
+            intensity = 1.0;
+            break;
+          case Gaussian:
+            yy = (by - cy) * (by - cy) / sy;
+            intensity = exp((-8.0) * (yy));
+            break;
+          case Sine:
+            intensity = 1;
+            break;
+          case RightHalf:
+            intensity = 1;
+            break;
+          case LeftHalf:
+            intensity = 1;
+            break;
+          case TopHalf:
+            yy = (by - 2 * cy) * (by - 2 * cy) / sy;
+            intensity = exp(-4.0 * yy);
+            break;
+          case BottomHalf:
+            yy = (by) * (by) / sy;
+            intensity = exp(-4.0 * yy);
+            break;
+          case RampRight:
+            intensity = 1;
+            break;
+          case RampLeft:
+            intensity = 1;
+            break;
+            }
+          intensity = this->Internal->Regions[r]->Maximum * intensity;
+          cintensity = table[j* strideY];
+          table[j * strideY] =
+              intensity > cintensity ? intensity : cintensity;
+          }
+
+        }
 
       }
-
-    }
-  }
 
 double vtkTwoDTransferFunction::getXRange()
   {

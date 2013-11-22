@@ -7,6 +7,7 @@ vtk_module(vtkFiltersParallel
     vtkRenderingCore
     vtkFiltersModeling
     vtkFiltersGeometry
+vtkImagingStatistics
   TEST_DEPENDS
     vtkParallelMPI
     vtkTestingRendering
