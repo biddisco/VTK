@@ -162,6 +162,8 @@ protected:
   virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
     vtkInformationVector *);
   virtual int FillOutputPortInformation(int port, vtkInformation *info);
+  virtual int RequestUpdateTimeDependentInformation(vtkInformation *, vtkInformationVector **,
+    vtkInformationVector *);
 
   vtkXdmfArraySelection* GetPointArraySelection();
   vtkXdmfArraySelection* GetCellArraySelection();

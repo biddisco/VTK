@@ -145,6 +145,12 @@ int vtkXdmfReader::ProcessRequest(vtkInformation *request,
     return this->RequestDataObject(outputVector);
     }
 
+    if (request->Has(vtkStreamingDemandDrivenPipeline::REQUEST_TIME_DEPENDENT_INFORMATION()))
+      {
+      this->RequestUpdateTimeDependentInformation(request, inputVector, outputVector);
+      }
+
+
   return this->Superclass::ProcessRequest(request, inputVector, outputVector);
 }
 
@@ -323,6 +329,7 @@ int vtkXdmfReader::RequestInformation(vtkInformation *, vtkInformationVector **,
 
   // * Publish the SIL which provides information about the grid hierarchy.
   outInfo->Set(vtkDataObject::SIL(), domain->GetSIL());
+  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_DEPENDENT_INFORMATION(),1);
 
   // * Publish time information.
   std::vector<double> time_steps(domain->GetTimeSteps().begin(),
@@ -339,6 +346,19 @@ int vtkXdmfReader::RequestInformation(vtkInformation *, vtkInformationVector **,
     }
 
   return 1;
+}
+
+
+//----------------------------------------------------------------------------
+int vtkXdmfReader::RequestUpdateTimeDependentInformation(vtkInformation *request, vtkInformationVector **invec,
+  vtkInformationVector *outputVector)
+{
+ // Look for specially supported requests.
+  if(request->Has(vtkStreamingDemandDrivenPipeline::REQUEST_TIME_DEPENDENT_INFORMATION()))
+    {
+    this->RequestInformation(request, invec, outputVector);
+    }
+return 1;
 }
 
 //----------------------------------------------------------------------------
@@ -375,8 +395,8 @@ int vtkXdmfReader::RequestData(vtkInformation *, vtkInformationVector **,
   int update_extent[6] = {0, -1, 0, -1, 0, -1};
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT()))
     {
-    outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),
-      update_extent);
+//    outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),
+//      update_extent);
     }
 
   this->LastTimeIndex = this->ChooseTimeStep(outInfo);
