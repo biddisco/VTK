@@ -290,6 +290,7 @@ int vtkImageAccumulate::RequestData(
   outData->AllocateScalars(outInfo);
 
   vtkDataArray *inArray = this->GetInputArrayToProcess(0,inputVector);
+//  vtkDataArray *inArray1 = this->GetInputArrayToProcess(1,inputVector);
   inPtr = inData->GetArrayPointerForExtent(inArray, uExt);
   outPtr = outData->GetScalarPointer();
 
