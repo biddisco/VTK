@@ -32,7 +32,6 @@ set(Module_SRCS
   vtkTransmitUnstructuredGridPiece.cxx
   vtkPYoungsMaterialInterface.cxx
   vtkPMaskPoints.cxx
-  vtkPImageAccumulate.cxx
   )
 set_source_files_properties(
   vtkBlockDistribution.h

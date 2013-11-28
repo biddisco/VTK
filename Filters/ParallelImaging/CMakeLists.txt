@@ -5,6 +5,7 @@ set(Module_SRCS
   vtkExtractPiece.cxx
   vtkMemoryLimitImageDataStreamer.cxx
   vtkTransmitImageDataPiece.cxx
+  vtkPImageAccumulate.cxx
   )
 
 vtk_module_library(vtkFiltersParallelImaging ${Module_SRCS})
