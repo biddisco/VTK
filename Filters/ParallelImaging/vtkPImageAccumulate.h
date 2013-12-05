@@ -7,12 +7,12 @@
 #ifndef __vtkPImageAccumulate_h
 #define __vtkPImageAccumulate_h
 
-#include "vtkFiltersParallelModule.h" // For export macro
+#include "vtkFiltersParallelImagingModule.h" // For export macro
 #include "vtkImageAccumulate.h"
 
 class vtkMultiProcessController;
 
-class VTKFILTERSPARALLEL_EXPORT vtkPImageAccumulate : public vtkImageAccumulate
+class VTKFILTERSPARALLELIMAGING_EXPORT vtkPImageAccumulate : public vtkImageAccumulate
 {
 public:
   static vtkPImageAccumulate* New();
