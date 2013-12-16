@@ -1,7 +1,7 @@
 /*=========================================================================
 
  Program:   Visualization Toolkit
- Module:    vtkPiecewiseFunction.h
+ Module:    vtkGaussianPiecewiseFunction.h
 
  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
  All rights reserved.
@@ -13,7 +13,7 @@
 
  =========================================================================*/
 
-// .NAME vtkPiecewiseFunction - Defines a 1D piecewise function.
+// .NAME vtkGaussianPiecewiseFunction - Defines a 1D piecewise function.
 //
 // .SECTION Description
 // Defines a piecewise function mapping. This mapping allows the addition
@@ -30,18 +30,19 @@
 // adding points  (which do not have Sharpness and Midpoint parameters)
 // will default to Midpoint = 0.5 (halfway between the control points) and
 // Sharpness = 0.0 (linear).
-#ifndef __vtkPiecewiseFunction_h
-#define __vtkPiecewiseFunction_h
+#ifndef __vtkGaussianPiecewiseFunction_h
+#define __vtkGaussianPiecewiseFunction_h
 
 #include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkAbstractPiecewiseFunction.h"
 
-class vtkPiecewiseFunctionInternals;
+class vtkGaussianPiecewiseFunctionInternals;
 
-class VTKCOMMONDATAMODEL_EXPORT vtkPiecewiseFunction: public vtkAbstractPiecewiseFunction
+class VTKCOMMONDATAMODEL_EXPORT vtkGaussianPiecewiseFunction: public vtkAbstractPiecewiseFunction
   {
 public:
-  static vtkPiecewiseFunction *New();vtkTypeMacro(vtkPiecewiseFunction,vtkDataObject);
+  static vtkGaussianPiecewiseFunction *New();vtkTypeMacro(vtkGaussianPiecewiseFunction,vtkAbstractPiecewiseFunction)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
 
   void DeepCopy(vtkDataObject *f);
@@ -59,24 +60,28 @@ public:
   // Get the number of points used to specify the function
   int GetSize();
 
+  void SetRange(double min, double max);
+
   // Description:
   // Add/Remove points to/from the function. If a duplicate point is added
   // then the function value is changed at that location.
   // Return the index of the point (0 based), or -1 on error.
-  int AddPoint(double x, double y);
-  int AddPoint(double x, double y, double midpoint, double sharpness);
-  int RemovePoint(double x);
+  int AddGaussian(double x_, double h_, double w_, double bx_, double by_);
+  int RemoveGaussian(double x);
+  void RemoveGaussianAtIndex(int index);
 
   // Description:
-  // Removes all points from the function.
+  // Removes all points/Gaussians from the function.
   void RemoveAllPoints();
+  void RemoveAllGaussians();
 
   // Description:
-  // Add a line segment to the function. All points defined between the
-  // two points specified are removed from the function. This is a legacy
-  // method that does not allow the specification of the sharpness and
-  // midpoint values for the two nodes.
-  void AddSegment(double x1, double y1, double x2, double y2);
+  // Changes range and shifts gaussians to new range
+  bool UpdateRange(bool toNodes, double range[2]);
+
+  // Description:
+  // in case you want the gettable function to return a table of ones.
+  bool blankGaussian;
 
   // Description:
   // Returns the value of the function at the specified location using
@@ -84,18 +89,26 @@ public:
   double GetValue(double x);
 
   // Description:
-  // For the node specified by index, set/get the
-  // location (X), value (Y), midpoint, and sharpness
-  // values at the node. Returns -1 if the index is
-  // out of range, returns 1 otherwise.
-  int GetNodeValue(int index, double val[4]);
-  int SetNodeValue(int index, double val[4]);
+  // Returns specific value of a gaussian
+  double getX(int index);
+  double getH(int index);
+  double getW(int index);
+  double getBx(int index);
+  double getBy(int index);
+
+  // Description:
+  // Sets specific value of a gaussian
+  void setX(int index, double _x);
+  void setH(int index, double _h);
+  void setW(int index, double _w);
+  void setBx(int index, double _bx);
+  void setBy(int index, double _by);
 
   // Description:
   // Returns a pointer to the data stored in the table.
   // Fills from a pointer to data stored in a similar table. These are
   // legacy methods which will be maintained for compatibility - however,
-  // note that the vtkPiecewiseFunction no longer stores the nodes
+  // note that the vtkGaussianPiecewiseFunction no longer stores the nodes
   // in a double array internally.
   double *GetDataPointer();
   void FillFromDataPointer(int, double*);
@@ -104,6 +117,7 @@ public:
   // Returns the min and max node locations of the function.
   vtkGetVector2Macro( Range, double )
   ;
+  double GetRangeAtIndex(int index);
 
   // Description:
   // Remove all points out of the new range, and make sure there is a point
@@ -118,6 +132,13 @@ public:
       int stride = 1);
   virtual void GetTable(double x1, double x2, int size, double *table,
       int stride = 1);
+
+  // Description:
+  // For the node specified by index, set/get the
+  // location (X), value (Y), midpoint, and sharpness
+  // values at the node.
+  int GetNodeValue(int index, double val[4]);
+  int SetNodeValue(int index, double val[4]);
 
   // Description:
   // Constructs a piecewise function from a table.  Function range is
@@ -154,7 +175,7 @@ public:
   double GetFirstNonZeroValue();
 
   // Description:
-  // Clears out the current function. A newly created vtkPiecewiseFunction
+  // Clears out the current function. A newly created vtkGaussianPiecewiseFunction
   // is alreay initialized, so there is no need to call this method which
   // in turn simply calls RemoveAllPoints()
   void Initialize();
@@ -162,24 +183,25 @@ public:
   //BTX
   // Description:
   // Retrieve an instance of this class from an information object.
-  static vtkPiecewiseFunction* GetData(vtkInformation* info);
-  static vtkPiecewiseFunction* GetData(vtkInformationVector* v, int i = 0);
+  static vtkGaussianPiecewiseFunction* GetData(vtkInformation* info);
+  static vtkGaussianPiecewiseFunction* GetData(vtkInformationVector* v, int i =
+      0);
   //ETX
 
   // Description:
   // Toggle whether to allow duplicate scalar values in the piecewise
   // function (off by default).
-  vtkSetMacro(AllowDuplicateScalars, int)
-  ;vtkGetMacro(AllowDuplicateScalars, int)
-  ;vtkBooleanMacro(AllowDuplicateScalars, int)
+  vtkSetMacro(AllowMultipleGaussiansSamePoint, int)
+  ;vtkGetMacro(AllowMultipleGaussiansSamePoint, int)
+  ;vtkBooleanMacro(AllowMultipleGaussiansSamePoint, int)
   ;
 
 protected:
-  vtkPiecewiseFunction();
-  ~vtkPiecewiseFunction();
+  vtkGaussianPiecewiseFunction();
+  ~vtkGaussianPiecewiseFunction();
 
   // The internal STL structures
-  vtkPiecewiseFunctionInternals *Internal;
+  vtkGaussianPiecewiseFunctionInternals *Internal;
 
   // Determines the function value outside of defined points
   // Zero = always return 0.0 outside of defined points
@@ -187,12 +209,15 @@ protected:
   //        highest value above defined points
   int Clamping;
 
-  // Array of points ((X,Y) pairs)
+  // Array of points (x,h,w,bx,by) groups
   double *Function;
 
-  // Min and max range of function point locations
+  // Description:
+  // Min and max range over which the gaussians can span. The range is INDEPENDENT of the gaussians
+  // However new gaussians can only be added inside the range
   double Range[2];
 
+  // Description:
   // Internal method to sort the vector and update the
   // Range whenever a node is added, edited or removed.
   // It always calls Modified().
@@ -200,12 +225,25 @@ protected:
   // Returns true if the range has been updated and Modified() has been called
   bool UpdateRange();
 
-  int AllowDuplicateScalars;
+  //Description:
+  // scale the nodes = multiply width and position by x
+  // i.e. scaling from one range to another
+  void scaleNodesXAxis(double scale);
+  //Description:
+  // position (x) += shift
+  void shiftNodes(double shift);
+  //Description:
+  // scale the nodes = multiply width and position by x
+  // and position (x) += shift
+  void scaleAndShift(double oldRange[2], double newRange[2]);
+
+  //Description:
+  // allow more than one gaussian to have the same point
+  int AllowMultipleGaussiansSamePoint;
 
 private:
-  vtkPiecewiseFunction(const vtkPiecewiseFunction&);  // Not implemented.
-  void operator=(const vtkPiecewiseFunction&);  // Not implemented.
+  vtkGaussianPiecewiseFunction(const vtkGaussianPiecewiseFunction&); // Not implemented.
+  void operator=(const vtkGaussianPiecewiseFunction&);  // Not implemented.
   };
 
 #endif
-

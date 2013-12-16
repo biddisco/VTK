@@ -33,6 +33,8 @@ public:
 vtkStandardNewMacro(vtkDiscretizableColorTransferFunction);
 vtkCxxSetObjectMacro(vtkDiscretizableColorTransferFunction,
   ScalarOpacityFunction, vtkPiecewiseFunction);
+/*vtkCxxSetObjectMacro(vtkDiscretizableColorTransferFunction,
+  GradientOpacityFunction, vtkPiecewiseFunction);*/
 //-----------------------------------------------------------------------------
 vtkDiscretizableColorTransferFunction::vtkDiscretizableColorTransferFunction()
   : Internals(new vtkInternals())
@@ -48,6 +50,9 @@ vtkDiscretizableColorTransferFunction::vtkDiscretizableColorTransferFunction()
   this->ScalarOpacityFunction = 0;
   this->ScalarOpacityFunctionObserverId = 0;
   this->EnableOpacityMapping = false;
+
+
+
 }
 
 //-----------------------------------------------------------------------------
@@ -62,6 +67,13 @@ vtkDiscretizableColorTransferFunction::~vtkDiscretizableColorTransferFunction()
   delete this->Internals;
   this->Internals = NULL;
 }
+
+
+//-------------my stuff------------------
+/*void vtkDiscretizableColorTransferFunction::SetGradientOpacityFunction(vtkPiecewiseFunction *function){
+this->GradientOpacityFunction = function;
+}*/
+
 
 //-----------------------------------------------------------------------------
 unsigned long vtkDiscretizableColorTransferFunction::GetMTime()
@@ -470,7 +482,13 @@ vtkIdType vtkDiscretizableColorTransferFunction::GetNumberOfAvailableColors()
   return this->NumberOfValues;
 }
 
-//----------------------------------------------------------------------------
+/*
+vtkPiecewiseFunction* vtkDiscretizableColorTransferFunction::GetGradientOpacityFunction() const
+{
+  return this->GradientOpacityFunction;
+}
+*/
+
 vtkPiecewiseFunction* vtkDiscretizableColorTransferFunction::GetScalarOpacityFunction() const
 {
   return this->ScalarOpacityFunction;

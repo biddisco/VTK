@@ -917,4 +917,3 @@ void vtkFixedPointVolumeRayCastCompositeGOHelper::PrintSelf(ostream& os, vtkInde
 {
   this->Superclass::PrintSelf(os,indent);
 }
-

@@ -36,6 +36,14 @@ public:
   vtkTypeMacro(vtkImageGradientMagnitude,vtkThreadedImageAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  void ThreadedRequestData(vtkInformation*,
+      vtkInformationVector** inputVector,
+      vtkInformationVector*,
+      vtkImageData*** inData,
+      vtkImageData** outData,
+      int outExt[6],
+      int threadId);
+
   // Description:
   // If "HandleBoundariesOn" then boundary pixels are duplicated
   // So central differences can get values.
@@ -62,8 +70,7 @@ protected:
                                   vtkInformationVector**,
                                   vtkInformationVector*);
 
-  void ThreadedExecute (vtkImageData *inData, vtkImageData *outData,
-                       int extent[6], int id);
+
 private:
   vtkImageGradientMagnitude(const vtkImageGradientMagnitude&);  // Not implemented.
   void operator=(const vtkImageGradientMagnitude&);  // Not implemented.

@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkFixedPointVolumeRayCastCompositeGOShadeHelper.h
+  Module:    vtkFixedPointVolumeRayCastCompositeSCGOHelper.h
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
@@ -16,7 +16,7 @@
 
 =========================================================================*/
 
-// .NAME vtkFixedPointVolumeRayCastCompositeGOShadeHelper - A helper that generates composite images for the volume ray cast mapper
+// .NAME vtkFixedPointVolumeRayCastCompositeSCGOHelper - A helper that generates composite images for the volume ray cast mapper
 // .SECTION Description
 // This is one of the helper classes for the vtkFixedPointVolumeRayCastMapper.
 // It will generate composite images using an alpha blending operation.
@@ -26,8 +26,8 @@
 // .SECTION see also
 // vtkFixedPointVolumeRayCastMapper
 
-#ifndef __vtkFixedPointVolumeRayCastCompositeGOShadeHelper_h
-#define __vtkFixedPointVolumeRayCastCompositeGOShadeHelper_h
+#ifndef __vtkFixedPointVolumeRayCastCompositeSCGOHelper_h
+#define __vtkFixedPointVolumeRayCastCompositeSCGOHelper_h
 
 #include "vtkRenderingVolumeModule.h" // For export macro
 #include "vtkFixedPointVolumeRayCastHelper.h"
@@ -35,11 +35,11 @@
 class vtkFixedPointVolumeRayCastMapper;
 class vtkVolume;
 
-class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeGOShadeHelper : public vtkFixedPointVolumeRayCastHelper
+class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeSCGOHelper : public vtkFixedPointVolumeRayCastHelper
 {
 public:
-  static vtkFixedPointVolumeRayCastCompositeGOShadeHelper *New();
-  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeGOShadeHelper,vtkFixedPointVolumeRayCastHelper);
+  static vtkFixedPointVolumeRayCastCompositeSCGOHelper *New();
+  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeSCGOHelper,vtkFixedPointVolumeRayCastHelper);
   void PrintSelf( ostream& os, vtkIndent indent );
 
   virtual void  GenerateImage( int threadID,
@@ -48,12 +48,12 @@ public:
                                vtkFixedPointVolumeRayCastMapper *mapper);
 
 protected:
-  vtkFixedPointVolumeRayCastCompositeGOShadeHelper();
-  ~vtkFixedPointVolumeRayCastCompositeGOShadeHelper();
+  vtkFixedPointVolumeRayCastCompositeSCGOHelper();
+  ~vtkFixedPointVolumeRayCastCompositeSCGOHelper();
 
 private:
-  vtkFixedPointVolumeRayCastCompositeGOShadeHelper(const vtkFixedPointVolumeRayCastCompositeGOShadeHelper&);  // Not implemented.
-  void operator=(const vtkFixedPointVolumeRayCastCompositeGOShadeHelper&);  // Not implemented.
+  vtkFixedPointVolumeRayCastCompositeSCGOHelper(const vtkFixedPointVolumeRayCastCompositeSCGOHelper&);  // Not implemented.
+  void operator=(const vtkFixedPointVolumeRayCastCompositeSCGOHelper&);  // Not implemented.
 };
 
 #endif

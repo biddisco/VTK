@@ -185,6 +185,7 @@ public:
   virtual void SetScalarOpacityFunction(vtkPiecewiseFunction *function);
   virtual vtkPiecewiseFunction* GetScalarOpacityFunction() const;
 
+
   // Description:
   // Enable/disable the usage of the scalar opacity function.
   vtkSetMacro(EnableOpacityMapping, bool)
@@ -210,6 +211,7 @@ protected:
   bool EnableOpacityMapping;
   vtkSmartPointer<vtkPiecewiseFunction> ScalarOpacityFunction;
   unsigned long ScalarOpacityFunctionObserverId;
+
 
   void MapDataArrayToOpacity(
     vtkDataArray *scalars, int component, vtkUnsignedCharArray* colors);

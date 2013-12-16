@@ -27,33 +27,53 @@
 // to control the transition to the next node (the last node's values are
 // ignored) Outside the range of nodes, the values are 0 if Clamping is off,
 // or the nearest node point if Clamping is on. Using the legacy methods for
-// adding points  (which do not have Sharpness and Midpoint parameters)
+// adding points  (which do not have Sharpness and Midpoint parametssers)
 // will default to Midpoint = 0.5 (halfway between the control points) and
 // Sharpness = 0.0 (linear).
-#ifndef __vtkPiecewiseFunction_h
-#define __vtkPiecewiseFunction_h
+#ifndef __vtkTwoDTransferFunction_h
+#define __vtkTwoDTransferFunction_h
 
 #include "vtkCommonDataModelModule.h" // For export macro
-#include "vtkAbstractPiecewiseFunction.h"
+#include "vtkDataObject.h"
 
-class vtkPiecewiseFunctionInternals;
+class vtkTwoDTransferFunctionInternals;
 
-class VTKCOMMONDATAMODEL_EXPORT vtkPiecewiseFunction: public vtkAbstractPiecewiseFunction
+enum TransferFnMode
+  {
+  Uniform,
+  Gaussian,
+  RightHalf,
+  LeftHalf,
+  TopHalf,
+  BottomHalf,
+  Sine,
+  RampRight,
+  RampLeft
+  };
+
+class VTKCOMMONDATAMODEL_EXPORT vtkTwoDTransferFunction: public vtkDataObject
   {
 public:
-  static vtkPiecewiseFunction *New();vtkTypeMacro(vtkPiecewiseFunction,vtkDataObject);
+  static vtkTwoDTransferFunction *New();vtkTypeMacro(vtkTwoDTransferFunction,vtkDataObject)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
+
+  enum regionvalue
+    {
+    REGION_X,
+    REGION_Y,
+    REGION_W,
+    REGION_H,
+    REGION_MODE,
+    REGION_MAX
+    };
 
   void DeepCopy(vtkDataObject *f);
   void ShallowCopy(vtkDataObject *f);
 
   // Description:
   // Return what type of dataset this is.
-  int GetDataObjectType()
-    {
-    return VTK_PIECEWISE_FUNCTION;
-    }
-  ;
+  // int GetDataObjectType() {return VTK_PIECEWISE_FUNCTION;};
 
   // Description:
   // Get the number of points used to specify the function
@@ -63,20 +83,18 @@ public:
   // Add/Remove points to/from the function. If a duplicate point is added
   // then the function value is changed at that location.
   // Return the index of the point (0 based), or -1 on error.
-  int AddPoint(double x, double y);
-  int AddPoint(double x, double y, double midpoint, double sharpness);
-  int RemovePoint(double x);
+  //int AddPoint( double x, double y );
+  int AddRegion(double x, double y, double width, double height, double mode,
+      double max);
+  int AddRegion(double x, double y, double width, double height,
+      TransferFnMode mode, double max);
 
   // Description:
   // Removes all points from the function.
   void RemoveAllPoints();
+  void RemoveAllRegions();
 
-  // Description:
-  // Add a line segment to the function. All points defined between the
-  // two points specified are removed from the function. This is a legacy
-  // method that does not allow the specification of the sharpness and
-  // midpoint values for the two nodes.
-  void AddSegment(double x1, double y1, double x2, double y2);
+  void RemoveRegionAtIndex(int index);
 
   // Description:
   // Returns the value of the function at the specified location using
@@ -88,8 +106,11 @@ public:
   // location (X), value (Y), midpoint, and sharpness
   // values at the node. Returns -1 if the index is
   // out of range, returns 1 otherwise.
-  int GetNodeValue(int index, double val[4]);
-  int SetNodeValue(int index, double val[4]);
+  int GetRegionValues(int index, double* val);
+  int GetRegionValues(int index, double* val, TransferFnMode &mo);
+  int SetRegionValues(int index, double val[5], TransferFnMode mo);
+  int SetRegionValue(int index, double val, regionvalue v);
+  int SetRegionMode(int index, TransferFnMode mo);
 
   // Description:
   // Returns a pointer to the data stored in the table.
@@ -102,22 +123,44 @@ public:
 
   // Description:
   // Returns the min and max node locations of the function.
-  vtkGetVector2Macro( Range, double )
+  vtkGetVector4Macro( Range, double )
   ;
+  double getXRange();
+  double getYRange();
+  double GetRangeAtIndex(int index);
+
+  void scaleAndShift(double oldXRange[2], double oldYRange[2],
+      double newXRange[2], double newYRange[2]);
 
   // Description:
   // Remove all points out of the new range, and make sure there is a point
   // at each end of that range.
   // Return 1 on success, 0 otherwise.
-  int AdjustRange(double range[2]);
+  int SetRange(double xmin, double xmax, double ymin, double ymax);
+  int SetRange(double range[4]);
+  int SetXRange(double range[2]);
+  int SetYRange(double range[2]);
 
   // Description:
   // Fills in an array of function values evaluated at regular intervals.
   // Parameter "stride" is used to step through the output "table".
-  virtual void GetTable(double x1, double x2, int size, float *table,
-      int stride = 1);
-  virtual void GetTable(double x1, double x2, int size, double *table,
-      int stride = 1);
+  virtual void GetTable(double x1, double x2, double y1, double y2, int sizeX,
+      int sizeY, float *table, int strideX = 1, int strideY = 1);
+  virtual void GetTable(double x1, double x2, double y1, double y2, int sizeX,
+      int sizeY, double *table, int strideX = 1, int strideY = 1);
+
+  // Description:
+  // Fills in an array of function values evaluated at regular intervals.
+  // Parameter "stride" is used to step through the output "table".
+  // The tables are calculated as if the function were one dimensional
+  virtual void GetOneDScalarTable(double x1, double x2, int sizeX, float *table,
+      int strideX = 1);
+  virtual void GetOneDScalarTable(double x1, double x2, int sizeX,
+      double *table, int strideX = 1);
+  virtual void GetOneDGradientTable(double x1, double x2, int sizeX,
+      float *table, int strideX = 1);
+  virtual void GetOneDGradientTable(double x1, double x2, int sizeX,
+      double *table, int strideX = 1);
 
   // Description:
   // Constructs a piecewise function from a table.  Function range is
@@ -138,6 +181,10 @@ public:
   ;vtkGetMacro( Clamping, int )
   ;vtkBooleanMacro( Clamping, int )
   ;
+
+  double getValue(int index, regionvalue value);
+
+  TransferFnMode getRegionMode(int index);
 
   // Description:
   // Return the type of function:
@@ -162,8 +209,8 @@ public:
   //BTX
   // Description:
   // Retrieve an instance of this class from an information object.
-  static vtkPiecewiseFunction* GetData(vtkInformation* info);
-  static vtkPiecewiseFunction* GetData(vtkInformationVector* v, int i = 0);
+  static vtkTwoDTransferFunction* GetData(vtkInformation* info);
+  static vtkTwoDTransferFunction* GetData(vtkInformationVector* v, int i = 0);
   //ETX
 
   // Description:
@@ -175,11 +222,11 @@ public:
   ;
 
 protected:
-  vtkPiecewiseFunction();
-  ~vtkPiecewiseFunction();
+  vtkTwoDTransferFunction();
+  ~vtkTwoDTransferFunction();
 
   // The internal STL structures
-  vtkPiecewiseFunctionInternals *Internal;
+  vtkTwoDTransferFunctionInternals *Internal;
 
   // Determines the function value outside of defined points
   // Zero = always return 0.0 outside of defined points
@@ -191,7 +238,7 @@ protected:
   double *Function;
 
   // Min and max range of function point locations
-  double Range[2];
+  double Range[4];
 
   // Internal method to sort the vector and update the
   // Range whenever a node is added, edited or removed.
@@ -200,12 +247,13 @@ protected:
   // Returns true if the range has been updated and Modified() has been called
   bool UpdateRange();
 
+  void eliminateOutOfRange();
+
   int AllowDuplicateScalars;
 
 private:
-  vtkPiecewiseFunction(const vtkPiecewiseFunction&);  // Not implemented.
-  void operator=(const vtkPiecewiseFunction&);  // Not implemented.
+  vtkTwoDTransferFunction(const vtkTwoDTransferFunction&);  // Not implemented.
+  void operator=(const vtkTwoDTransferFunction&);  // Not implemented.
   };
 
 #endif
-

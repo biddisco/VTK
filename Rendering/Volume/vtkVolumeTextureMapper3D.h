@@ -1,19 +1,18 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    vtkVolumeTextureMapper3D.h
+ Program:   Visualization Toolkit
+ Module:    vtkVolumeTextureMapper3D.h
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+ Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+ All rights reserved.
+ See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 // .NAME vtkVolumeTextureMapper3D - volume render with 3D texture mapping
-
 // .SECTION Description
 // vtkVolumeTextureMapper3D renders a volume using 3D texture mapping.
 // This class is actually an abstract superclass - with all the actual
@@ -69,7 +68,6 @@
 //
 // .SECTION see also
 // vtkVolumeMapper
-
 #ifndef __vtkVolumeTextureMapper3D_h
 #define __vtkVolumeTextureMapper3D_h
 
@@ -78,13 +76,15 @@
 
 class vtkImageData;
 class vtkColorTransferFunction;
+class vtkAbstractPiecewiseFunction;
 class vtkPiecewiseFunction;
 class vtkVolumeProperty;
 
-class VTKRENDERINGVOLUME_EXPORT vtkVolumeTextureMapper3D : public vtkVolumeMapper
-{
+class VTKRENDERINGVOLUME_EXPORT vtkVolumeTextureMapper3D: public vtkVolumeMapper
+  {
 public:
-  vtkTypeMacro(vtkVolumeTextureMapper3D,vtkVolumeMapper);
+  vtkTypeMacro(vtkVolumeTextureMapper3D,vtkVolumeMapper)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
 
   static vtkVolumeTextureMapper3D *New();
@@ -94,35 +94,41 @@ public:
   // may not be honored for interactive renders. An interactive
   // render is defined as one that has less than 1 second of
   // allocated render time.
-  vtkSetMacro( SampleDistance, float );
-  vtkGetMacro( SampleDistance, float );
+  vtkSetMacro( SampleDistance, float )
+  ;vtkGetMacro( SampleDistance, float )
+  ;
 
   // Description:
   // These are the dimensions of the 3D texture
-  vtkGetVectorMacro( VolumeDimensions, int,   3 );
+  vtkGetVectorMacro( VolumeDimensions, int, 3 )
+  ;
 
   // Description:
   // This is the spacing of the 3D texture
-  vtkGetVectorMacro( VolumeSpacing,    float, 3 );
+  vtkGetVectorMacro( VolumeSpacing, float, 3 )
+  ;
 
   // Description:
   // Based on hardware and properties, we may or may not be able to
   // render using 3D texture mapping. This indicates if 3D texture
   // mapping is supported by the hardware, and if the other extensions
   // necessary to support the specific properties are available.
-  virtual int IsRenderSupported( vtkVolumeProperty *,
-                                 vtkRenderer *vtkNotUsed(r))
-    {return 0;}
+  virtual int IsRenderSupported(vtkVolumeProperty *, vtkRenderer *vtkNotUsed(r))
+    {
+    return 0;
+    }
 
   // Description:
   // Allow access to the number of polygons used for the
   // rendering.
-  vtkGetMacro( NumberOfPolygons, int );
+  vtkGetMacro( NumberOfPolygons, int )
+  ;
 
   // Description:
   // Allow access to the actual sample distance used to render
   // the image.
-  vtkGetMacro( ActualSampleDistance, float );
+  vtkGetMacro( ActualSampleDistance, float )
+  ;
 
 //BTX
 
@@ -130,17 +136,19 @@ public:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
   // DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
   // Render the volume
-  virtual void Render(vtkRenderer *, vtkVolume *) {}
+  virtual void Render(vtkRenderer *, vtkVolume *)
+    {
+    }
 
   // Description:
   // What rendering method is supported?
   enum
-  {
-    FRAGMENT_PROGRAM_METHOD=0,
-    NVIDIA_METHOD=1,
-    ATI_METHOD=2,
-    NO_METHOD=3
-  };
+    {
+    FRAGMENT_PROGRAM_METHOD = 0,
+    NVIDIA_METHOD = 1,
+    ATI_METHOD = 2,
+    NO_METHOD = 3
+    };
 
   // Description:
   // Returns the number of components of the point scalar field
@@ -152,14 +160,20 @@ public:
   // one will be used. Don't allow ATI_METHOD - it is not actually
   // supported.
   vtkSetClampMacro( PreferredRenderMethod, int,
-                    vtkVolumeTextureMapper3D::FRAGMENT_PROGRAM_METHOD,
-                    vtkVolumeTextureMapper3D::NVIDIA_METHOD );
+      vtkVolumeTextureMapper3D::FRAGMENT_PROGRAM_METHOD,
+      vtkVolumeTextureMapper3D::NVIDIA_METHOD )
+  ;
   void SetPreferredMethodToFragmentProgram()
-    { this->SetPreferredRenderMethod( vtkVolumeTextureMapper3D::FRAGMENT_PROGRAM_METHOD ); }
+    {
+    this->SetPreferredRenderMethod(
+        vtkVolumeTextureMapper3D::FRAGMENT_PROGRAM_METHOD);
+    }
   void SetPreferredMethodToNVidia()
-    { this->SetPreferredRenderMethod( vtkVolumeTextureMapper3D::NVIDIA_METHOD ); }
-  vtkGetMacro(PreferredRenderMethod, int);
-
+    {
+    this->SetPreferredRenderMethod(vtkVolumeTextureMapper3D::NVIDIA_METHOD);
+    }
+  vtkGetMacro(PreferredRenderMethod, int)
+  ;
 
   // Description:
   // Set/Get if the mapper use compressed textures (if supported by the
@@ -168,90 +182,85 @@ public:
   // times faster. 2. It saves some VRAM.
   // There is one reason to not use compressed textures: quality may be lower
   // than with uncompressed textures.
-  vtkSetMacro(UseCompressedTexture,bool);
-  vtkGetMacro(UseCompressedTexture,bool);
+  vtkSetMacro(UseCompressedTexture,bool)
+  ;vtkGetMacro(UseCompressedTexture,bool)
+  ;
 
 protected:
   vtkVolumeTextureMapper3D();
   ~vtkVolumeTextureMapper3D();
 
-  float                    *PolygonBuffer;
-  float                    *IntersectionBuffer;
-  int                       NumberOfPolygons;
-  int                       BufferSize;
+  float *PolygonBuffer;
+  float *IntersectionBuffer;
+  int NumberOfPolygons;
+  int BufferSize;
 
-  unsigned char            *Volume1;
-  unsigned char            *Volume2;
-  unsigned char            *Volume3;
-  int                       VolumeSize;
-  int                       VolumeComponents;
-  int                       VolumeDimensions[3];
-  float                     VolumeSpacing[3];
+  unsigned char *Volume1;
+  unsigned char *Volume2;
+  unsigned char *Volume3;
+  int VolumeSize;
+  int VolumeComponents;
+  int VolumeDimensions[3];
+  float VolumeSpacing[3];
 
-  float                     SampleDistance;
-  float                     ActualSampleDistance;
+  float SampleDistance;
+  float ActualSampleDistance;
 
-  vtkImageData             *SavedTextureInput;
-  vtkImageData             *SavedParametersInput;
+  vtkImageData *SavedTextureInput;
+  vtkImageData *SavedParametersInput;
 
   vtkColorTransferFunction *SavedRGBFunction;
-  vtkPiecewiseFunction     *SavedGrayFunction;
-  vtkPiecewiseFunction     *SavedScalarOpacityFunction;
-  vtkPiecewiseFunction     *SavedGradientOpacityFunction;
-  int                       SavedColorChannels;
-  float                     SavedSampleDistance;
-  float                     SavedScalarOpacityDistance;
+  vtkPiecewiseFunction *SavedGrayFunction;
+  vtkAbstractPiecewiseFunction *SavedScalarOpacityFunction;
+  vtkAbstractPiecewiseFunction *SavedGradientOpacityFunction;
+  int SavedColorChannels;
+  float SavedSampleDistance;
+  float SavedScalarOpacityDistance;
 
-  unsigned char             ColorLookup[65536*4];
-  unsigned char             AlphaLookup[65536];
-  float                     TempArray1[3*4096];
-  float                     TempArray2[4096];
-  int                       ColorTableSize;
-  float                     ColorTableScale;
-  float                     ColorTableOffset;
+  unsigned char ColorLookup[65536 * 4];
+  unsigned char AlphaLookup[65536];
+  float TempArray1[3 * 4096];
+  float TempArray2[4096];
+  int ColorTableSize;
+  float ColorTableScale;
+  float ColorTableOffset;
 
-  unsigned char             DiffuseLookup[65536*4];
-  unsigned char             SpecularLookup[65536*4];
+  unsigned char DiffuseLookup[65536 * 4];
+  unsigned char SpecularLookup[65536 * 4];
 
-  vtkTimeStamp              SavedTextureMTime;
-  vtkTimeStamp              SavedParametersMTime;
+  vtkTimeStamp SavedTextureMTime;
+  vtkTimeStamp SavedParametersMTime;
 
-  int                       RenderMethod;
-  int                       PreferredRenderMethod;
-  bool                      UseCompressedTexture;
+  int RenderMethod;
+  int PreferredRenderMethod;
+  bool UseCompressedTexture;
 
-  bool                      SupportsNonPowerOfTwoTextures;
+  bool SupportsNonPowerOfTwoTextures;
 
   // Description:
   // For the given viewing direction, compute the set of polygons.
-  void   ComputePolygons( vtkRenderer *ren, vtkVolume *vol, double bounds[6] );
+  void ComputePolygons(vtkRenderer *ren, vtkVolume *vol, double bounds[6]);
 
   // Description:
   // Update the internal RGBA representation of the volume. Return 1 if
   // anything change, 0 if nothing changed.
-  int    UpdateVolumes( vtkVolume * );
-  int    UpdateColorLookup( vtkVolume * );
+  int UpdateVolumes(vtkVolume *);
+  int UpdateColorLookup(vtkVolume *);
 
   // Description:
   // Impemented in subclass - check is texture size is OK.
   //BTX
   virtual int IsTextureSizeSupported(int vtkNotUsed(size)[3],
-                                     int vtkNotUsed(components))
+      int vtkNotUsed(components))
     {
-      return 0;
+    return 0;
     }
   //ETX
 
 private:
-  vtkVolumeTextureMapper3D(const vtkVolumeTextureMapper3D&);  // Not implemented.
+  vtkVolumeTextureMapper3D(const vtkVolumeTextureMapper3D&); // Not implemented.
   void operator=(const vtkVolumeTextureMapper3D&);  // Not implemented.
-};
-
+  };
 
 #endif
-
-
-
-
-
 

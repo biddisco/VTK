@@ -1,5 +1,6 @@
 set(Module_SRCS
   vtkAbstractCellLocator.cxx
+  vtkAbstractPiecewiseFunction.cxx
   vtkAbstractPointLocator.cxx
   vtkAdjacentVertexIterator.cxx
   vtkAMRBox.cxx
@@ -46,6 +47,7 @@ set(Module_SRCS
   vtkEmptyCell.cxx
   vtkExplicitCell.cxx
   vtkFieldData.cxx
+  vtkGaussianPiecewiseFunction.cxx
   vtkGenericAdaptorCell.cxx
   vtkGenericAttributeCollection.cxx
   vtkGenericAttribute.cxx
@@ -169,6 +171,7 @@ set(Module_SRCS
   vtkTriangle.cxx
   vtkTriangleStrip.cxx
   vtkTriQuadraticHexahedron.cxx
+  vtkTwoDTransferFunction.cxx
   vtkUndirectedGraph.cxx
   vtkUniformGrid.cxx
   vtkUnstructuredGrid.cxx
@@ -244,6 +247,7 @@ set_source_files_properties(
   vtkInformationQuadratureSchemeDefinitionVectorKey
   vtkLocator
   vtkNonLinearCell
+  vtkAbstractPiecewiseFunction
   vtkPointSet
   vtkSpline
   vtkStructuredData
