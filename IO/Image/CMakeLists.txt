@@ -19,9 +19,9 @@ set(Module_SRCS
   vtkMedicalImageReader2.cxx
   vtkMetaImageReader.cxx
   vtkMetaImageWriter.cxx
-  vtkNIFTIImageHeader.cxx
-  vtkNIFTIImageReader.cxx
-  vtkNIFTIImageWriter.cxx
+#  vtkNIFTIImageHeader.cxx
+#  vtkNIFTIImageReader.cxx
+#  vtkNIFTIImageWriter.cxx
   vtkNrrdReader.cxx
   vtkPNGReader.cxx
   vtkPNGWriter.cxx
