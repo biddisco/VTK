@@ -29,6 +29,7 @@
 #include "vtkInformationKeyVectorKey.h"
 #include "vtkInformationObjectBaseKey.h"
 #include "vtkInformationObjectBaseVectorKey.h"
+#include "vtkInformationObjectKey.h"
 #include "vtkInformationRequestKey.h"
 #include "vtkInformationStringKey.h"
 #include "vtkInformationStringVectorKey.h"
@@ -255,6 +256,20 @@ void vtkInformation::CopyEntry(vtkInformation* from,
   {
     key->DeepCopy(from, this);
   }
+}
+
+//----------------------------------------------------------------------------
+void vtkInformation::CopyEntry(vtkInformation* from,
+                               vtkInformationObjectKey* key, int deep)
+{
+  if (!deep)
+    {
+    key->ShallowCopy(from, this);
+    }
+  else
+    {
+    key->DeepCopy(from, this);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -492,6 +507,7 @@ VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(String, const char*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(DataObject, vtkDataObject*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Information, vtkInformation*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(InformationVector, vtkInformationVector*);
+VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Object, vtkObject*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(ObjectBase, vtkObjectBase*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Variant, const vtkVariant&);
 #undef VTK_INFORMATION_DEFINE_SCALAR_PROPERTY
@@ -747,6 +763,13 @@ void vtkInformation::Append(vtkInformationKeyVectorKey* key,
 
 //----------------------------------------------------------------------------
 void vtkInformation::Append(vtkInformationKeyVectorKey* key,
+                            vtkInformationObjectKey* value)
+{
+  key->Append(this, value);
+}
+
+//----------------------------------------------------------------------------
+void vtkInformation::Append(vtkInformationKeyVectorKey* key,
                             vtkInformationDoubleKey* value)
 {
   key->Append(this, value);
@@ -825,6 +848,13 @@ void vtkInformation::Append(vtkInformationKeyVectorKey* key,
 //----------------------------------------------------------------------------
 void vtkInformation::AppendUnique(vtkInformationKeyVectorKey* key,
                                   vtkInformationDataObjectKey* value)
+{
+  key->AppendUnique(this, value);
+}
+
+//----------------------------------------------------------------------------
+void vtkInformation::AppendUnique(vtkInformationKeyVectorKey* key,
+                                  vtkInformationObjectKey* value)
 {
   key->AppendUnique(this, value);
 }
@@ -914,6 +944,12 @@ vtkInformationKey* vtkInformation::GetKey(vtkInformationKey* key)
 
 //----------------------------------------------------------------------------
 vtkInformationKey* vtkInformation::GetKey(vtkInformationDataObjectKey* key)
+{
+  return key;
+}
+
+//----------------------------------------------------------------------------
+vtkInformationKey* vtkInformation::GetKey(vtkInformationObjectKey* key)
 {
   return key;
 }

@@ -32,7 +32,7 @@
 
 struct vtkEnsembleSourceInternal;
 class vtkTable;
-class vtkInformationDataObjectMetaDataKey;
+class vtkInformationObjectMetaDataKey;
 class vtkInformationIntegerRequestKey;
 class vtkInformationIntegerKey;
 
@@ -81,7 +81,7 @@ public:
   /**
    * Meta-data for the ensemble. This is set with SetMetaData.
    */
-  static vtkInformationDataObjectMetaDataKey* META_DATA();
+  static vtkInformationObjectMetaDataKey* META_DATA();
 
   /**
    * Key used to request a particular ensemble member.
