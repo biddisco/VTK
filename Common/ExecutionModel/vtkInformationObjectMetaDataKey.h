@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkInformationDataObjectMetaDataKey.h
+  Module:    vtkInformationObjectMetaDataKey.h
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -13,38 +13,38 @@
 
 =========================================================================*/
 /**
- * @class   vtkInformationDataObjectMetaDataKey
- * @brief   key used to define meta-data of type vtkDataObject
- * vtkInformationDataObjectMetaDataKey is a vtkInformationDataObjectKey
+ * @class   vtkInformationObjectMetaDataKey
+ * @brief   key used to define meta-data of type vtkObject
+ * vtkInformationObjectMetaDataKey is a vtkInformationObjectKey
  * that (shallow) copies itself downstream during the REQUEST_INFORMATION pass. Hence
  * it can be used to provide meta-data of type vtkDataObject or any subclass.
 */
 
-#ifndef vtkInformationDataObjectMetaDataKey_h
-#define vtkInformationDataObjectMetaDataKey_h
+#ifndef __vtkInformationObjectMetaDataKey_h
+#define __vtkInformationObjectMetaDataKey_h
 
 #include "vtkCommonExecutionModelModule.h" // For export macro
-#include "vtkInformationDataObjectKey.h"
+#include "vtkInformationObjectKey.h"
 
 #include "vtkCommonInformationKeyManager.h" // Manage instances of this type.
 
-class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationDataObjectMetaDataKey : public vtkInformationDataObjectKey
+class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationObjectMetaDataKey : public vtkInformationObjectKey
 {
 public:
-  vtkTypeMacro(vtkInformationDataObjectMetaDataKey,vtkInformationDataObjectKey);
+  vtkTypeMacro(vtkInformationObjectMetaDataKey,vtkInformationObjectKey);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
-  vtkInformationDataObjectMetaDataKey(const char* name, const char* location);
-  ~vtkInformationDataObjectMetaDataKey() VTK_OVERRIDE;
+  vtkInformationObjectMetaDataKey(const char* name, const char* location);
+  ~vtkInformationObjectMetaDataKey() VTK_OVERRIDE;
 
   /**
    * This method simply returns a new vtkInformationDataObjectMetaDataKey, given a
    * name and a location. This method is provided for wrappers. Use the
    * constructor directly from C++ instead.
    */
-  static vtkInformationDataObjectMetaDataKey* MakeKey(const char* name, const char* location)
+  static vtkInformationObjectMetaDataKey* MakeKey(const char* name, const char* location)
   {
-    return new vtkInformationDataObjectMetaDataKey(name, location);
+    return new vtkInformationObjectMetaDataKey(name, location);
   }
 
   /**
@@ -57,8 +57,8 @@ public:
                                       vtkInformation* toInfo) VTK_OVERRIDE;
 
 private:
-  vtkInformationDataObjectMetaDataKey(const vtkInformationDataObjectMetaDataKey&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInformationDataObjectMetaDataKey&) VTK_DELETE_FUNCTION;
+  vtkInformationObjectMetaDataKey(const vtkInformationObjectMetaDataKey&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkInformationObjectMetaDataKey&) VTK_DELETE_FUNCTION;
 };
 
 #endif
