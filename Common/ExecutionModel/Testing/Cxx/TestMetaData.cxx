@@ -17,7 +17,7 @@
 // pipeline properly and NeedToExecute/StoreMetaData functions as expected.
 
 #include "vtkInformation.h"
-#include "vtkInformationDataObjectMetaDataKey.h"
+#include "vtkInformationObjectMetaDataKey.h"
 #include "vtkInformationIntegerRequestKey.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkInformationVector.h"
@@ -36,7 +36,7 @@ public:
   static MySource *New();
   vtkTypeMacro(vtkPolyDataAlgorithm,vtkAlgorithm);
 
-  static vtkInformationDataObjectMetaDataKey* META_DATA();
+  static vtkInformationObjectMetaDataKey* META_DATA();
   static vtkInformationIntegerRequestKey* REQUEST();
   static vtkInformationIntegerKey* DATA();
 
@@ -83,7 +83,7 @@ protected:
 
 vtkStandardNewMacro(MySource);
 
-vtkInformationKeyMacro(MySource, META_DATA, DataObjectMetaData);
+vtkInformationKeyMacro(MySource, META_DATA, ObjectMetaData);
 vtkInformationKeyMacro(MySource, DATA, Integer);
 
 class vtkInformationMyRequestKey : public vtkInformationIntegerRequestKey

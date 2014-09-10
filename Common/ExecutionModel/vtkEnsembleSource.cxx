@@ -16,7 +16,7 @@
 
 #include "vtkDataObject.h"
 #include "vtkInformation.h"
-#include "vtkInformationDataObjectMetaDataKey.h"
+#include "vtkInformationObjectMetaDataKey.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkInformationIntegerRequestKey.h"
 #include "vtkInformationVector.h"
@@ -30,7 +30,7 @@
 vtkStandardNewMacro(vtkEnsembleSource);
 vtkCxxSetObjectMacro(vtkEnsembleSource, MetaData, vtkTable);
 
-vtkInformationKeyMacro(vtkEnsembleSource, META_DATA, DataObjectMetaData);
+vtkInformationKeyMacro(vtkEnsembleSource, META_DATA,   ObjectMetaData);
 vtkInformationKeyMacro(vtkEnsembleSource, DATA_MEMBER, Integer);
 
 // Subclass vtkInformationIntegerRequestKey to set the DataKey.
