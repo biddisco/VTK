@@ -55,6 +55,7 @@ class vtkInformationKey;
 class vtkInformationKeyToInformationFriendship;
 class vtkInformationKeyVectorKey;
 class vtkInformationObjectBaseKey;
+class vtkInformationObjectKey;
 class vtkInformationRequestKey;
 class vtkInformationStringKey;
 class vtkInformationStringVectorKey;
@@ -121,6 +122,7 @@ public:
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationInformationVectorKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationIntegerKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationIntegerVectorKey* key, int deep=0);
+  VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationObjectKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationRequestKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationStringKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationStringVectorKey* key, int deep=0);
@@ -279,6 +281,8 @@ public:
               vtkInformationIntegerKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
               vtkInformationIntegerVectorKey* value);
+  VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
+              vtkInformationObjectKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key, vtkInformationStringKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
               vtkInformationStringVectorKey* value);
@@ -301,6 +305,8 @@ public:
                     vtkInformationIntegerKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
                     vtkInformationIntegerVectorKey* value);
+  VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
+                    vtkInformationObjectKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
                     vtkInformationStringKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
@@ -348,6 +354,14 @@ public:
   VTKCOMMONCORE_EXPORT int Has(vtkInformationDataObjectKey* key);
 
   // Description:
+  // Get/Set an entry storing a vtkObject instance.
+  VTKCOMMONCORE_EXPORT void Set(vtkInformationObjectKey* key,
+    vtkObject VTK_WRAP_EXTERN *);
+  VTKCOMMONCORE_EXPORT vtkObject VTK_WRAP_EXTERN* Get(vtkInformationObjectKey* key);
+  VTKCOMMONCORE_EXPORT void Remove(vtkInformationObjectKey* key);
+  VTKCOMMONCORE_EXPORT int Has(vtkInformationObjectKey* key);
+
+  // Description:
   // Upcast the given key instance.
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationDataObjectKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationDoubleKey* key);
@@ -356,6 +370,7 @@ public:
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationInformationVectorKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationIntegerKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationIntegerVectorKey* key);
+  VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationObjectKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationRequestKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationStringKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationStringVectorKey* key);

@@ -138,6 +138,7 @@ SET(Module_SRCS
   vtkInformationKeyVectorKey.cxx
   vtkInformationObjectBaseKey.cxx
   vtkInformationObjectBaseVectorKey.cxx
+  vtkInformationObjectKey.cxx
   vtkInformationRequestKey.cxx
   vtkInformationStringKey.cxx
   vtkInformationStringVectorKey.cxx
@@ -462,6 +463,7 @@ set_source_files_properties(
   vtkInformationKeyVectorKey
   vtkInformationObjectBaseKey
   vtkInformationObjectBaseVectorKey
+  vtkInformationObjectKey
   vtkInformationQuadratureSchemeDefinitionVectorKey
   vtkInformationRequestKey
   vtkInformationStringKey
