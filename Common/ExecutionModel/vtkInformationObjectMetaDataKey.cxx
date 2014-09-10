@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkInformationDataObjectMetaDataKey.cxx
+  Module:    vtkInformationObjectMetaDataKey.cxx
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -12,24 +12,24 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkInformationDataObjectMetaDataKey.h"
+#include "vtkInformationObjectMetaDataKey.h"
 
 #include "vtkInformation.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
 //----------------------------------------------------------------------------
-vtkInformationDataObjectMetaDataKey::vtkInformationDataObjectMetaDataKey(const char* name, const char* location) :
-  vtkInformationDataObjectKey(name, location)
+vtkInformationObjectMetaDataKey::vtkInformationObjectMetaDataKey(const char* name, const char* location) :
+  vtkInformationObjectKey(name, location)
 {
 }
 
 //----------------------------------------------------------------------------
-vtkInformationDataObjectMetaDataKey::~vtkInformationDataObjectMetaDataKey()
+vtkInformationObjectMetaDataKey::~vtkInformationObjectMetaDataKey()
 {
 }
 
 //----------------------------------------------------------------------------
-void vtkInformationDataObjectMetaDataKey::CopyDefaultInformation(
+void vtkInformationObjectMetaDataKey::CopyDefaultInformation(
   vtkInformation* request,
   vtkInformation* fromInfo,
   vtkInformation* toInfo)
@@ -41,7 +41,7 @@ void vtkInformationDataObjectMetaDataKey::CopyDefaultInformation(
 }
 
 //----------------------------------------------------------------------------
-void vtkInformationDataObjectMetaDataKey::PrintSelf(ostream& os, vtkIndent indent)
+void vtkInformationObjectMetaDataKey::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
