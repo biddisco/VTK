@@ -25,10 +25,10 @@ SET(Module_SRCS
   vtkImageProgressIterator.cxx
   vtkImageToStructuredGrid.cxx
   vtkImageToStructuredPoints.cxx
-  vtkInformationDataObjectMetaDataKey.cxx
   vtkInformationExecutivePortKey.cxx
   vtkInformationExecutivePortVectorKey.cxx
   vtkInformationIntegerRequestKey.cxx
+  vtkInformationObjectMetaDataKey.cxx
   vtkMultiBlockDataSetAlgorithm.cxx
   vtkMultiTimeStepAlgorithm.cxx
   vtkPassInputTypeAlgorithm.cxx

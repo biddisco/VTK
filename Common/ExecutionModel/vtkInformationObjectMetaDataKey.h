@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkInformationDataObjectMetaDataKey.h
+  Module:    vtkInformationObjectMetaDataKey.h
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -12,27 +12,27 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkInformationDataObjectMetaDataKey - key used to define meta-data of type vtkDataObject
-// vtkInformationDataObjectMetaDataKey is a vtkInformationDataObjectKey
+// .NAME vtkInformationObjectMetaDataKey - key used to define meta-data of type vtkDataObject
+// vtkInformationObjectMetaDataKey is a vtkInformationDataObjectKey
 // that (shallow) copies itself downstream during the REQUEST_INFORMATION pass. Hence
 // it can be used to provide meta-data of type vtkDataObject or any subclass.
 
-#ifndef vtkInformationDataObjectMetaDataKey_h
-#define vtkInformationDataObjectMetaDataKey_h
+#ifndef __vtkInformationObjectMetaDataKey_h
+#define __vtkInformationObjectMetaDataKey_h
 
 #include "vtkCommonExecutionModelModule.h" // For export macro
-#include "vtkInformationDataObjectKey.h"
+#include "vtkInformationObjectKey.h"
 
 #include "vtkCommonInformationKeyManager.h" // Manage instances of this type.
 
-class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationDataObjectMetaDataKey : public vtkInformationDataObjectKey
+class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationObjectMetaDataKey : public vtkInformationObjectKey
 {
 public:
-  vtkTypeMacro(vtkInformationDataObjectMetaDataKey,vtkInformationDataObjectKey);
+  vtkTypeMacro(vtkInformationObjectMetaDataKey,vtkInformationObjectKey);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  vtkInformationDataObjectMetaDataKey(const char* name, const char* location);
-  ~vtkInformationDataObjectMetaDataKey();
+  vtkInformationObjectMetaDataKey(const char* name, const char* location);
+  ~vtkInformationObjectMetaDataKey();
 
   // Description:
   // This method simply returns a new vtkInformationDataObjectMetaDataKey, given a
@@ -52,8 +52,8 @@ public:
                                       vtkInformation* toInfo);
 
 private:
-  vtkInformationDataObjectMetaDataKey(const vtkInformationDataObjectMetaDataKey&);  // Not implemented.
-  void operator=(const vtkInformationDataObjectMetaDataKey&);  // Not implemented.
+  vtkInformationObjectMetaDataKey(const vtkInformationObjectMetaDataKey&);  // Not implemented.
+  void operator=(const vtkInformationObjectMetaDataKey&);  // Not implemented.
 };
 
 #endif
