@@ -3,6 +3,7 @@ SET(Module_SRCS
   vtkAlgorithmOutput.cxx
   vtkAnnotationLayersAlgorithm.cxx
   vtkArrayDataAlgorithm.cxx
+  vtkSerialBoundsExtentTranslator.cxx
   vtkCachedStreamingDemandDrivenPipeline.cxx
   vtkCastToConcrete.cxx
   vtkCompositeDataPipeline.cxx

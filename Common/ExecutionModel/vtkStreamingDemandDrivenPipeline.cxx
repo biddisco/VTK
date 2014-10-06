@@ -20,6 +20,7 @@
 #include "vtkDataSet.h"
 #include "vtkDataSetAttributes.h"
 #include "vtkExtentTranslator.h"
+#include "vtkSerialBoundsExtentTranslator.h"
 #include "vtkInformation.h"
 #include "vtkInformationDoubleKey.h"
 #include "vtkInformationDoubleVectorKey.h"
@@ -917,7 +918,20 @@ vtkStreamingDemandDrivenPipeline
           splitMode = outInfo->Get(vtkExtentTranslator::UPDATE_SPLIT_MODE());
           }
 
-        vtkExtentTranslator* et = vtkExtentTranslator::New();
+        vtkExtentTranslator* et = NULL;
+        if (outInfo->Has(vtkSerialBoundsExtentTranslator::META_DATA()))
+          {
+          et = vtkExtentTranslator::SafeDownCast(outInfo->Get(vtkSerialBoundsExtentTranslator::META_DATA()));
+          vtkSerialBoundsExtentTranslator  *bet = vtkSerialBoundsExtentTranslator::SafeDownCast(et);
+          if (bet) 
+            {
+            std::cout << "Got a Bounds extent translator in executive" << std::endl;
+            }
+          }
+        else {
+          et = vtkExtentTranslator::New();
+        }
+
         int execExt[6];
         et->PieceToExtentThreadSafe(piece, numPieces, ghost,
                                     uExt, execExt,
