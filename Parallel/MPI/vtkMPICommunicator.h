@@ -74,6 +74,7 @@ public:
   // Returns the singleton which behaves as the global
   // communicator (MPI_COMM_WORLD)
   static vtkMPICommunicator* GetWorldCommunicator();
+  static void SetWorldCommunicator(vtkMPICommunicator *c);
 
 
   // Description:
