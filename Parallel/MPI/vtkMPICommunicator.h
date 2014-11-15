@@ -76,6 +76,7 @@ public:
    * communicator (MPI_COMM_WORLD)
    */
   static vtkMPICommunicator* GetWorldCommunicator();
+  static void SetWorldCommunicator(vtkMPICommunicator *c);
 
 
   /**
