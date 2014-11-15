@@ -410,6 +410,10 @@ vtkMPICommunicator* vtkMPICommunicator::GetWorldCommunicator()
     }
   return vtkMPICommunicator::WorldCommunicator;
 }
+void vtkMPICommunicator::SetWorldCommunicator(vtkMPICommunicator *c)
+{
+  vtkMPICommunicator::WorldCommunicator = c;
+}
 
 //----------------------------------------------------------------------------
 void vtkMPICommunicator::PrintSelf(ostream& os, vtkIndent indent)
