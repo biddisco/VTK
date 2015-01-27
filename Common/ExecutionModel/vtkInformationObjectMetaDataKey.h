@@ -38,9 +38,9 @@ public:
   // This method simply returns a new vtkInformationDataObjectMetaDataKey, given a
   // name and a location. This method is provided for wrappers. Use the
   // constructor directly from C++ instead.
-  static vtkInformationDataObjectMetaDataKey* MakeKey(const char* name, const char* location)
+  static vtkInformationObjectMetaDataKey* MakeKey(const char* name, const char* location)
     {
-    return new vtkInformationDataObjectMetaDataKey(name, location);
+    return new vtkInformationObjectMetaDataKey(name, location);
     }
 
   // Description:
