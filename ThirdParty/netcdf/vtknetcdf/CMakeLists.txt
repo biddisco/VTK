@@ -286,7 +286,7 @@ IF (NETCDF_DISABLE_COMPILER_WARNINGS)
   ELSE ()
   # Most compilers use -w to suppress warnings.
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -w")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -w -stdlib=libstdc++")
   ENDIF ()
 ENDIF ()
 
