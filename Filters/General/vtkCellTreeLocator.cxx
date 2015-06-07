@@ -1522,7 +1522,43 @@ void vtkCellTreeLocator::FindCellsWithinBounds(double *bbox, vtkIdList *cells)
   return FindCellsWithinBounds(TestBox, cells);
 }
 //---------------------------------------------------------------------------
-
+vtkIdListCollection *vtkCellTreeLocator::GetLeafNodeCellInformation()
+{
+  this->BuildLocatorIfNeeded();
+  //
+  vtkIdListCollection *LeafCellsList = vtkIdListCollection::New();
+  //
+  nodeStack ns;
+  //
+  vtkCellTreeNode *n0 = &this->Tree->Nodes.front();
+  ns.push(n0);
+  while (!ns.empty())
+    {
+    n0 = ns.top();
+    if (n0->IsLeaf())
+      {
+      vtkSmartPointer<vtkIdList> newList = vtkSmartPointer<vtkIdList>::New();
+      LeafCellsList->AddItem(newList);
+      newList->SetNumberOfIds((int)n0->Size());
+      for (int i=0; i<(int)n0->Size(); i++)
+        {
+        vtkIdType cell_ID = this->Tree->Leaves[n0->Start()+i];
+        newList->SetId(i, cell_ID);
+        }
+      ns.pop();
+      }
+    else
+      {
+      vtkCellTreeNode *n1 = &this->Tree->Nodes.at(n0->GetLeftChildIndex());
+      vtkCellTreeNode *n2 = &this->Tree->Nodes.at(n0->GetLeftChildIndex()+1);
+      ns.pop();
+      ns.push(n1);
+      ns.push(n2);
+      }
+    }
+  return LeafCellsList;
+}
+//----------------------------------------------------------------------------
 void vtkCellTreeLocator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
