@@ -44,6 +44,7 @@ class vtkCellPointTraversal;
 class vtkIdTypeArray;
 class vtkCellArray;
 class vtkBoundingBox;
+class vtkIdListCollection;
 
 class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocator
 {
@@ -70,6 +71,12 @@ class VTKFILTERSGENERAL_EXPORT vtkCellTreeLocator : public vtkAbstractCellLocato
     // When using cached cell bounds, the test is very fast as no cell tests to compute 
     // parametric coordinates are performed.
     virtual bool FindCellsFast(double pos[3], vtkIdList *cells);
+
+    // Description:
+    // After subdivision has completed, one may wish to query the tree to find
+    // which cells are in which leaf nodes. This function returns a list
+    // which holds a cell Id list for each leaf node.
+    vtkIdListCollection *GetLeafNodeCellInformation();
 
     // Description:
     // Return intersection point (if any) AND the cell which was intersected by
