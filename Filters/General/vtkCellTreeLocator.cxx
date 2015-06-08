@@ -279,12 +279,12 @@ class vtkCellTreeBuilder
 
     // -------------------------------------------------------------------------
 
-    void Split( unsigned int index, float min[3], float max[3] )
+    void Split( unsigned int index, float min[3], float max[3], int level )
     {
       unsigned int start = this->m_nodes[index].Start();
       unsigned int size  = this->m_nodes[index].Size();
 
-      if( size < this->m_leafsize )
+      if( size < this->m_leafsize || level>=this->m_maxdepth)
       {
         return;
       }
@@ -402,8 +402,8 @@ class vtkCellTreeBuilder
       this->m_nodes[index].MakeNode( (int)m_nodes.size(), dim, clip );
       this->m_nodes.insert( m_nodes.end(), child, child+2 );
 
-      Split( this->m_nodes[index].GetLeftChildIndex(), lmin, lmax );
-      Split( this->m_nodes[index].GetRightChildIndex(), rmin, rmax );
+      Split( this->m_nodes[index].GetLeftChildIndex(), lmin, lmax, level+1 );
+      Split( this->m_nodes[index].GetRightChildIndex(), rmin, rmax, level+1 );
     }
 
   public:
@@ -412,10 +412,12 @@ class vtkCellTreeBuilder
     {
       this->m_buckets =  5;
       this->m_leafsize = 8;
+      this->m_maxdepth = 32;
     }
 
-    void Build( vtkCellTreeLocator *ctl, vtkCellTreeLocator::vtkCellTree& ct, vtkDataSet* ds )
+    void Build( vtkCellTreeLocator *ctl, vtkCellTreeLocator::vtkCellTree& ct, vtkDataSet* ds, int maxdepth )
     {
+      m_maxdepth = maxdepth;
       const vtkIdType size = ds->GetNumberOfCells();
       if( size > std::numeric_limits<vtkIdType>::max() )
       {
@@ -480,7 +482,7 @@ class vtkCellTreeBuilder
       root.MakeLeaf( 0, size );
       this->m_nodes.push_back( root );
 
-      Split( 0, min, max );
+      Split( 0, min, max, 0 );
 
       ct.Nodes.resize( this->m_nodes.size() );
       ct.Nodes[0] = this->m_nodes[0];
@@ -516,6 +518,7 @@ class vtkCellTreeBuilder
   public:
     unsigned int     m_buckets;
     unsigned int     m_leafsize;
+    unsigned int     m_maxdepth;
     std::vector<PerCell>   m_pc;
     std::vector<vtkCellTreeLocator::vtkCellTreeNode>    m_nodes;
 };
@@ -595,7 +598,7 @@ void vtkCellTreeLocator::BuildLocatorInternal()
   vtkCellTreeBuilder builder;
   builder.m_leafsize = this->NumberOfCellsPerNode;
   builder.m_buckets  = NumberOfBuckets;
-  builder.Build( this, *(Tree), this->DataSet );
+  builder.Build( this, *(Tree), this->DataSet, this->MaxLevel );
   this->BuildTime.Modified();
 }
 
