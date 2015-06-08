@@ -199,6 +199,8 @@ protected:
      vtkCellTreeLocator();
     ~vtkCellTreeLocator();
 
+  vtkBoundingBox GetNodeBoundsFromCells(vtkCellTreeNode *n0);
+
    // Test ray against node BBox : clip t values to extremes
   bool RayMinMaxT(const double origin[3],
     const double dir[3],
