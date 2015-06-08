@@ -18,6 +18,8 @@
 #include "vtkPolyData.h"
 #include "vtkGenericCell.h"
 #include "vtkIdListCollection.h"
+#include "vtkPointData.h"
+#include "vtkCellArray.h"
 
 #include <stack>
 #include <vector>
@@ -532,16 +534,78 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
 // OK so this is a quick a dirty one for testing, but I can't be arsed
 // working out which faces are visible
 
+//---------------------------------------------------------------------------
+static void AddBox(vtkPolyData *pd, double *bounds, int level)
+{
+  vtkPoints      *pts = pd->GetPoints();
+  vtkCellArray *lines = pd->GetLines();
+  vtkIntArray *levels = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(0));
+  double x[3];
+  vtkIdType cells[8], ids[2];
+  //
+  x[0] = bounds[0]; x[1] = bounds[2]; x[2] = bounds[4];
+  cells[0] = pts->InsertNextPoint(x);
+  x[0] = bounds[1]; x[1] = bounds[2]; x[2] = bounds[4];
+  cells[1] = pts->InsertNextPoint(x);
+  x[0] = bounds[0]; x[1] = bounds[3]; x[2] = bounds[4];
+  cells[2] = pts->InsertNextPoint(x);
+  x[0] = bounds[1]; x[1] = bounds[3]; x[2] = bounds[4];
+  cells[3] = pts->InsertNextPoint(x);
+  x[0] = bounds[0]; x[1] = bounds[2]; x[2] = bounds[5];
+  cells[4] = pts->InsertNextPoint(x);
+  x[0] = bounds[1]; x[1] = bounds[2]; x[2] = bounds[5];
+  cells[5] = pts->InsertNextPoint(x);
+  x[0] = bounds[0]; x[1] = bounds[3]; x[2] = bounds[5];
+  cells[6] = pts->InsertNextPoint(x);
+  x[0] = bounds[1]; x[1] = bounds[3]; x[2] = bounds[5];
+  cells[7] = pts->InsertNextPoint(x);
+  //
+  ids[0] = cells[0]; ids[1] = cells[1];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[2]; ids[1] = cells[3];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[4]; ids[1] = cells[5];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[6]; ids[1] = cells[7];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[0]; ids[1] = cells[2];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[1]; ids[1] = cells[3];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[4]; ids[1] = cells[6];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[5]; ids[1] = cells[7];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[0]; ids[1] = cells[4];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[1]; ids[1] = cells[5];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[2]; ids[1] = cells[6];
+  lines->InsertNextCell(2,ids);
+  ids[0] = cells[3]; ids[1] = cells[7];
+  lines->InsertNextCell(2,ids);
+  //
+  // Colour boxes by scalar if array present
+  //
+  for (int i=0; levels && i<8; i++)
+    {
+    levels->InsertNextTuple1(level);
+    }
+}
+
+
 class _box
 {
 public:
   double bounds[6];
-  _box(double *b)
+  int level;
+  _box(double *b, int l)
   {
     for (int i=0; i<6; i++)
       {
       bounds[i] = b[i];
       }
+    level = l;
   };
 };
 
@@ -562,7 +626,7 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
     ns.pop();
     if (node->depth==level)
       {
-      bl.push_back(_box(node->Bounds));
+      bl.push_back(_box(node->Bounds, node->depth));
       }
     else
       {
@@ -575,28 +639,19 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
           }
         ns.push(node->mChild[2]);
         }
-      else if (level==-1)
+      if (level==-1)
         {
-        bl.push_back(_box(node->Bounds));
+        bl.push_back(_box(node->Bounds, node->depth));
         }
       }
     }
 
-  // Ok, now create cube(oid)s and stuff'em into a polydata thingy
-  vtkAppendPolyData *polys = vtkAppendPolyData::New();
-  size_t s = bl.size();
-  for (size_t i=0; i<s; i++)
+  // For each node, add the bbox to our polydata
+  int s = (int) bl.size();
+  for (int i=0; i<s; i++)
     {
-    vtkCubeSource *cube = vtkCubeSource::New();
-    cube->SetBounds( bl[i].bounds );
-    cube->Update();
-    polys->AddInputConnection(cube->GetOutputPort());
-    cube->Delete();
+    AddBox(pd, bl[i].bounds, bl[i].level);
     }
-  polys->Update();
-  pd->SetPoints(polys->GetOutput()->GetPoints());
-  pd->SetPolys(polys->GetOutput()->GetPolys());
-  polys->Delete();
 }
 
 void vtkModifiedBSPTree::GenerateRepresentationLeafs(vtkPolyData *pd)
