@@ -1369,6 +1369,37 @@ static void AddBox(vtkPolyData *pd, double *bounds, int level)
     }
 }
 //---------------------------------------------------------------------------
+vtkBoundingBox vtkCellTreeLocator::GetNodeBoundsFromCells(vtkCellTreeNode *n0)
+{
+    vtkBoundingBox all_cells;
+    double cellBounds[6];
+    //
+    if (n0->IsLeaf())
+    {
+        for (int i=0; i<(int)n0->Size(); i++)
+          {
+          vtkIdType cell_ID = this->Tree->Leaves[n0->Start()+i];
+          double *boundsPtr = cellBounds;
+          if (this->CellBounds)
+            {
+            boundsPtr = this->CellBounds[cell_ID];
+            }
+          else
+            {
+            this->DataSet->GetCellBounds(cell_ID, boundsPtr);
+            }
+          all_cells.AddBounds(boundsPtr);
+          }
+    }
+    else {
+        vtkCellTreeNode *n1 = &this->Tree->Nodes.at(n0->GetLeftChildIndex());
+        vtkCellTreeNode *n2 = &this->Tree->Nodes.at(n0->GetLeftChildIndex()+1);
+        all_cells.AddBox(this->GetNodeBoundsFromCells(n1));
+        all_cells.AddBox(this->GetNodeBoundsFromCells(n2));
+    }
+  return all_cells;
+}
+//---------------------------------------------------------------------------
 void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
 {
   this->BuildLocatorIfNeeded();
@@ -1385,23 +1416,31 @@ void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
     {
     n0 = ns.top().first;
     int lev = ns.top().second.second;
-    if (n0->IsLeaf() && ((lev==level) || (level==-1)))
+
+    if (lev==level)
       {
-      bl.push_back(boxLevel(ns.top().second.first,lev));
+      bl.push_back(boxLevel(GetNodeBoundsFromCells(n0), lev));
       ns.pop();
       }
-    else if (n0->IsLeaf())
+    else
       {
-      ns.pop();
+      if (level==-1)
+        {
+          bl.push_back(boxLevel(GetNodeBoundsFromCells(n0), lev));
+        }
+      if (n0->IsNode())
+        {
+        SplitNodeBox(n0, ns.top().second.first, lbox, rbox);
+        vtkCellTreeNode *n1 = &this->Tree->Nodes.at(n0->GetLeftChildIndex());
+        vtkCellTreeNode *n2 = &this->Tree->Nodes.at(n0->GetLeftChildIndex()+1);
+        ns.pop();
+        ns.push(nodeBoxLevel(n1,boxLevel(lbox,lev+1)));
+        ns.push(nodeBoxLevel(n2,boxLevel(rbox,lev+1)));
       }
-    else if (n0->IsNode())
-      {
-      SplitNodeBox(n0, ns.top().second.first, lbox, rbox);
-      vtkCellTreeNode *n1 = &this->Tree->Nodes.at(n0->GetLeftChildIndex());
-      vtkCellTreeNode *n2 = &this->Tree->Nodes.at(n0->GetLeftChildIndex()+1);
-      ns.pop();
-      ns.push(nodeBoxLevel(n1,boxLevel(lbox,lev+1)));
-      ns.push(nodeBoxLevel(n2,boxLevel(rbox,lev+1)));
+      else
+        {
+        ns.pop();
+        }
       }
     }
   //
