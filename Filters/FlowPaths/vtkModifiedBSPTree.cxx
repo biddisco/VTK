@@ -535,11 +535,12 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
 // working out which faces are visible
 
 //---------------------------------------------------------------------------
-static void AddBox(vtkPolyData *pd, double *bounds, int level)
+static void AddBox(vtkPolyData *pd, double *bounds, int level, vtkIdType numcells)
 {
-  vtkPoints      *pts = pd->GetPoints();
-  vtkCellArray *lines = pd->GetLines();
-  vtkIntArray *levels = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(0));
+  vtkPoints      *pts    = pd->GetPoints();
+  vtkCellArray *lines    = pd->GetLines();
+  vtkIntArray *levels    = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(0));
+  vtkIntArray *cellcount = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(1));
   double x[3];
   vtkIdType cells[8], ids[2];
   //
@@ -589,7 +590,8 @@ static void AddBox(vtkPolyData *pd, double *bounds, int level)
   //
   for (int i=0; levels && i<8; i++)
     {
-    levels->InsertNextTuple1(level);
+    if (levels) levels->InsertNextTuple1(level);
+    if (cellcount) cellcount->InsertNextTuple1(numcells);
     }
 }
 
@@ -598,14 +600,16 @@ class _box
 {
 public:
   double bounds[6];
-  int level;
-  _box(double *b, int l)
+  int       level;
+  vtkIdType numcells;
+  _box(double *b, int l, vtkIdType c)
   {
     for (int i=0; i<6; i++)
       {
       bounds[i] = b[i];
       }
-    level = l;
+    level    = l;
+    numcells = c;
   };
 };
 
@@ -626,7 +630,7 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
     ns.pop();
     if (node->depth==level)
       {
-      bl.push_back(_box(node->Bounds, node->depth));
+      bl.push_back(_box(node->Bounds, node->depth, node->num_cells));
       }
     else
       {
@@ -641,7 +645,7 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
         }
       if (level==-1)
         {
-        bl.push_back(_box(node->Bounds, node->depth));
+        bl.push_back(_box(node->Bounds, node->depth, node->num_cells));
         }
       }
     }
@@ -650,7 +654,7 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
   int s = (int) bl.size();
   for (int i=0; i<s; i++)
     {
-    AddBox(pd, bl[i].bounds, bl[i].level);
+    AddBox(pd, bl[i].bounds, bl[i].level, bl[i].numcells);
     }
 }
 
