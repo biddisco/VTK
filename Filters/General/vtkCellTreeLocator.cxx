@@ -1287,9 +1287,26 @@ void vtkCellTreeLocator::FreeSearchStructure(void)
   this->Superclass::FreeCellBounds();
 }
 //---------------------------------------------------------------------------
+class _box
+{
+public:
+  double bounds[6];
+  int       level;
+  vtkIdType numcells;
+  _box(double *b, int l, vtkIdType c)
+  {
+    for (int i=0; i<6; i++)
+      {
+      bounds[i] = b[i];
+      }
+    level    = l;
+    numcells = c;
+  };
+};
+
 // For drawing coloured boxes, we want the level/depth
+typedef std::vector<_box> boxlist;
 typedef std::pair<vtkBoundingBox, int> boxLevel;
-typedef std::vector<boxLevel> boxlist;
 // For testing bounds of the tree we need node/box
 typedef std::pair<vtkCellTreeLocator::vtkCellTreeNode*, boxLevel> nodeBoxLevel;
 typedef std::stack<nodeBoxLevel, std::vector<nodeBoxLevel> > nodeinfostack;
@@ -1311,11 +1328,13 @@ static void SplitNodeBox(vtkCellTreeLocator::vtkCellTreeNode *n, vtkBoundingBox 
   r = rr;
 }
 //---------------------------------------------------------------------------
-static void AddBox(vtkPolyData *pd, double *bounds, int level)
+//---------------------------------------------------------------------------
+static void AddBox(vtkPolyData *pd, double *bounds, int level, vtkIdType numcells)
 {
-  vtkPoints      *pts = pd->GetPoints();
-  vtkCellArray *lines = pd->GetLines();
-  vtkIntArray *levels = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(0));
+  vtkPoints      *pts    = pd->GetPoints();
+  vtkCellArray *lines    = pd->GetLines();
+  vtkIntArray *levels    = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(0));
+  vtkIntArray *cellcount = vtkIntArray::SafeDownCast(pd->GetPointData()->GetArray(1));
   double x[3];
   vtkIdType cells[8], ids[2];
   //
@@ -1365,9 +1384,11 @@ static void AddBox(vtkPolyData *pd, double *bounds, int level)
   //
   for (int i=0; levels && i<8; i++)
     {
-    levels->InsertNextTuple1(level);
+      if (levels) levels->InsertNextTuple1(level);
+      if (cellcount) cellcount->InsertNextTuple1(numcells);
     }
 }
+
 //---------------------------------------------------------------------------
 vtkBoundingBox vtkCellTreeLocator::GetNodeBoundsFromCells(vtkCellTreeNode *n0)
 {
@@ -1416,17 +1437,20 @@ void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
     {
     n0 = ns.top().first;
     int lev = ns.top().second.second;
+    double bounds[6];
 
     if (lev==level)
       {
-      bl.push_back(boxLevel(GetNodeBoundsFromCells(n0), lev));
+      GetNodeBoundsFromCells(n0).GetBounds(bounds);
+      bl.push_back(_box(bounds, lev, n0->Size()));
       ns.pop();
       }
     else
       {
       if (level==-1)
         {
-          bl.push_back(boxLevel(GetNodeBoundsFromCells(n0), lev));
+          GetNodeBoundsFromCells(n0).GetBounds(bounds);
+          bl.push_back(_box(bounds, lev, n0->Size()));
         }
       if (n0->IsNode())
         {
@@ -1443,16 +1467,12 @@ void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
         }
       }
     }
-  //
-  //
-  //
+
   // For each node, add the bbox to our polydata
   int s = (int) bl.size();
   for (int i=0; i<s; i++)
     {
-    double bounds[6];
-    bl[i].first.GetBounds(bounds);
-    AddBox(pd, bounds, bl[i].second);
+    AddBox(pd, bl[i].bounds, bl[i].level, bl[i].numcells);
     }
 }
 //---------------------------------------------------------------------------
