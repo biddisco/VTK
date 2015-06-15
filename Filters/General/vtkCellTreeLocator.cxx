@@ -1449,11 +1449,6 @@ void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
     }
     else
     {
-      if (level==-1)
-      {
-          GetNodeBoundsFromCells(n0).GetBounds(bounds);
-          bl.push_back(_box(bounds, lev, n0->Size()));
-      }
       if (n0->IsNode())
       {
         SplitNodeBox(n0, ns.top().second.first, lbox, rbox);
@@ -1465,6 +1460,11 @@ void vtkCellTreeLocator::GenerateRepresentation(int level, vtkPolyData *pd)
       }
       else
       {
+        if (level==-1)
+        {
+          GetNodeBoundsFromCells(n0).GetBounds(bounds);
+          bl.push_back(_box(bounds, lev, n0->Size()));
+        }
         ns.pop();
       }
     }
