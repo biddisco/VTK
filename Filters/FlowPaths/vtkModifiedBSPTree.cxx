@@ -324,7 +324,7 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
     {
       for (int i=0; i<3; i++)
       {
-        node->mChild[i]    = new BSPNode();
+        node->mChild[i] = new BSPNode();
         node->mChild[i]->depth = node->depth+1;
         node->mChild[i]->mAxis = rand() % 3;
       }
@@ -643,7 +643,7 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
         }
         ns.push(node->mChild[2]);
       }
-      if (level==-1)
+      else if (level==-1)
       {
         bl.push_back(_box(node->Bounds, node->depth, node->num_cells));
       }
