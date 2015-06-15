@@ -306,7 +306,6 @@ class BSPNode {
       double &rTmin, double &rTmax) const;
     //
     friend class vtkModifiedBSPTree;
-    friend class vtkParticleBoxTree;
   public:
   static bool VTKFILTERSFLOWPATHS_EXPORT RayMinMaxT(
     const double bounds[6], const double origin[3], const double dir[3], double &rTmin, double &rTmax);
