@@ -324,7 +324,7 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
       {
       for (int i=0; i<3; i++)
         {
-        node->mChild[i]    = new BSPNode();
+        node->mChild[i] = new BSPNode();
         node->mChild[i]->depth = node->depth+1;
         node->mChild[i]->mAxis = rand() % 3;
         }
@@ -346,9 +346,9 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
                 // process the MIN-List
                 cell_extents ext = lists->Mins[Daxis][i];
                 // max is on left of middle node
-                if    (ext.max < pDiv)
+                if (ext.max < pDiv)
                   {
-                  left ->Mins[Daxis][Cmin_l[Daxis]++] = ext;
+                  left->Mins[Daxis][Cmin_l[Daxis]++] = ext;
                   }
                 // min is on right of middle node
                 else if (ext.min > pDiv)
@@ -358,15 +358,15 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
                 // neither - must be one of ours
                 else
                   {
-                  mid  ->Mins[Daxis][Cmin_m[Daxis]++] = ext;
+                  mid->Mins[Daxis][Cmin_m[Daxis]++] = ext;
                   }
                 //
                 // process the MAX-List
                 ext = lists->Maxs[Daxis][i];
                 // max is on left of middle node
-                if    (ext.max < pDiv)
+                if (ext.max < pDiv)
                   {
-                  left ->Maxs[Daxis][Cmax_l[Daxis]++] = ext;
+                  left->Maxs[Daxis][Cmax_l[Daxis]++] = ext;
                   }
                 // min is on right of middle node
                 else if (ext.min > pDiv)
@@ -376,7 +376,7 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
                 // neither - must be one of ours
                 else
                   {
-                  mid  ->Maxs[Daxis][Cmax_m[Daxis]++] = ext;
+                  mid->Maxs[Daxis][Cmax_m[Daxis]++] = ext;
                   }
                 }
               // construct the sorted list of extents for the 2 remaining axes
@@ -389,7 +389,7 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
                   cell_extents ext = lists->Mins[Daxis][i];
                   if (this->CellBounds[ext.cell_ID][2*node->mAxis+1] < pDiv)
                     {
-                    left ->Mins[Daxis][Cmin_l[Daxis]++] = ext;
+                    left->Mins[Daxis][Cmin_l[Daxis]++] = ext;
                     }
                   else if (this->CellBounds[ext.cell_ID][2*node->mAxis] > pDiv)
                     {
@@ -397,14 +397,14 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
                     }
                   else
                     {
-                    mid  ->Mins[Daxis][Cmin_m[Daxis]++] = ext;
+                    mid->Mins[Daxis][Cmin_m[Daxis]++] = ext;
                     }
                   //
                   // process the MAX-List
                   ext = lists->Maxs[Daxis][i];
                   if (this->CellBounds[ext.cell_ID][2*node->mAxis+1] < pDiv)
                     {
-                    left ->Maxs[Daxis][Cmax_l[Daxis]++] = ext;
+                    left->Maxs[Daxis][Cmax_l[Daxis]++] = ext;
                     }
                   else if (this->CellBounds[ext.cell_ID][2*node->mAxis] > pDiv)
                     {
@@ -412,7 +412,7 @@ void vtkModifiedBSPTree::Subdivide(BSPNode *node,
                     }
                   else
                     {
-                    mid  ->Maxs[Daxis][Cmax_m[Daxis]++] = ext;
+                    mid->Maxs[Daxis][Cmax_m[Daxis]++] = ext;
                     }
                   }
                 }
@@ -643,7 +643,7 @@ void vtkModifiedBSPTree::GenerateRepresentation(int level, vtkPolyData *pd)
           }
         ns.push(node->mChild[2]);
         }
-      if (level==-1)
+      else if (level==-1)
         {
         bl.push_back(_box(node->Bounds, node->depth, node->num_cells));
         }
