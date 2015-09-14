@@ -50,6 +50,7 @@ class XdmfElement;
 class XdmfGrid;
 class XdmfGeometry;
 class XdmfTopology;
+class XdmfDataDesc;
 }
 
 class VTKIOXDMF2_EXPORT vtkXdmfWriter : public vtkDataObjectAlgorithm

@@ -1281,10 +1281,10 @@ int vtkXdmfWriter::WriteArrays(vtkFieldData* fd, xdmf2::XdmfGrid *grid, int asso
 }
 
 //------------------------------------------------------------------------------
-void vtkXdmfWriter::ConvertVToXArray(vtkDataArray *vda,
-                                      XdmfArray *xda, vtkIdType rank,
-                                      vtkIdType *dims, int allocStrategy,
-                                      const char *heavyprefix, XdmfDataDesc *desc)
+void vtkXdmfWriter::ConvertVToXArray(vtkDataArray *vda, 
+                                      xdmf2::XdmfArray *xda, vtkIdType rank, 
+                                      vtkIdType *dims, int allocStrategy, 
+                                      const char *heavyprefix, xdmf2::XdmfDataDesc *desc)
 {
   XdmfInt32 lRank = rank;
   XdmfInt64 *lDims = new XdmfInt64[rank+1];
