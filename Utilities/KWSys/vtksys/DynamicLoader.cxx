@@ -29,6 +29,8 @@
 // (default) Each part of the ifdef contains a complete implementation for
 // the static methods of DynamicLoader.
 
+#include <iostream>
+
 // ---------------------------------------------------------------
 // 1. Implementation for HPUX  machines
 #ifdef __hpux
@@ -42,6 +44,9 @@ namespace KWSYS_NAMESPACE
 //----------------------------------------------------------------------------
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libname )
 {
+
+std::cout << "HP vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
+
   return shl_load(libname.c_str(), BIND_DEFERRED | DYNAMIC_PATH, 0L);
 }
 
@@ -120,7 +125,9 @@ DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libna
   NSObjectFileImageReturnCode rc;
   NSObjectFileImage image = 0;
 
+std::cout << "MAC vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
   rc = NSCreateObjectFileImageFromFile(libname.c_str(), &image);
+
   // rc == NSObjectFileImageInappropriateFile when trying to load a dylib file
   if( rc != NSObjectFileImageSuccess )
     {
@@ -189,6 +196,7 @@ namespace KWSYS_NAMESPACE
 //----------------------------------------------------------------------------
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libname)
 {
+std::cout << "WIN vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
   DynamicLoader::LibraryHandle lh;
   int length = MultiByteToWideChar(CP_UTF8, 0, libname.c_str(), -1, NULL, 0);
   wchar_t* wchars = new wchar_t[length+1];
@@ -304,6 +312,7 @@ static image_id last_dynamic_err = B_OK;
 //----------------------------------------------------------------------------
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libname )
 {
+std::cout << "BEOS vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
   // image_id's are integers, errors are negative. Add one just in case we
   //  get a valid image_id of zero (is that even possible?).
   image_id rc = load_add_on(libname.c_str());
@@ -385,7 +394,8 @@ const char* DynamicLoader::LastError()
 // 5. Implementation for systems without dynamic libs
 // __gnu_blrts__ is IBM BlueGene/L
 // __LIBCATAMOUNT__ is defined on Catamount on Cray compute nodes
-#if defined(__gnu_blrts__) || defined(__LIBCATAMOUNT__) || defined(__CRAYXT_COMPUTE_LINUX_TARGET)
+#if 0 
+// defined(__gnu_blrts__) || defined(__LIBCATAMOUNT__) || defined(__CRAYXT_COMPUTE_LINUX_TARGET)
 #include <string.h> // for strerror()
 #define DYNAMICLOADER_DEFINED 1
 
@@ -395,6 +405,8 @@ namespace KWSYS_NAMESPACE
 //----------------------------------------------------------------------------
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libname )
 {
+std::cout << "CRAY NULL !!! vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
+
   return 0;
 }
 
@@ -439,6 +451,7 @@ namespace KWSYS_NAMESPACE
 //----------------------------------------------------------------------------
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libname )
 {
+std::cout << "MINT vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
   char *name = (char *)calloc(1, libname.size() + 1);
   dld_init(program_invocation_name);
   strncpy(name, libname.c_str(), libname.size());
@@ -491,6 +504,17 @@ namespace KWSYS_NAMESPACE
 //----------------------------------------------------------------------------
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const std::string& libname )
 {
+//std::cout << " LINUX YAY! vtksys::DynamicLoader About to open " << libname.c_str() << std::endl;
+#ifdef __gnu_blrts__
+sddsds  std::cout << "CRAY __gnu_blrts__ " << std::endl;
+#endif
+#ifdef __LIBCATAMOUNT__
+asdadas std::cout << "CRAY __LIBCATAMOUNT__ " << std::endl;
+#endif
+#ifdef __CRAYXT_COMPUTE_LINUX_TARGET
+// qwewe i std::cout << "CRAY __CRAYXT_COMPUTE_LINUX_TARGET " << std::endl;
+#endif
+
   return dlopen(libname.c_str(), RTLD_LAZY);
 }
 
