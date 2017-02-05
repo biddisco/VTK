@@ -343,6 +343,10 @@ int vtkPUnstructuredGridGhostCellsGenerator::RequestData(
   output->GetInformation()->Set(vtkDataObject::DATA_NUMBER_OF_GHOST_LEVELS(),
     maxGhostLevel);
 
+
+//  vtkDataArray *da =
+  output->GetCellGhostArray()->SetName("GhostCellsFromVTK");
+
   this->Controller->Barrier();
 
   delete this->Internals;
