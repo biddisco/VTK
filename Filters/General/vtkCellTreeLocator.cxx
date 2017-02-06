@@ -137,7 +137,7 @@ class vtkCellPointTraversal
     }
 
         const vtkCellTreeLocator::vtkCellTreeNode* Next()  // this returns n (the location in the CellTree) if it is a leaf or 0 if the point doesn't contain in the data domain
-          {
+        {
           while( true )
           {
             if( this->m_sp == this->m_stack ) //This means the point is not within the domain
@@ -1328,7 +1328,6 @@ static void SplitNodeBox(vtkCellTreeLocator::vtkCellTreeNode *n, vtkBoundingBox 
   r = rr;
 }
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
 static void AddBox(vtkPolyData *pd, double *bounds, int level, vtkIdType numcells)
 {
   vtkPoints      *pts    = pd->GetPoints();
@@ -1493,7 +1492,7 @@ void vtkCellTreeLocator::FindCellsWithinBounds(vtkBoundingBox &box, vtkIdList *c
     n0 = ns.top().first;
     vtkBoundingBox &nodebox = ns.top().second.first;
     if (TestBox.Intersects(nodebox))
-      {
+    {
       if (n0->IsLeaf())
       {
         for (int i=0; i<(int)n0->Size(); i++)
@@ -1507,10 +1506,10 @@ void vtkCellTreeLocator::FindCellsWithinBounds(vtkBoundingBox &box, vtkIdList *c
           else
           {
             this->DataSet->GetCellBounds(cell_ID, boundsPtr);
-            }
+          }
           vtkBoundingBox box(boundsPtr);
           if (TestBox.Intersects(box))
-            {
+          {
             cells->InsertNextId(cell_ID);
           }
         }
