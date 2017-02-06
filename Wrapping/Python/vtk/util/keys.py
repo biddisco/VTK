@@ -18,7 +18,7 @@ from vtk.vtkCommonCore import vtkInformationStringVectorKey as StringVectorKey
 from vtk.vtkCommonCore import vtkInformationUnsignedLongKey as UnsignedLongKey
 from vtk.vtkCommonCore import vtkInformationVariantKey as VariantKey
 from vtk.vtkCommonCore import vtkInformationVariantVectorKey as VariantVectorKey
-from vtk.vtkCommonExecutionModel import vtkInformationDataObjectMetaDataKey as DataObjectMetaDataKey
+from vtk.vtkCommonExecutionModel import vtkInformationObjectMetaDataKey as ObjectMetaDataKey
 from vtk.vtkCommonExecutionModel import vtkInformationExecutivePortKey as ExecutivePortKey
 from vtk.vtkCommonExecutionModel import vtkInformationExecutivePortVectorKey as ExecutivePortVectorKey
 from vtk.vtkCommonExecutionModel import vtkInformationIntegerRequestKey as IntegerRequestKey

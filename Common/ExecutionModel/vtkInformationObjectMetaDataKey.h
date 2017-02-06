@@ -14,24 +14,24 @@
 =========================================================================*/
 /**
  * @class   vtkInformationObjectMetaDataKey
- * @brief   key used to define meta-data of type vtkDataObject
- * vtkInformationObjectMetaDataKey is a vtkInformationDataObjectKey
+ * @brief   key used to define meta-data of type vtkObject
+ * vtkInformationObjectMetaDataKey is a vtkInformationObjectKey
  * that (shallow) copies itself downstream during the REQUEST_INFORMATION pass. Hence
- * it can be used to provide meta-data of type vtkDataObject or any subclass.
+ * it can be used to provide meta-data of type vtkObject or any subclass.
 */
 
 #ifndef vtkInformationObjectMetaDataKey_h
 #define vtkInformationObjectMetaDataKey_h
 
 #include "vtkCommonExecutionModelModule.h" // For export macro
-#include "vtkInformationDataObjectKey.h"
+#include "vtkInformationObjectKey.h"
 
 #include "vtkCommonInformationKeyManager.h" // Manage instances of this type.
 
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationObjectMetaDataKey : public vtkInformationObjectKey
 {
 public:
-  vtkTypeMacro(vtkInformationObjectMetaDataKey,vtkInformationDataObjectKey);
+  vtkTypeMacro(vtkInformationObjectMetaDataKey,vtkInformationObjectKey);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   vtkInformationObjectMetaDataKey(const char* name, const char* location);

@@ -31,7 +31,7 @@ class VTKCOMMONCORE_EXPORT vtkInformationObjectKey : public vtkInformationKey
 {
 public:
   vtkTypeMacro(vtkInformationObjectKey,vtkInformationKey);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   vtkInformationObjectKey(const char* name, const char* location);
   ~vtkInformationObjectKey();
@@ -48,11 +48,11 @@ public:
   // Copy the entry associated with this key from one information
   // object to another.  If there is no entry in the first information
   // object for this key, the value is removed from the second.
-  virtual void ShallowCopy(vtkInformation* from, vtkInformation* to);
+  void ShallowCopy(vtkInformation* from, vtkInformation* to) VTK_OVERRIDE;
 
   // Description:
   // Report a reference this key has in the given information object.
-  virtual void Report(vtkInformation* info, vtkGarbageCollector* collector);
+  void Report(vtkInformation* info, vtkGarbageCollector* collector) VTK_OVERRIDE;
 
 private:
   vtkInformationObjectKey(const vtkInformationObjectKey&);  // Not implemented.

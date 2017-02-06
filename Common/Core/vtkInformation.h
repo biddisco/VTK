@@ -44,7 +44,7 @@
 
 class vtkDataObject;
 class vtkExecutive;
-class vtkInformationDataObjectKey;
+class vtkInformationObjectKey;
 class vtkInformationDoubleKey;
 class vtkInformationDoubleVectorKey;
 class vtkInformationExecutivePortKey;
@@ -61,7 +61,6 @@ class vtkInformationKeyToInformationFriendship;
 class vtkInformationKeyVectorKey;
 class vtkInformationObjectBaseKey;
 class vtkInformationObjectBaseVectorKey;
-class vtkInformationObjectKey;
 class vtkInformationRequestKey;
 class vtkInformationStringKey;
 class vtkInformationStringVectorKey;
@@ -135,7 +134,7 @@ public:
    * vtkInformationVector objects are created).
    */
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationKey* key, int deep=0);
-  VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationDataObjectKey* key, int deep=0);
+  VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationObjectKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationDoubleVectorKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationVariantKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationVariantVectorKey* key, int deep=0);
@@ -144,7 +143,6 @@ public:
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationIntegerKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationIntegerVectorKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationObjectBaseVectorKey* key, int deep=0);
-  VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationObjectKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationRequestKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationStringKey* key, int deep=0);
   VTKCOMMONCORE_EXPORT void CopyEntry(vtkInformation* from, vtkInformationStringVectorKey* key, int deep=0);
@@ -333,7 +331,7 @@ public:
   // anyway and this causes a python help string to be too long.
 
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
-              vtkInformationDataObjectKey* value);
+              vtkInformationObjectKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key, vtkInformationDoubleKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
               vtkInformationDoubleVectorKey* value);
@@ -345,8 +343,6 @@ public:
               vtkInformationIntegerKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
               vtkInformationIntegerVectorKey* value);
-  VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
-              vtkInformationObjectKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key, vtkInformationStringKey* value);
   VTKCOMMONCORE_EXPORT void Append(vtkInformationKeyVectorKey* key,
               vtkInformationStringVectorKey* value);
@@ -356,7 +352,7 @@ public:
               vtkInformationUnsignedLongKey* value);
 
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
-                    vtkInformationDataObjectKey* value);
+                    vtkInformationObjectKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
                     vtkInformationDoubleKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
@@ -369,8 +365,6 @@ public:
                     vtkInformationIntegerKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
                     vtkInformationIntegerVectorKey* value);
-  VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
-                    vtkInformationObjectKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
                     vtkInformationStringKey* value);
   VTKCOMMONCORE_EXPORT void AppendUnique(vtkInformationKeyVectorKey* key,
@@ -442,25 +436,26 @@ public:
 
   //@{
   /**
-   * Get/Set an entry storing a vtkDataObject instance.
+   * Get/Set an entry storing a vtkObject instance.
    */
-  VTKCOMMONCORE_EXPORT void Set(vtkInformationDataObjectKey* key,
-    vtkDataObject VTK_WRAP_EXTERN *);
-  VTKCOMMONCORE_EXPORT vtkDataObject VTK_WRAP_EXTERN* Get(vtkInformationDataObjectKey* key);
-  VTKCOMMONCORE_EXPORT void Remove(vtkInformationDataObjectKey* key);
-  VTKCOMMONCORE_EXPORT int Has(vtkInformationDataObjectKey* key);
+  VTKCOMMONCORE_EXPORT void Set(vtkInformationObjectKey* key,
+    vtkObject VTK_WRAP_EXTERN *);
+  VTKCOMMONCORE_EXPORT vtkObject VTK_WRAP_EXTERN* Get(vtkInformationObjectKey* key);
+  VTKCOMMONCORE_EXPORT void Remove(vtkInformationObjectKey* key);
+  VTKCOMMONCORE_EXPORT int Has(vtkInformationObjectKey* key);
   //@}
 
-  // Description:
-  // Upcast the given key instance.
-  VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationDataObjectKey* key);
+  //@{
+  /**
+   * Upcast the given key instance.
+   */
+  VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationObjectKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationDoubleKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationDoubleVectorKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationInformationKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationInformationVectorKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationIntegerKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationIntegerVectorKey* key);
-  VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationObjectKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationRequestKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationStringKey* key);
   VTKCOMMONCORE_EXPORT static vtkInformationKey* GetKey(vtkInformationStringVectorKey* key);

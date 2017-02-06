@@ -16,7 +16,7 @@
 
 #include "vtkCommand.h"
 #include "vtkGarbageCollector.h"
-#include "vtkInformationDataObjectKey.h"
+#include "vtkInformationObjectKey.h"
 #include "vtkInformationDoubleKey.h"
 #include "vtkInformationDoubleVectorKey.h"
 #include "vtkInformationIdTypeKey.h"
@@ -29,7 +29,6 @@
 #include "vtkInformationKeyVectorKey.h"
 #include "vtkInformationObjectBaseKey.h"
 #include "vtkInformationObjectBaseVectorKey.h"
-#include "vtkInformationObjectKey.h"
 #include "vtkInformationRequestKey.h"
 #include "vtkInformationStringKey.h"
 #include "vtkInformationStringVectorKey.h"
@@ -246,30 +245,16 @@ void vtkInformation::CopyEntry(vtkInformation* from,
 
 //----------------------------------------------------------------------------
 void vtkInformation::CopyEntry(vtkInformation* from,
-                               vtkInformationDataObjectKey* key, int deep)
-{
-  if (!deep)
-  {
-    key->ShallowCopy(from, this);
-  }
-  else
-  {
-    key->DeepCopy(from, this);
-  }
-}
-
-//----------------------------------------------------------------------------
-void vtkInformation::CopyEntry(vtkInformation* from,
                                vtkInformationObjectKey* key, int deep)
 {
   if (!deep)
-    {
+  {
     key->ShallowCopy(from, this);
-    }
+  }
   else
-    {
+  {
     key->DeepCopy(from, this);
-    }
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -504,7 +489,6 @@ VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Integer, int);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Double, double);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(UnsignedLong, unsigned long);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(String, const char*);
-VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(DataObject, vtkDataObject*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Information, vtkInformation*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(InformationVector, vtkInformationVector*);
 VTK_INFORMATION_DEFINE_SCALAR_PROPERTY(Object, vtkObject*);
@@ -756,13 +740,6 @@ VTK_INFORMATION_DEFINE_POINTER_PROPERTY(Integer, int);
 
 //----------------------------------------------------------------------------
 void vtkInformation::Append(vtkInformationKeyVectorKey* key,
-                            vtkInformationDataObjectKey* value)
-{
-  key->Append(this, value);
-}
-
-//----------------------------------------------------------------------------
-void vtkInformation::Append(vtkInformationKeyVectorKey* key,
                             vtkInformationObjectKey* value)
 {
   key->Append(this, value);
@@ -843,13 +820,6 @@ void vtkInformation::Append(vtkInformationKeyVectorKey* key,
                             vtkInformationStringVectorKey* value)
 {
   key->Append(this, value);
-}
-
-//----------------------------------------------------------------------------
-void vtkInformation::AppendUnique(vtkInformationKeyVectorKey* key,
-                                  vtkInformationDataObjectKey* value)
-{
-  key->AppendUnique(this, value);
 }
 
 //----------------------------------------------------------------------------
@@ -938,12 +908,6 @@ void vtkInformation::AppendUnique(vtkInformationKeyVectorKey* key,
 
 //----------------------------------------------------------------------------
 vtkInformationKey* vtkInformation::GetKey(vtkInformationKey* key)
-{
-  return key;
-}
-
-//----------------------------------------------------------------------------
-vtkInformationKey* vtkInformation::GetKey(vtkInformationDataObjectKey* key)
 {
   return key;
 }
