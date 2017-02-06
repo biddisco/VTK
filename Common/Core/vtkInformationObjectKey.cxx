@@ -15,7 +15,7 @@
 #include "vtkInformationObjectKey.h"
 
 //----------------------------------------------------------------------------
-vtkInformationObjectKey::vtkInformationObjectKey(const char* name, const char* location):
+vtkInformationObjectKey::vtkInformationObjectKey(const char* name, const char* location) :
   vtkInformationKey(name, location)
 {
   vtkCommonInformationKeyManager::Register(this);

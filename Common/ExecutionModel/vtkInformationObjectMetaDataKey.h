@@ -20,8 +20,8 @@
  * it can be used to provide meta-data of type vtkDataObject or any subclass.
 */
 
-#ifndef __vtkInformationObjectMetaDataKey_h
-#define __vtkInformationObjectMetaDataKey_h
+#ifndef vtkInformationObjectMetaDataKey_h
+#define vtkInformationObjectMetaDataKey_h
 
 #include "vtkCommonExecutionModelModule.h" // For export macro
 #include "vtkInformationObjectKey.h"
