@@ -5,14 +5,19 @@
 #include <stdarg.h>
 #include <vtk_hdf5.h>
 
+#if defined(vtkhdf5_is_parallel)
+#define PARALLEL_IO
+#endif
+
 // XXX(kitware) include mangling header
 #include "vtk_h5part_mangle.h"
 #include "vtkh5part_export.h" // for exports
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+// must go first, comment to stop clang-format moving it
 #include "H5PartTypes.h"
+//
 #include "H5PartAttrib.h"
 #include "H5Block.h"
 #ifdef PARALLEL_IO

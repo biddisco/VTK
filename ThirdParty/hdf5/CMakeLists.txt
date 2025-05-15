@@ -45,3 +45,5 @@ configure_file(
 
 vtk_module_install_headers(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/vtk_hdf5.h")
+
+set(vtkhdf5_is_parallel ${vtkhdf5_is_parallel} PARENT_SCOPE)
