@@ -143,6 +143,8 @@ vtkH5PartReader::vtkH5PartReader()
   this->TimeOutOfRange = 0;
   this->MaskOutOfTimeRangeOutput = 0;
   this->PointDataArraySelection = vtkDataArraySelection::New();
+  this->UpdateNumPieces = 0;
+  this->UpdatePiece = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -259,6 +261,10 @@ int vtkH5PartReader::RequestInformation(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
 {
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
+  //
+  this->UpdatePiece = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
+  this->UpdateNumPieces = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
+  //
   outInfo->Set(CAN_HANDLE_PIECE_REQUEST(), 1);
 
   if (!this->OpenFile())
@@ -450,6 +456,70 @@ public:
   //
   bool operator()(double a, double b) const { return (fabs(a - b) <= (this->tolerance)); }
 };
+
+//----------------------------------------------------------------------------
+template <class T1, class T2>
+void CopyIntoTuple(int offset, vtkDataArray* source, vtkDataArray* dest)
+{
+  vtkIdType N = source->GetNumberOfTuples();
+  T1* sptr = static_cast<T1*>(source->GetVoidPointer(0));
+  T2* dptr = static_cast<T2*>(dest->WriteVoidPointer(0, N)) + offset;
+  for (vtkIdType i = 0; i < N; ++i)
+  {
+    *dptr = *sptr++;
+    dptr += 3;
+  }
+}
+//----------------------------------------------------------------------------
+template <class T2>
+void vtkH5PartReader::CopyIntoVector(int offset, vtkDataArray* source, vtkDataArray* dest)
+{
+  switch (source->GetDataType())
+  {
+    case VTK_CHAR:
+    case VTK_SIGNED_CHAR:
+    case VTK_UNSIGNED_CHAR:
+      CopyIntoTuple<char, T2>(offset, source, dest);
+      break;
+    case VTK_SHORT:
+      CopyIntoTuple<short int, T2>(offset, source, dest);
+      break;
+    case VTK_UNSIGNED_SHORT:
+      CopyIntoTuple<unsigned short int, T2>(offset, source, dest);
+      break;
+    case VTK_INT:
+      CopyIntoTuple<int, T2>(offset, source, dest);
+      break;
+    case VTK_UNSIGNED_INT:
+      CopyIntoTuple<unsigned int, T2>(offset, source, dest);
+      break;
+    case VTK_LONG:
+      CopyIntoTuple<long int, T2>(offset, source, dest);
+      break;
+    case VTK_UNSIGNED_LONG:
+      CopyIntoTuple<unsigned long int, T2>(offset, source, dest);
+      break;
+    case VTK_LONG_LONG:
+      CopyIntoTuple<long long, T2>(offset, source, dest);
+      break;
+    case VTK_UNSIGNED_LONG_LONG:
+      CopyIntoTuple<unsigned long long, T2>(offset, source, dest);
+      break;
+    case VTK_FLOAT:
+      CopyIntoTuple<float, T2>(offset, source, dest);
+      break;
+    case VTK_DOUBLE:
+      CopyIntoTuple<double, T2>(offset, source, dest);
+      break;
+    case VTK_ID_TYPE:
+      CopyIntoTuple<vtkIdType, T2>(offset, source, dest);
+      break;
+    default:
+      break;
+      vtkErrorMacro(<< "Unexpected data type");
+  }
+}
+
 //------------------------------------------------------------------------------
 int vtkH5PartReader::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
@@ -459,9 +529,9 @@ int vtkH5PartReader::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
   vtkPolyData* output = vtkPolyData::GetData(outInfo);
 
-  const int piece =
+  this->UpdatePiece =
     outInfo->Has(SDDP::UPDATE_PIECE_NUMBER()) ? outInfo->Get(SDDP::UPDATE_PIECE_NUMBER()) : 0;
-  const int numPieces = outInfo->Has(SDDP::UPDATE_NUMBER_OF_PIECES())
+  this->UpdateNumPieces = outInfo->Has(SDDP::UPDATE_NUMBER_OF_PIECES())
     ? outInfo->Get(SDDP::UPDATE_NUMBER_OF_PIECES())
     : 1;
 
@@ -597,32 +667,30 @@ int vtkH5PartReader::RequestData(vtkInformation* vtkNotUsed(request),
     return 1;
   }
 
+  // open the file if not already done
+  if (!this->OpenFile())
+  {
+    return 0;
+  }
+
   // Set the TimeStep on the H5 file
   H5PartSetStep(this->H5FileId, this->ActualTimeStep);
-  // Get the number of points for this step
-  vtkIdType Nt = H5PartGetNumParticles(this->H5FileId);
-  if (piece < Nt)
-  {
-    if (numPieces > 1)
-    {
-      vtkIdType div = Nt / numPieces;
-      vtkIdType rem = Nt % numPieces;
+  //
+  // Get the number of particles for this timestep
+  //
+  vtkIdType Nparticles = H5PartGetNumParticles(this->H5FileId);
 
-      vtkIdType myNt = piece < rem ? div + 1 : div;
-      vtkIdType myOffset = piece < rem ? (div + 1) * piece : (div + 1) * rem + div * (piece - rem);
-      H5PartSetView(this->H5FileId, myOffset, myOffset + myNt);
-      Nt = myNt;
-    }
-    else
-    {
-      H5PartSetView(this->H5FileId, -1, -1);
-    }
-  }
-  else
-  {
-    // don't do anything.
-    return 1;
-  }
+  //
+  // Split particles up per process for parallel load
+  //
+  std::vector<vtkIdType> minIds, maxIds, Ids;
+  //
+  this->PartitionByExtents(Nparticles, Ids);
+  vtkIdType ParticleStart = Ids[0];
+  vtkIdType ParticleEnd = Ids[1];
+
+  vtkIdType Nt = ParticleEnd - ParticleStart + 1;
+  //
 
   // Setup arrays for reading data
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -647,76 +715,160 @@ int vtkH5PartReader::RequestData(vtkInformation* vtkNotUsed(request),
       dataarray->SetName(rootname.c_str());
 
       // now read the data components.
-      hsize_t count1_mem[] = { static_cast<hsize_t>(Nt * Nc) };
-      hsize_t count2_mem[] = { static_cast<hsize_t>(Nt) };
-      hsize_t offset_mem[] = { 0 };
-      hsize_t stride_mem[] = { static_cast<hsize_t>(Nc) };
+      herr_t r;
+      hsize_t count1_mem[] = { (hsize_t)(Nt * Nc) };
+      hsize_t count2_mem[] = { (hsize_t)(Nt) };
+      hsize_t offset_mem[] = { (hsize_t)(0) };
+      hsize_t stride_mem[] = { (hsize_t)(Nc) };
+      hsize_t count1_dsk[] = { (hsize_t)(Nt) };
+      hsize_t offset_dsk[] = { (hsize_t)(ParticleStart) };
+      hsize_t stride_dsk[] = { (hsize_t)(1) };
+      //
       for (int c = 0; c < Nc; c++)
       {
         const char* name = arraylist[c].c_str();
+#if (!H5_USE_16_API && ((H5_VERS_MAJOR > 1) || ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR >= 8))))
+        hid_t dataset = H5Dopen(H5FileId->timegroup, name, h_params);
+#else
         hid_t dataset = H5Dopen(H5FileId->timegroup, name);
+#endif
         hid_t diskshape = H5PartGetDiskShape(H5FileId, dataset);
-        hid_t memspace = H5Screate_simple(1, count1_mem, nullptr);
-        hid_t component_datatype = H5PartGetNativeDatasetType(H5FileId, name);
-        offset_mem[0] = c;
-        H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_mem, stride_mem, count2_mem, nullptr);
-
-        if (H5Tequal(component_datatype, datatype) > 0)
+        /* parallel read needs hyperslab for disk */
+        r =
+          H5Sselect_hyperslab(diskshape, H5S_SELECT_SET, offset_dsk, stride_dsk, count1_dsk, NULL);
+        if (Nc == 1 /*|| this->UseStridedMultiComponentRead*/)
         {
-          H5Dread(
-            dataset, datatype, memspace, diskshape, H5P_DEFAULT, dataarray->GetVoidPointer(0));
+          hid_t memspace = H5Screate_simple(1, count1_mem, NULL);
+          hid_t component_datatype = H5PartGetNativeDatasetType(H5FileId, name);
+          /* read x/y/z arrays into strided mem - use hyperslab */
+          offset_mem[0] = c;
+          r =
+            H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_mem, stride_mem, count2_mem, NULL);
+          if (H5Tequal(component_datatype, datatype))
+          {
+            H5Dread(
+              dataset, datatype, memspace, diskshape, H5P_DEFAULT, dataarray->GetVoidPointer(0));
+          }
+          else
+          {
+            // read data into a temporary array of the right type and then copy it
+            // over to the "dataarray".
+            // This can be optimized to create a single component array. But I
+            // don't understand the stride/offset stuff too well to fix that.
+            vtkDataArray* temparray =
+              vtkDataArray::CreateDataArray(GetVTKDataType(component_datatype));
+            temparray->SetNumberOfComponents(Nc);
+            temparray->SetNumberOfTuples(Nt);
+            r = H5Sselect_hyperslab(
+              memspace, H5S_SELECT_SET, offset_mem, stride_mem, count2_mem, NULL);
+            H5Dread(dataset, component_datatype, memspace, diskshape, H5P_DEFAULT,
+              temparray->GetVoidPointer(0));
+            dataarray->CopyComponent(c, temparray, c);
+            temparray->FastDelete();
+          }
+          H5Sclose(memspace);
+          H5Tclose(component_datatype);
         }
         else
         {
-          // read data into a temporary array of the right type and then copy it
-          // over to the "dataarray".
-          // This can be optimized to create a single component array. But I
-          // don't understand the stride/offset stuff too well to fix that.
-          vtkDataArray* temparray =
-            vtkDataArray::CreateDataArray(GetVTKDataType(component_datatype));
-          temparray->SetNumberOfComponents(Nc);
-          temparray->SetNumberOfTuples(Nt);
-          H5Sselect_hyperslab(
-            memspace, H5S_SELECT_SET, offset_mem, stride_mem, count2_mem, nullptr);
-          H5Dread(dataset, component_datatype, memspace, diskshape, H5P_DEFAULT,
-            temparray->GetVoidPointer(0));
-          dataarray->CopyComponent(c, temparray, c);
-          temparray->Delete();
-        }
-        if (memspace != H5S_ALL)
-        {
+          vtkSmartPointer<vtkDataArray> onearray = NULL;
+          onearray.TakeReference(vtkDataArray::CreateDataArray(vtk_datatype));
+          onearray->SetNumberOfComponents(1);
+          onearray->SetNumberOfTuples(Nt);
+          onearray->SetName(name);
+          offset_mem[0] = 0;
+          count1_mem[0] = Nt;
+          stride_mem[0] = 1;
+          hid_t memspace = H5Screate_simple(1, count1_mem, NULL);
+          hid_t component_datatype = H5PartGetNativeDatasetType(H5FileId, name);
+          r =
+            H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_mem, stride_mem, count2_mem, NULL);
+          if (H5Tequal(component_datatype, datatype))
+          {
+            H5Dread(
+              dataset, datatype, memspace, diskshape, H5P_DEFAULT, onearray->GetVoidPointer(0));
+          }
+          else
+          {
+            vtkErrorMacro("H5Part : Unhandled type change condition");
+          }
+          switch (dataarray->GetDataType())
+          {
+            case VTK_FLOAT:
+              this->CopyIntoVector<float>(c, onearray, dataarray);
+              break;
+            case VTK_DOUBLE:
+              this->CopyIntoVector<double>(c, onearray, dataarray);
+              break;
+            case VTK_CHAR:
+            case VTK_SIGNED_CHAR:
+            case VTK_UNSIGNED_CHAR:
+              this->CopyIntoVector<char>(c, onearray, dataarray);
+              break;
+            case VTK_SHORT:
+              CopyIntoVector<short int>(c, onearray, dataarray);
+              break;
+            case VTK_UNSIGNED_SHORT:
+              CopyIntoVector<unsigned short int>(c, onearray, dataarray);
+              break;
+            case VTK_INT:
+              CopyIntoVector<int>(c, onearray, dataarray);
+              break;
+            case VTK_UNSIGNED_INT:
+              CopyIntoVector<unsigned int>(c, onearray, dataarray);
+              break;
+            case VTK_LONG:
+              CopyIntoVector<long int>(c, onearray, dataarray);
+              break;
+            case VTK_UNSIGNED_LONG:
+              CopyIntoVector<unsigned long int>(c, onearray, dataarray);
+              break;
+            case VTK_LONG_LONG:
+              CopyIntoVector<long long>(c, onearray, dataarray);
+              break;
+            case VTK_UNSIGNED_LONG_LONG:
+              CopyIntoVector<unsigned long long>(c, onearray, dataarray);
+              break;
+            case VTK_ID_TYPE:
+              CopyIntoVector<vtkIdType>(c, onearray, dataarray);
+              break;
+            default:
+              vtkErrorMacro("H5Part : Unhandled vector type");
+          }
           H5Sclose(memspace);
+          H5Tclose(component_datatype);
+          // if the array we read for the vector component is a field array
+          // then skip reading it twice.
+          // if (this->MultiComponentArraysAsFieldData)
+          // {
+          //   output->GetPointData()->AddArray(onearray);
+          // }
         }
-        if (diskshape != H5S_ALL)
-        {
-          H5Sclose(diskshape);
-        }
+        H5Sclose(diskshape);
         H5Dclose(dataset);
       }
-    }
-    else
-    {
       H5Tclose(datatype);
-      vtkErrorMacro("An unexpected data type was encountered");
-      return 0;
-    }
-    H5Tclose(datatype);
-    //
-    if (dataarray)
-    {
-      if ((*it).first == "Coords")
-        coords = dataarray;
-      else
+      if (dataarray)
       {
-        output->GetPointData()->AddArray(dataarray);
-        if (!output->GetPointData()->GetScalars())
+        if ((*it).first == "Coords")
         {
-          output->GetPointData()->SetActiveScalars(dataarray->GetName());
+          coords = dataarray;
+          // coords->SetName("Coordinates");
+        }
+        else
+        {
+          output->GetPointData()->AddArray(dataarray);
+          if (!output->GetPointData()->GetScalars())
+          {
+            output->GetPointData()->SetActiveScalars(dataarray->GetName());
+          }
         }
       }
     }
   }
-
+  //
+  // generate cells
+  //
   if (this->GenerateVertexCells)
   {
     vtkSmartPointer<vtkCellArray> vertices = vtkSmartPointer<vtkCellArray>::New();
@@ -734,6 +886,116 @@ int vtkH5PartReader::RequestData(vtkInformation* vtkNotUsed(request),
   return 1;
 }
 
+//----------------------------------------------------------------------------
+int vtkH5PartReader::SplitExtent(int piece, int numPieces, vtkIdType* ext)
+{
+  int numPiecesInFirstHalf;
+  unsigned long size[3];
+  int splitAxis;
+  vtkIdType mid;
+
+  if (piece >= numPieces || piece < 0)
+  {
+    return 0;
+  }
+
+  // keep splitting until we have only one piece.
+  // piece and numPieces will always be relative to the current ext.
+  int cnt = 0;
+  while (numPieces > 1)
+  {
+    // Get the dimensions for each axis.
+    size[0] = ext[1] - ext[0];
+    size[1] = ext[3] - ext[2];
+    size[2] = ext[5] - ext[4];
+    // choose the biggest axis
+    if (size[2] >= size[1] && size[2] >= size[0] && size[2] / 2 >= 1)
+    {
+      splitAxis = 2;
+    }
+    else if (size[1] >= size[0] && size[1] / 2 >= 1)
+    {
+      splitAxis = 1;
+    }
+    else if (size[0] / 2 >= 1)
+    {
+      splitAxis = 0;
+    }
+    else
+    {
+      // signal no more splits possible
+      splitAxis = -1;
+    }
+
+    if (splitAxis == -1)
+    {
+      // can not split any more.
+      if (piece == 0)
+      {
+        // just return the remaining piece
+        numPieces = 1;
+      }
+      else
+      {
+        // the rest must be empty
+        return 0;
+      }
+    }
+    else
+    {
+      // split the chosen axis into two pieces.
+      numPiecesInFirstHalf = (numPieces / 2);
+      mid = size[splitAxis];
+      mid = (mid * numPiecesInFirstHalf) / numPieces + ext[splitAxis * 2];
+      if (piece < numPiecesInFirstHalf)
+      {
+        // piece is in the first half
+        // set extent to the first half of the previous value.
+        ext[splitAxis * 2 + 1] = mid;
+        // piece must adjust.
+        numPieces = numPiecesInFirstHalf;
+      }
+      else
+      {
+        // piece is in the second half.
+        // set the extent to be the second half. (two halves share points)
+        ext[splitAxis * 2] = mid;
+        // piece must adjust
+        numPieces = numPieces - numPiecesInFirstHalf;
+        piece -= numPiecesInFirstHalf;
+      }
+    }
+  } // end of while
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkH5PartReader::PartitionByExtents(vtkIdType N, std::vector<vtkIdType>& startend)
+{
+  vtkIdType WholeExtent[6] = { 0, N, 0, 0, 0, 0 };
+  this->SplitExtent(this->UpdatePiece, this->UpdateNumPieces, WholeExtent);
+  /*
+    vtkExtentTranslator *extTran = vtkExtentTranslator::New();
+    extTran->SetSplitModeToBlock();
+  #if !defined(LIMIT_PARTITIONS)
+    extTran->SetNumberOfPieces(this->UpdateNumPieces);
+  #else
+    extTran->SetNumberOfPieces(LIMIT_PARTITIONS);
+  #endif
+    extTran->SetPiece(this->UpdatePiece);
+    extTran->SetWholeExtent(WholeExtent);
+    extTran->PieceToExtent();
+    int PartitionExtents[6];
+    extTran->GetExtent(PartitionExtents);
+    extTran->FastDelete();
+  */
+  startend.push_back(WholeExtent[0]);
+  startend.push_back(WholeExtent[1] - 1);
+  vtkDebugMacro(<< "PartitionByExtents (Translator) " << startend[0] << " : " << startend[1]
+                << " = " << (startend[1] - startend[0] + 1));
+  return 1;
+}
 //------------------------------------------------------------------------------
 int vtkH5PartReader::GetCoordinateArrayStatus(const char* name)
 {
