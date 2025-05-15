@@ -159,6 +159,10 @@ protected:
   int IndexOfVectorComponent(const char* name);
 
   std::string NameOfVectorComponent(const char* name);
+  int SplitExtent(int piece, int numPieces, vtkIdType* ext);
+  int PartitionByExtents(vtkIdType N, std::vector<vtkIdType>& startend);
+  template <class T2>
+  void CopyIntoVector(int offset, vtkDataArray* source, vtkDataArray* dest);
 
   //
   // Internal Variables
@@ -175,6 +179,8 @@ protected:
   vtkTimeStamp FileOpenedTime;
   int MaskOutOfTimeRangeOutput;
   int TimeOutOfRange;
+  int UpdatePiece;
+  int UpdateNumPieces;
   //
   char* Xarray;
   char* Yarray;
