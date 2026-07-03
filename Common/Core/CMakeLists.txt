@@ -304,6 +304,7 @@ set(classes
   vtkInformationKeyVectorKey
   vtkInformationObjectBaseKey
   vtkInformationObjectBaseVectorKey
+  vtkInformationObjectKey
   vtkInformationRequestKey
   vtkInformationStringKey
   vtkInformationStringVectorKey

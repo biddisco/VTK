@@ -32,6 +32,7 @@ set(classes
   vtkImageToStructuredGrid
   vtkImageToStructuredPoints
   vtkInformationDataObjectMetaDataKey
+  vtkInformationObjectMetaDataKey
   vtkInformationExecutivePortKey
   vtkInformationExecutivePortVectorKey
   vtkInformationIntegerRequestKey

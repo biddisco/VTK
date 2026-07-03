@@ -42,6 +42,7 @@ class vtkInformationKeyToInformationFriendship;
 class vtkInformationKeyVectorKey;
 class vtkInformationObjectBaseKey;
 class vtkInformationObjectBaseVectorKey;
+class vtkInformationObjectKey;
 class vtkInformationRequestKey;
 class vtkInformationStringKey;
 class vtkInformationStringVectorKey;
@@ -119,6 +120,7 @@ public:
   void CopyEntry(vtkInformation* from, vtkInformationIntegerVectorKey* key, vtkTypeBool deep = 0);
   void CopyEntry(
     vtkInformation* from, vtkInformationObjectBaseVectorKey* key, vtkTypeBool deep = 0);
+  void CopyEntry(vtkInformation* from, vtkInformationObjectKey* key, vtkTypeBool deep = 0);
   void CopyEntry(vtkInformation* from, vtkInformationRequestKey* key, vtkTypeBool deep = 0);
   void CopyEntry(vtkInformation* from, vtkInformationStringKey* key, vtkTypeBool deep = 0);
   void CopyEntry(vtkInformation* from, vtkInformationStringVectorKey* key, vtkTypeBool deep = 0);
@@ -312,6 +314,7 @@ public:
   void Append(vtkInformationKeyVectorKey* key, vtkInformationStringKey* value);
   void Append(vtkInformationKeyVectorKey* key, vtkInformationStringVectorKey* value);
   void Append(vtkInformationKeyVectorKey* key, vtkInformationObjectBaseKey* value);
+  void Append(vtkInformationKeyVectorKey* key, vtkInformationObjectKey* value);
   void Append(vtkInformationKeyVectorKey* key, vtkInformationUnsignedLongKey* value);
 
   void AppendUnique(vtkInformationKeyVectorKey* key, vtkInformationDataObjectKey* value);
@@ -324,6 +327,7 @@ public:
   void AppendUnique(vtkInformationKeyVectorKey* key, vtkInformationStringKey* value);
   void AppendUnique(vtkInformationKeyVectorKey* key, vtkInformationStringVectorKey* value);
   void AppendUnique(vtkInformationKeyVectorKey* key, vtkInformationObjectBaseKey* value);
+  void AppendUnique(vtkInformationKeyVectorKey* key, vtkInformationObjectKey* value);
   void AppendUnique(vtkInformationKeyVectorKey* key, vtkInformationUnsignedLongKey* value);
 
   ///@{
@@ -369,6 +373,16 @@ public:
 
   ///@{
   /**
+   * Get/Set an entry storing a vtkObject instance.
+   */
+  void Set(vtkInformationObjectKey* key, vtkObject*);
+  vtkObject* Get(vtkInformationObjectKey* key);
+  void Remove(vtkInformationObjectKey* key);
+  int Has(vtkInformationObjectKey* key) VTK_FUTURE_CONST;
+  ///@}
+
+  ///@{
+  /**
    * Manipulate a ObjectBaseVector entry.
    */
   void Append(vtkInformationObjectBaseVectorKey* key, vtkObjectBase* data);
@@ -397,6 +411,7 @@ public:
    */
   static vtkInformationKey* GetKey(vtkInformationDataObjectKey* key);
   static vtkInformationKey* GetKey(vtkInformationDoubleKey* key);
+  static vtkInformationKey* GetKey(vtkInformationObjectKey* key);
   static vtkInformationKey* GetKey(vtkInformationDoubleVectorKey* key);
   static vtkInformationKey* GetKey(vtkInformationInformationKey* key);
   static vtkInformationKey* GetKey(vtkInformationInformationVectorKey* key);
